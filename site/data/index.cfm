@@ -1,9 +1,21 @@
+<cfset factory_obj = createObject("component", "cfc.MetadataFactory") />
+
 <html>
 <head>
 <title>Document generator</title>
 </head>
 
 <body>
+	
+<cfset currentDirectory = GetDirectoryFromPath(GetTemplatePath()) & "newDir" />
+<cfoutput>#currentDirectory#<br /></cfoutput>
+<cfoutput>#expandPath("\")#<br /></cfoutput>
+<cfset path_str = "C:\development\hobby" />
+<cfoutput>#path_str#</cfoutput>
+
+<cfset library_struct = structNew() />
+<cfset factory_obj.browseDirectory(path_str, path_str, library_struct) />
+<cfdump var="#library_struct#" expand="true">
 
 <cfset €euro$ = "geld" />
 <pre>
@@ -35,10 +47,10 @@
 </cfloop>
 <cfoutput>#output_str#</cfoutput>
 
-<cfset obj = createObject("component", "cfc.cfcMetadata.CFComponent") />
-<pre>
-<cfoutput>#getMetaData(obj).hint#</cfoutput>
-</pre>
+<cfset data = getComponentMetaData("cfc.TestImplementation") />
+<cfdump var="#data#">
+<cfset data = getComponentMetaData("cfc.TestInterface") />
+<cfdump var="#data#">
 
 </body>
 </html>

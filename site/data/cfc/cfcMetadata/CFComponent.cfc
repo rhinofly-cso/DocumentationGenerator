@@ -2,7 +2,7 @@
 	Contains the properties and functions to store and access metadata from CF components.
 	
 	@author Eelco Eggen
-	@date
+	@date 17 August 2010
 */
 component displayname="cfc.cfcMetadata.CFComponent" extends="cfc.CFCMetadata" accessors="true" output="false"
 {

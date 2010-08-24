@@ -1,9 +1,8 @@
-<cfscript>
 /**
 	Contains the properties and functions to store and access metadata from CF components.
 	
 	@author Eelco Eggen
-	@date
+	@date 17 August 2010
 */
 component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" output="false"
 {
@@ -17,4 +16,3 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 	property name="date" type="string" hint="Date on which the component was written.";
 	property name="private" type="boolean" hint="Indicates whether the component should be documented.";
 }
-</cfscript>
