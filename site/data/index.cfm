@@ -11,11 +11,14 @@
 <cfoutput>#currentDirectory#<br /></cfoutput>
 <cfoutput>#expandPath("\")#<br /></cfoutput>
 <cfset path_str = "C:\development\hobby" />
+<!--- <cfset path_str = "C:\development\docGen" /> --->
 <cfoutput>#path_str#</cfoutput>
+
+<cfdump var="#getMetadata(factory_obj).functions#" expand="false" />
 
 <cfset library_struct = structNew() />
 <cfset factory_obj.browseDirectory(path_str, path_str, library_struct) />
-<cfdump var="#library_struct#" expand="true">
+<cfdump var="#library_struct#" expand="false" />
 
 <cfset €euro$ = "geld" />
 <pre>
@@ -48,9 +51,9 @@
 <cfoutput>#output_str#</cfoutput>
 
 <cfset data = getComponentMetaData("cfc.TestImplementation") />
-<cfdump var="#data#">
+<cfdump var="#data#" expand="false" />
 <cfset data = getComponentMetaData("cfc.TestInterface") />
-<cfdump var="#data#">
+<cfdump var="#data#" expand="false" />
 
 </body>
 </html>
