@@ -15,4 +15,29 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 	property name="author" type="string" hint="Author of the component.";
 	property name="date" type="string" hint="Date on which the component was written.";
 	property name="private" type="boolean" hint="Indicates whether the component should be documented.";
+	property name="related" type="string" hint="List of link expressions to related documentation pages.";
+
+	public void function addExtendedBy(required string componentName)
+	{
+		var extendedBy_str = this.getExtendedBy();
+		
+		if (isNull(extendedBy_str))
+		{
+			extendedBy_str = "";
+		}
+		extendedBy_str = listAppend(extendedBy_str, arguments.componentName);
+		this.setExtendedBy(extendedBy_str);
+	}
+
+	public void function addRelated(required string link)
+	{
+		var related_str = this.getRelated();
+		
+		if (isNull(related_str))
+		{
+			related_str = "";
+		}
+		related_str = listAppend(related_str, arguments.link);
+		this.setRelated(related_str);
+	}
 }
