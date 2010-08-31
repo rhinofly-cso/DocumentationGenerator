@@ -885,10 +885,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 		
 		directoryPath_str = path_str;
 		directoryPath_str = removeChars(path_str, 1, len(customTagPath_str));
-		directoryPath_str = replace(directoryPath_str, "\\", ".", "all");
-		directoryPath_str = replace(directoryPath_str, "//", ".", "all");
-		directoryPath_str = replace(directoryPath_str, "\", ".", "all");
-		directoryPath_str = replace(directoryPath_str, "/", ".", "all");
+		directoryPath_str = reReplace(directoryPath_str, "[/\\]+", ".", "all");
 		if (left(directoryPath_str, 1) eq ".")
 		{
 			directoryPath_str = removeChars(directoryPath_str, 1, 1);
@@ -914,6 +911,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 		{
 			if (dirs_qry.type[i] eq "Dir")
 			{
+				// we use directoryPath_str for an actual path again
 				directoryPath_str = path_str;
 				// the forward slash is always supposed to work
 				directoryPath_str &= "/";

@@ -40,4 +40,23 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 		related_str = listAppend(related_str, arguments.link);
 		this.setRelated(related_str);
 	}
+
+	/**
+		Returns the first sentence from the hint property.
+	*/
+	public string function getShortHint()
+	{
+		var hint_str = this.getHint();
+		
+		if (isNull(hint_str))
+		{
+			return "";
+		}
+		else
+		{
+			hint_str = listFirst(hint_str, ".");
+			hint_str &= ".";
+			return hint_str;
+		}
+	}
 }
