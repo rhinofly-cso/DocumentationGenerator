@@ -870,18 +870,21 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 		return return_obj;
 	}
 	
-	public void function browseDirectory(required string path, required string customTagPath, required struct library)
+	public void function browseDirectory(required string path, required string customTagPath, required struct library, required struct packages)
 	{
 		var i = 0;
 		var files_qry = "";
 		var dirs_qry = "";
 		var componentPath_str = "";
 		var directoryPath_str = "";
+		var packageName_str = "";
+		var components_str = "";
 		var metadata_struct = "";
 		var metadata_obj = "";
 		var path_str = arguments.path;
 		var customTagPath_str = arguments.customTagPath;
 		var libraryRef_struct = arguments.library;
+		var packagesRef_struct = arguments.packages;
 		
 		directoryPath_str = path_str;
 		directoryPath_str = removeChars(path_str, 1, len(customTagPath_str));
@@ -890,20 +893,54 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 		{
 			directoryPath_str = removeChars(directoryPath_str, 1, 1);
 		}
-		if (len(directoryPath_str) > 0 and right(directoryPath_str, 1) neq ".")
+		if (len(directoryPath_str) > 0)
 		{
-			directoryPath_str &= ".";
+			if (right(directoryPath_str, 1) eq ".")
+			{
+				packageName_str = removeChars(directoryPath_str, len(directoryPath_str), 1);
+			}
+			else
+			{
+				packageName_str = directoryPath_str;
+				directoryPath_str &= ".";
+			}
+		}
+		else
+		{
+			packageName_str = "_topLevel";
 		}
 
 		files_qry = directoryList(path_str, false, "query", "*.cfc");
+		if (files_qry.recordCount > 0)
+		{
+			structInsert(packagesRef_struct, packageName_str, structNew());
+		}
 		for (i = 1; i <= files_qry.recordCount; i++)
 		{
 			componentPath_str = directoryPath_str;
 			componentPath_str &= listGetAt(files_qry.name[i], 1, ".");
 			
-			metadata_struct = getComponentMetadata(componentPath_str);
+			try
+			{
+				metadata_struct = getComponentMetadata(componentPath_str);
+			}
+			catch (any excptn)
+			{
+				throw(message="Could not obtain component metadata for #componentPath_str#.");
+			}
 			metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
 			structInsert(libraryRef_struct, metadata_struct.name, metadata_obj);
+
+			components_str = metadata_struct.name;
+			if (structKeyExists(packagesRef_struct[packageName_str], metadata_struct.type))
+			{
+				components_str = listAppend(packagesRef_struct[packageName_str][metadata_struct.type], components_str);
+				packagesRef_struct[packageName_str][metadata_struct.type] = components_str;
+			}
+			else
+			{
+				structInsert(packagesRef_struct[packageName_str], metadata_struct.type, components_str);
+			}
 		}
 		
 		dirs_qry = directoryList(path_str, false, "query");
@@ -916,7 +953,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 				// the forward slash is always supposed to work
 				directoryPath_str &= "/";
 				directoryPath_str &= dirs_qry.name[i];
-				browseDirectory(directoryPath_str, customTagPath_str, libraryRef_struct);
+				browseDirectory(directoryPath_str, customTagPath_str, libraryRef_struct, packagesRef_struct);
 			}
 		}		
 	}
