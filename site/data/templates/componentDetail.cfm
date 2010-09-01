@@ -1,6 +1,8 @@
 <!--- 
-	This template requires the metadata object cfcMetadata_obj of the component.
-	Also, it requires a lot of other stuff.
+	This template requires the metadata object cfcMetadata_obj of the component in the 
+	variable scope.
+	Also, it requires (a reference to) a library structure libraryRef_struct containing 
+	component metadata objects for all components in the library.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
@@ -11,17 +13,17 @@
 <cfset packagePath_str = replace(variables.packageName_str, ".", "/") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
 
-<!--- TODO: figure out keywords --->
-<cfset keywords = "JobAPI,fly.cso.api.v1.JobAPI,getApiKey,getCVEnumerations,getJob,getJobCount,getJobEnumerations,getJobs,getOrganisations,isValidApiKey,removeJob,saveCV,saveJob" />
-
 <cfif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.cfcInterface")>
 	<cfset type_str = "Interface" />
-<cfelse>
+<cfelseif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.cfcComponent")>
 	<cfset type_str = "Component" />
+<cfelse>
+	<cfthrow message="Error: unknown component type #cfcMetadata_obj.getClass().getName()#.">
 </cfif>
-<cfset extendsList_str = cfcMetadata_obj.getExtends() />
-<cfif isNull(extendsList_str)>
-	<cfset extendsList_str = "" />
+
+<cfset extends_str = cfcMetadata_obj.getExtends() />
+<cfif isNull(variables.extends_str)>
+	<cfset extends_str = "" />
 </cfif>
 
 <cfoutput>
@@ -30,7 +32,6 @@
 		<link rel="stylesheet" href="#variables.rootPath_str#style.css" type="text/css" media="screen" />
 		<link rel="stylesheet" href="#variables.rootPath_str#print.css" type="text/css" media="print" />
 		<link rel="stylesheet" href="#variables.rootPath_str#override.css" type="text/css" />
-		<meta name="keywords" content="#variables.keywords#">
 		<title>#variables.componentName_str#</title>
 	</head>
 
@@ -56,29 +57,25 @@
 		style="display:none">
 		<tr>
 			<td class="titleTableTitle" align="left">
-				API Documentation
+				CSO-API Documentation
 			</td>
 			<td class="titleTableTopNav" align="right">
 				<a href="#variables.rootPath_str#package-summary.html" 
 					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
-					All Packages
-				</a>
-				&nbsp;|&nbsp;
+					All Packages</a>
+				|
 				<a href="#variables.rootPath_str#class-summary.html" 
 					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
-					All Classes
-				</a>
-				&nbsp;|&nbsp;
+					All Classes</a>
+				|
 				<a id="framesLink1" 
 					href="#variables.rootPath_str#index.html?#variables.componentPage_str#&amp;#variables.packagePath_str#class-list.html">
-					Frames
-				</a>
+					Frames</a>
 				<a id="noFramesLink1" 
 					style="display:none" 
 					href="" 
 					onclick="parent.location=document.location">
-					No Frames
-				</a>
+					No Frames</a>
 			</td>
 			<td class="titleTableLogo" align="right" rowspan="3">
 				<img src="#variables.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">
@@ -90,9 +87,7 @@
 			</td>
 		</tr>
 		<tr class="titleTableRow3">
-			<td colspan="3">
-				&nbsp;
-			</td>
+			<td colspan="3"></td>
 		</tr>
 	</table>
 	
@@ -113,32 +108,10 @@
 				<td>
 					<a href="package-detail.html"
 						onclick="javascript:loadClassListFrame('class-list.html')">
-						#variables.packageName_str#
-					</a>
+						#variables.packageName_str#</a>
 				</td>
 			</tr>
-			<tr>
-				<td class="classHeaderTableLabel">
-					#variables.type_str#
-				</td>
-				<td class="classSignature">
-					#cfcMetadata_obj.getAccess()# #lCase(type)# #listLast(variables.componentName_str, ".")#
-					<cfif listLen(extendsList_str) gt 0>
-						extends
-						<cfset started_bool = false />
-						<cfloop list="extendsList_str" item="extends_str">
-							<cfif variables.started_bool>
-								,
-							<cfelse>
-								<cfset started_bool = true>
-							</cfif>
-							<a href="#variables.rootPath_str & replace(extends_str, ".", "/")#.html">
-								#listLast(extends_str, ".")#
-							</a>
-						</cfloop>
-					</cfif>
-				</td>
-			</tr>
+			<cfinclude template="./includes/dsp_inheritance.cfm" />
 		</table>
 		
 		<hr>

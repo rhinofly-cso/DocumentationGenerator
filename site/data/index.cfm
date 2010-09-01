@@ -7,6 +7,17 @@
 
 <body>
 
+<cfset abc = arrayNew(1) />
+<cfset arrayAppend(abc, "c") />
+<cfset arrayAppend(abc, "b") />
+<cfset arrayAppend(abc, "a") />
+<cfdump var="#abc#">
+
+<cfset arraySort(abc, "text") />
+<cfdump var="#abc#">
+
+<cfabort />
+
 <cfset path_str = "C:\development\docGen\data" />
 <cfoutput>#path_str#</cfoutput>
 

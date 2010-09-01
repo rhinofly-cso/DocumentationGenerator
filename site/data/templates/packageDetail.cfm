@@ -48,24 +48,20 @@
 			<td class="titleTableTopNav" align="right">
 				<a href="#variables.rootPath_str#package-summary.html" 
 					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
-					All Packages
-				</a>
-				&nbsp;|&nbsp;
+					All Packages</a>
+				|
 				<a href="#variables.rootPath_str#class-summary.html" 
 					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
-					All Classes
-				</a>
-				&nbsp;|&nbsp;
+					All Classes</a>
+				|
 				<a id="framesLink1" 
 					href="#variables.rootPath_str#index.html?#variables.packagePath_str#package-detail.html&amp;#variables.packagePath_str#class-list.html">
-					Frames
-				</a>
+					Frames</a>
 				<a id="noFramesLink1" 
 					style="display:none" 
 					href="" 
 					onclick="parent.location=document.location">
-					No Frames
-				</a>
+					No Frames</a>
 			</td>
 			<td class="titleTableLogo" align="right" rowspan="3">
 				<img src="#variables.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">

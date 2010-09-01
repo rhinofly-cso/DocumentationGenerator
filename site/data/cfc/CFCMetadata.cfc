@@ -46,6 +46,7 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 	*/
 	public string function getShortHint()
 	{
+		var end_num = 0;
 		var hint_str = this.getHint();
 		
 		if (isNull(hint_str))
@@ -54,8 +55,11 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 		}
 		else
 		{
-			hint_str = listFirst(hint_str, ".");
-			hint_str &= ".";
+			end_num = reFind(". [A-Z]", hint_str);
+			if (end_num > 0)
+			{
+				hint_str = left(hint_str, end_num);
+			}
 			return hint_str;
 		}
 	}
