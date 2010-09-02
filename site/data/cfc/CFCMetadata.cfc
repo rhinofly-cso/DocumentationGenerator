@@ -55,7 +55,7 @@ component displayname="cfc.CFCMetadata" extends="fly.Object" accessors="true" ou
 		}
 		else
 		{
-			end_num = reFind(". [A-Z]", hint_str);
+			end_num = reFind("\.(<br[\s/]*>|\s+[A-Z])", hint_str);
 			if (end_num > 0)
 			{
 				hint_str = left(hint_str, end_num);

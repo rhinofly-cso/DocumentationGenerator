@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 18 August 2010
 */
-component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true" output="false"
+component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 {
 	/**
 		Creates and returns an argument metadata object from a struct.
@@ -878,7 +878,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 		var componentPath_str = "";
 		var directoryPath_str = "";
 		var packageName_str = "";
-		var components_str = "";
+		var content_str = "";
 		var metadata_struct = "";
 		var metadata_obj = "";
 		var path_str = arguments.path;
@@ -931,15 +931,15 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" accessors="true
 			metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
 			structInsert(libraryRef_struct, metadata_struct.name, metadata_obj);
 
-			components_str = metadata_struct.name;
+			content_str = metadata_struct.name;
 			if (structKeyExists(packagesRef_struct[packageName_str], metadata_struct.type))
 			{
-				components_str = listAppend(packagesRef_struct[packageName_str][metadata_struct.type], components_str);
-				packagesRef_struct[packageName_str][metadata_struct.type] = components_str;
+				content_str = listAppend(packagesRef_struct[packageName_str][metadata_struct.type], content_str);
+				packagesRef_struct[packageName_str][metadata_struct.type] = content_str;
 			}
 			else
 			{
-				structInsert(packagesRef_struct[packageName_str], metadata_struct.type, components_str);
+				structInsert(packagesRef_struct[packageName_str], metadata_struct.type, content_str);
 			}
 		}
 		

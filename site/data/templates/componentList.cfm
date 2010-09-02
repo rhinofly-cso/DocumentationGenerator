@@ -33,7 +33,7 @@
 				</a>
 			</li>
 
-			<cfloop list="variables.interfaces_str" item="componentName_str">
+			<cfloop list="variables.interfaces_str" index="componentName_str">
 				<cfset componentPage_str = listLast(componentName_str, ".") & ".html" />
 				<li>
 					<a href="#variables.componentPage_str#">
@@ -52,7 +52,7 @@
 				</a>
 			</li>
 
-			<cfloop list="variables.components_str" item="componentName_str">
+			<cfloop list="variables.components_str" index="componentName_str">
 				<cfset componentPage_str = listLast(componentName_str, ".") & ".html" />
 				<li>
 					<a href="#variables.componentPage_str#">

@@ -1,6 +1,8 @@
 <!--- 
 	This template requires a list components_str in the variables scope containing the names of 
-	all components.
+	all components ordered alphabetically by last name.
+	Also, it requires (a reference to) a library structure libraryRef_struct containing 
+	component metadata objects for all components in the library.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
@@ -22,13 +24,19 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="variables.components_str" item="componentName_str">
+		<cfloop list="variables.components_str" index="componentName_str">
 			<cfset componentPage_str = replace(componentName_str, ".", "/") & ".html" />
-			<li>
-				<a href="#variables.componentPage_str#" title="#componentName_str#">
-					#listLast(componentName_str, ".")#
-				</a>
-			</li>
+			<cfif isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcMetadata.CFInterface")>
+				<li>
+					<i><a href="#variables.componentPage_str#" title="#componentName_str#">
+						#listLast(componentName_str, ".")#</a></i>
+				</li>
+			<cfelse>
+				<li>
+					<a href="#variables.componentPage_str#" title="#componentName_str#">
+						#listLast(componentName_str, ".")#</a>
+				</li>
+			</cfif>
 		</cfloop>
 	</cfoutput>
 </ul>

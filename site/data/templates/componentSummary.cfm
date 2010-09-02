@@ -1,8 +1,7 @@
 <!--- 
 	This template requires an array of structs components_arr in the variables scope 
-	containing the names of all components in the library, together with their short 
-	descriptions. Struct keys are "name" and "description". Elements are sorted alphabetically 
-	by name.
+	containing the names of all components in the library (ordered alphabetically by last 
+	name), together with their short descriptions. Struct keys are "name" and "description".
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
@@ -103,38 +102,41 @@
 
 		<cfset rowOdd_num = 0 />
 		
-		<cfoutput>
-			<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
-				<cfset componentName_str = variables.components_arr[i].name />
-				<cfset componentPage_str = replace(variables.componentName_str, ".", "/") & ".html" />
-				<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
-				<cfset packagePath_str = replace(variables.packageName_str, ".", "/") & "/" />
-				<cfif variables.rowOdd_num>
-					<cfset rowOdd_num = 0 />
-				<cfelse>
-					<cfset rowOdd_num = 1 />
-				</cfif>
+		<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
+			<cfset componentName_str = variables.components_arr[i].name />
+			<cfset componentPage_str = replace(variables.componentName_str, ".", "/") & ".html" />
+			<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
+			<cfset packagePath_str = replace(variables.packageName_str, ".", "/") & "/" />
+			<cfif variables.rowOdd_num>
+				<cfset rowOdd_num = 0 />
+			<cfelse>
+				<cfset rowOdd_num = 1 />
+			</cfif>
+			<cfoutput>
 				<tr class="prow#variables.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						<a href="#variables.componentPage_str#" title="#variables.componentName_str#">
-							#listLast(variables.componentName_str, ".")#
-						</a>
+						<cfif isInstanceOf(libraryRef_struct[variables.componentName_str], "cfc.cfcMetadata.CFInterface")>
+							<i><a href="#variables.componentPage_str#" title="#variables.componentName_str#">
+								#listLast(variables.componentName_str, ".")#</a></i>
+						<cfelse>
+							<a href="#variables.componentPage_str#" title="#variables.componentName_str#">
+								#listLast(variables.componentName_str, ".")#</a>
+						</cfif>
 					</td>
 					<td class="summaryTableCol">
 						<a href="#variables.packagePath_str#package-detail.html" 
 							onclick="javascript:loadClassListFrame('#variables.packagePath_str#class-list.html');">
-							#variables.packageName_str#
-						</a>
+							#variables.packageName_str#</a>
 					</td>
 					<td class="summaryTableLastCol">
 						#variables.components_arr[i].description#
 					</td>
 				</tr>
-			</cfloop>
-		</cfoutput>
+			</cfoutput>
+		</cfloop>
 	</table>
 	</div>
 

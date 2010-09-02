@@ -86,38 +86,40 @@
 			titleBar_setSubNav(false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false);
 		}
 	--></script>
+</cfoutput>
 	
-	<div class="MainContent">
-	
-	<cfif arrayLen(variables.interfaces_arr) gt 0>
-		<a name="interfaceSummary"></a>
-		<div class="summaryTableTitle">
-			Interfaces
-		</div>
+<div class="MainContent">
 
-		<table cellpadding="3" cellspacing="0" class="summaryTable">
-			<tr>
-				<th>
-					&nbsp;
-				</th>
-				<th width="30%">
-					Interface
-				</th>
-				<th width="70%">
-					Description
-				</th>
-			</tr>
+<cfif arrayLen(variables.interfaces_arr) gt 0>
+	<a name="interfaceSummary"></a>
+	<div class="summaryTableTitle">
+		Interfaces
+	</div>
 
-			<cfset rowOdd_num = 0 />
-			
-			<cfloop from="1" to="arrayLen(variables.interfaces_arr)" index="i">
-				<cfset componentName_str = variables.interfaces_arr[i].name />
-				<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
-				<cfif variables.rowOdd_num>
-					<cfset rowOdd_num = 0 />
-				<cfelse>
-					<cfset rowOdd_num = 1 />
-				</cfif>
+	<table cellpadding="3" cellspacing="0" class="summaryTable">
+		<tr>
+			<th>
+				&nbsp;
+			</th>
+			<th width="30%">
+				Interface
+			</th>
+			<th width="70%">
+				Description
+			</th>
+		</tr>
+
+		<cfset rowOdd_num = 0 />
+		
+		<cfloop from="1" to="arrayLen(variables.interfaces_arr)" index="i">
+			<cfset componentName_str = variables.interfaces_arr[i].name />
+			<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
+			<cfif variables.rowOdd_num>
+				<cfset rowOdd_num = 0 />
+			<cfelse>
+				<cfset rowOdd_num = 1 />
+			</cfif>
+			<cfoutput>
 				<tr class="prow#variables.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
@@ -133,43 +135,45 @@
 						#variables.interfaces_arr[i].description#
 					</td>
 				</tr>
-			</cfloop>
-		</table>
+			</cfoutput>
+		</cfloop>
+	</table>
 
-		<cfif listLen(variables.components_str) gt 0>
-			<p></p>
-		</cfif>
+	<cfif arrayLen(variables.components_arr) gt 0>
+		<br />
 	</cfif>
+</cfif>
 
-	<cfif listLen(variables.components_str) gt 0>
-		<a name="componentSummary"></a>
-		<div class="summaryTableTitle">
-			Components
-		</div>
+<cfif arrayLen(variables.components_arr) gt 0>
+	<a name="componentSummary"></a>
+	<div class="summaryTableTitle">
+		Components
+	</div>
 
-		<table cellpadding="3" cellspacing="0" class="summaryTable">
-			<tr>
-				<th>
-					&nbsp;
-				</th>
-				<th width="30%">
-					Component
-				</th>
-				<th width="70%">
-					Description
-				</th>
-			</tr>
+	<table cellpadding="3" cellspacing="0" class="summaryTable">
+		<tr>
+			<th>
+				&nbsp;
+			</th>
+			<th width="30%">
+				Component
+			</th>
+			<th width="70%">
+				Description
+			</th>
+		</tr>
 
-			<cfset rowOdd_num = 0 />
-			
-			<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
-				<cfset componentName_str = variables.components_arr[i].name />
-				<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
-				<cfif variables.rowOdd_num>
-					<cfset rowOdd_num = 0 />
-				<cfelse>
-					<cfset rowOdd_num = 1 />
-				</cfif>
+		<cfset rowOdd_num = 0 />
+		
+		<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
+			<cfset componentName_str = variables.components_arr[i].name />
+			<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
+			<cfif variables.rowOdd_num>
+				<cfset rowOdd_num = 0 />
+			<cfelse>
+				<cfset rowOdd_num = 1 />
+			</cfif>
+			<cfoutput>
 				<tr class="prow#variables.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
@@ -185,11 +189,11 @@
 						#variables.components_arr[i].description#
 					</td>
 				</tr>
-			</cfloop>
-		</table>
-	</cfif>
+			</cfoutput>
+		</cfloop>
+	</table>
+</cfif>
 
-	</div>
-	</body>
-</cfoutput>
+</div>
+</body>
 </html>
