@@ -6,7 +6,7 @@
 */
 component displayname="cfc.cfcMetadata.CFInterface" extends="cfc.CFCMetadata" accessors="true" output="false"
 {
-	property name="implementedBy" type="string" hint="Names of CFCs that implement the interface.";
+	property name="implementedBy" type="string" hint="List of CFCs that implement the interface.";
 
 	public void function addImplementedBy(required string componentName)
 	{

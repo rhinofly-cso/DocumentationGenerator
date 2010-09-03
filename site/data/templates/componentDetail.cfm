@@ -15,12 +15,12 @@
 <cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
 
-<cfif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.cfcInterface")>
+<cfif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.CFInterface")>
 	<cfset type_str = "Interface" />
-<cfelseif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.cfcComponent")>
+<cfelseif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.CFComponent")>
 	<cfset type_str = "Component" />
 <cfelse>
-	<cfthrow message="Error: unknown component type #cfcMetadata_obj.getClass().getName()#.">
+	<cfthrow message="Error: unknown component type #getMetadata(cfcMetadata_obj).name#.">
 </cfif>
 
 <cfoutput>
