@@ -3,14 +3,16 @@
 	variable scope.
 	Also, it requires (a reference to) a library structure libraryRef_struct containing 
 	component metadata objects for all components in the library.
+	Finally, it requires an object builder_obj of the type cfc.DocumentBuilder for invoking 
+	its methods.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
 <cfset componentName_str = variables.cfcMetadata_obj.getName() />
-<cfset componentPage_str = replace(variables.componentName_str, ".", "/") & ".html" />
+<cfset componentPage_str = replace(variables.componentName_str, ".", "/", "all") & ".html" />
 <cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str), ".") />
-<cfset packagePath_str = replace(variables.packageName_str, ".", "/") & "/" />
+<cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
 
 <cfif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.cfcInterface")>
@@ -19,11 +21,6 @@
 	<cfset type_str = "Component" />
 <cfelse>
 	<cfthrow message="Error: unknown component type #cfcMetadata_obj.getClass().getName()#.">
-</cfif>
-
-<cfset extends_str = cfcMetadata_obj.getExtends() />
-<cfif isNull(variables.extends_str)>
-	<cfset extends_str = "" />
 </cfif>
 
 <cfoutput>

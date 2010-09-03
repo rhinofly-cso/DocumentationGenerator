@@ -9,7 +9,7 @@
 <html>
 
 <cfset rootPath_str = repeatString("../", listLen(packageName_str, ".")) />
-<cfset packagePath_str = replace(packageName_str, ".", "/") & "/" />
+<cfset packagePath_str = replace(packageName_str, ".", "/", "all") & "/" />
 
 <cfoutput>
 	<head>
@@ -112,8 +112,6 @@
 		<cfset rowOdd_num = 0 />
 		
 		<cfloop from="1" to="arrayLen(variables.interfaces_arr)" index="i">
-			<cfset componentName_str = variables.interfaces_arr[i].name />
-			<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
 			<cfif variables.rowOdd_num>
 				<cfset rowOdd_num = 0 />
 			<cfelse>
@@ -125,11 +123,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						<i>
-							<a href="#variables.componentPage_str#" title="#variables.componentName_str#">
-								#listLast(variables.componentName_str, ".")#
-							</a>
-						</i>
+						#variables.builder_obj.convertToLink(variables.interfaces_arr[i].name, variables.libraryRef_struct, "", true, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						#variables.interfaces_arr[i].description#
@@ -166,8 +160,6 @@
 		<cfset rowOdd_num = 0 />
 		
 		<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
-			<cfset componentName_str = variables.components_arr[i].name />
-			<cfset componentPage_str = listLast(variables.componentName_str, ".") & ".html" />
 			<cfif variables.rowOdd_num>
 				<cfset rowOdd_num = 0 />
 			<cfelse>
@@ -179,11 +171,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						<i>
-							<a href="#variables.componentPage_str#" title="#variables.componentName_str#">
-								#listLast(variables.componentName_str, ".")#
-							</a>
-						</i>
+						#variables.builder_obj.convertToLink(variables.components_arr[i].name, variables.libraryRef_struct, "", true, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						#variables.components_arr[i].description#

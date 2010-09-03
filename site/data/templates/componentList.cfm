@@ -34,11 +34,8 @@
 			</li>
 
 			<cfloop list="variables.interfaces_str" index="componentName_str">
-				<cfset componentPage_str = listLast(componentName_str, ".") & ".html" />
 				<li>
-					<a href="#variables.componentPage_str#">
-						<i>#listLast(componentName_str, ".")#</i>
-					</a>
+					#variables.builder_obj.convertToLink(componentName_str, variables.libraryRef_struct, "", true, true)#
 				</li>
 			</cfloop>
 		
@@ -53,15 +50,12 @@
 			</li>
 
 			<cfloop list="variables.components_str" index="componentName_str">
-				<cfset componentPage_str = listLast(componentName_str, ".") & ".html" />
 				<li>
-					<a href="#variables.componentPage_str#">
-						#listLast(componentName_str, ".")#
-					</a>
+					#variables.builder_obj.convertToLink(componentName_str, variables.libraryRef_struct, "", true, true)#
 				</li>
 			</cfloop>
 		
-			<li>&nbsp;</li>
+			<li></li>
 		</cfif>
 	</ul>
 	

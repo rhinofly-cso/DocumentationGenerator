@@ -25,18 +25,9 @@
 <ul>
 	<cfoutput>
 		<cfloop list="variables.components_str" index="componentName_str">
-			<cfset componentPage_str = replace(componentName_str, ".", "/") & ".html" />
-			<cfif isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcMetadata.CFInterface")>
-				<li>
-					<i><a href="#variables.componentPage_str#" title="#componentName_str#">
-						#listLast(componentName_str, ".")#</a></i>
-				</li>
-			<cfelse>
-				<li>
-					<a href="#variables.componentPage_str#" title="#componentName_str#">
-						#listLast(componentName_str, ".")#</a>
-				</li>
-			</cfif>
+			<li>
+				#variables.builder_obj.convertToLink(componentName_str, variables.libraryRef_struct, "", true)#
+			</li>
 		</cfloop>
 	</cfoutput>
 </ul>

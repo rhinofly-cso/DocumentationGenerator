@@ -27,11 +27,11 @@
 					<cfset component_str = components_arr[i].name />
 					<cfif isInstanceOf(library_struct[component_str], "cfc.cfcMetadata.CFInterface")>
 						<cfoutput>
-							<i>#generator_obj.convertToLink(component_str, library_struct)#</i><br />
+							<i>#generator_obj.convertToLink(component_str, library_struct, "", true)#</i><br />
 						</cfoutput>
 					<cfelseif isInstanceOf(library_struct[component_str], "cfc.cfcMetadata.CFComponent")>
 						<cfoutput>
-							#generator_obj.convertToLink(component_str, library_struct)#<br />
+							#generator_obj.convertToLink(component_str, library_struct, "", true)#<br />
 						</cfoutput>
 					</cfif>
 				</td>

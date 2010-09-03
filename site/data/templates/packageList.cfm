@@ -30,7 +30,7 @@
 <ul>
 	<cfoutput>
 		<cfloop list="variables.packages_str" index="packageName_str">
-			<cfset packagePath_str = replace(packageName_str, ".", "/") & "/" />
+			<cfset packagePath_str = replace(packageName_str, ".", "/", "all") & "/" />
 			<li>
 				<!--- <a href="#variables.packagePath_str#package-detail.html?listPackageClasses"> --->
 				<a href="#variables.packagePath_str#package-detail.html"

@@ -97,9 +97,11 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		
 		@link String to be converted to a hyperlink.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
-		@rootPath If not present in the webroot, all links to local pages must be prepended by this root path.
+		@rootPath If not present in the webroot, all links to local pages are prepended by this root path.
+		@componentLastName Displays the link as the name behind the last dot of the full component name.
+		@fromPackageRoot Treats the current package directory as the webroot and strips links to components of the package path.
 	*/
-	public string function convertToLink(required string link, required struct library, string rootPath_str="")
+	public string function convertToLink(required string link, required struct library, string rootPath_str="", boolean componentLastName="false", boolean fromPackageRoot="false")
 	{
 		var componentName_str = "";
 		var componentLink_str = "";
@@ -108,7 +110,12 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		
 		if (left(link_str, 7) eq "http://")
 		{
-			return "<a href=""#link_str#"">#link_str#</a>";
+			componentLink_str = "<a href=""";
+			componentLink_str &= link_str;
+			componentLink_str &= """>";
+			componentLink_str &= link_str;
+			componentLink_str &= "</a>";
+			return componentLink_str;
 		}
 		else
 		{
@@ -117,15 +124,37 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 			{
 				componentLink_str = "<a href=""";
 				componentLink_str &= arguments.rootPath_str;
-				componentLink_str &= replace(componentName_str, ".", "/", "all");
+				if (fromPackageRoot)
+				{
+					componentLink_str &= listLast(componentName_str, ".");
+				}
+				else
+				{
+					componentLink_str &= replace(componentName_str, ".", "/", "all");
+				}
 				componentLink_str &= ".html";
 				if (len(link_str) > len(componentName_str))
 				{
 					componentLink_str &= removechars(link_str, 1, len(componentName_str));
 				}
-				componentLink_str &= """>";
-				componentLink_str &= componentName_str;
+				componentLink_str &= """";
+				if (arguments.componentLastName)
+				{
+					componentLink_str &= " title=""";
+					componentLink_str &= componentName_str;
+					componentLink_str &= """>";
+					componentLink_str &= listLast(componentName_str, ".");
+				}
+				else
+				{
+					componentLink_str &= ">";
+					componentLink_str &= componentName_str;
+				}
 				componentLink_str &= "</a>";
+				if (componentLastName and isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcMetadata.CFInterface"))
+				{
+					componentLink_str = "<i>" & componentLink_str & "</i>";
+				}
 				return componentLink_str;
 			}
 			else

@@ -104,9 +104,8 @@
 		
 		<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
 			<cfset componentName_str = variables.components_arr[i].name />
-			<cfset componentPage_str = replace(variables.componentName_str, ".", "/") & ".html" />
 			<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
-			<cfset packagePath_str = replace(variables.packageName_str, ".", "/") & "/" />
+			<cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 			<cfif variables.rowOdd_num>
 				<cfset rowOdd_num = 0 />
 			<cfelse>
@@ -118,13 +117,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						<cfif isInstanceOf(libraryRef_struct[variables.componentName_str], "cfc.cfcMetadata.CFInterface")>
-							<i><a href="#variables.componentPage_str#" title="#variables.componentName_str#">
-								#listLast(variables.componentName_str, ".")#</a></i>
-						<cfelse>
-							<a href="#variables.componentPage_str#" title="#variables.componentName_str#">
-								#listLast(variables.componentName_str, ".")#</a>
-						</cfif>
+						#variables.builder_obj.convertToLink(componentName_str, variables.libraryRef_struct, "", true)#
 					</td>
 					<td class="summaryTableCol">
 						<a href="#variables.packagePath_str#package-detail.html" 
