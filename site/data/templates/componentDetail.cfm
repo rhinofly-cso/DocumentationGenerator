@@ -23,6 +23,11 @@
 	<cfthrow message="Error: unknown component type #getMetadata(cfcMetadata_obj).name#.">
 </cfif>
 
+<cfset author_str = cfcMetadata_obj.getAuthor() />
+<cfset date_str = cfcMetadata_obj.getDate() />
+<cfset hint_str = cfcMetadata_obj.getHint() />
+<cfset related_str = cfcMetadata_obj.getRelated() />
+
 <cfoutput>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -97,21 +102,66 @@
 	--></script>
 	
 	<div xmlns:fn="http://www.w3.org/2005/xpath-functions" class="MainContent">
-		<table class="classHeaderTable" cellpadding="0" cellspacing="0">
+	<table class="classHeaderTable" cellpadding="0" cellspacing="0">
+		<tr>
+			<td class="classHeaderTableLabel">
+				Package
+			</td>
+			<td>
+				<a href="package-detail.html"
+					onclick="javascript:loadClassListFrame('class-list.html')">
+					#variables.packageName_str#</a>
+			</td>
+		</tr>
+		<cfinclude template="./includes/dsp_inheritance.cfm" />
+	</table>
+
+	<cfif not isNull(variables.author_str)>
+		<table cellpadding="0" cellspacing="0" border="0">
 			<tr>
-				<td class="classHeaderTableLabel">
-					Package
+				<td style="white-space:nowrap" valign="top">
+					<b>Author:&nbsp;</b>
 				</td>
 				<td>
-					<a href="package-detail.html"
-						onclick="javascript:loadClassListFrame('class-list.html')">
-						#variables.packageName_str#</a>
+					#variables.author_str#
 				</td>
 			</tr>
-			<cfinclude template="./includes/dsp_inheritance.cfm" />
 		</table>
-		
-		<hr>
+	</cfif>
+	<cfif not isNull(variables.date_str)>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td style="white-space:nowrap" valign="top">
+					<b>Date:&nbsp;</b>
+				</td>
+				<td>
+					#variables.date_str#
+				</td>
+			</tr>
+		</table>
+	</cfif>
+	<cfif not isNull(variables.hint_str)>
+		<p>
+			#variables.hint_str#
+		</p>
+	</cfif>
+	<cfif not isNull(variables.related_str)>
+		<cfset started_bool = false />
+		<cfset relatedLinks_str = "" />
+		<cfloop list="#variables.extendedBy_str#" index="component_str">
+			<cfif variables.started_bool>
+				<cfset relatedLinks_str &= ", " />
+			<cfelse>
+				<cfset started_bool = true>
+			</cfif>
+			<cfset relatedLinks_str &= variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true) />
+		</cfloop>
+		<p>
+			<span class="classHeaderTableLabel">See also</span>
+		</p>
+		<div class="seeAlso">#relatedLinks_str#</div>
+	</cfif>
+	<br /><hr>
 	</div>
 	
 	<a name="methodSummary"></a>

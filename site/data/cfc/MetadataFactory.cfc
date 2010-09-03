@@ -149,8 +149,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		the parsing of CFScript code. If so, these are retrieved from the .cfc file and
 		processed. Alternatively, for tag-based CF code, the tags in the hint are all parsed.
 	*/
-	private void function _resolveFunctionHint(required string hint, required struct metadata, required any functionObject)
+	private void function _resolveHint(required struct metadata, required any returnObject)
 	{
+		var type_str = "";
 		var search_str = "";
 		var component_str = "";
 		var reverse_str = "";
@@ -158,20 +159,72 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var beginFromLast_num = 0;
 		var i = 0;
 		var token_str = "";
+		var exception_struct = "";
+		var throwsTagFollow_bool = false;
+		var seeTagFollow_bool = false;
 		var tag_str = "";
 		var hintTag_bool = false;
 		var parsedHint_str = "";
-		var hint_str = arguments.hint;
 		var metadataRef_struct = arguments.metadata;
-		var functionRef_obj = arguments.functionObject;
+		var returnRef_obj = arguments.returnObject;
+		var hint_str = returnRef_obj.getHint();
 		
+		if (isInstanceOf(returnRef_obj, "cfc.CFProperty"))
+		{
+			type_str = "property";
+		}
+		else
+		{
+			if (isInstanceOf(returnRef_obj, "cfc.CFFunction"))
+			{
+				type_str = "function";
+			}
+			else
+			{
+				if (isInstanceOf(returnRef_obj, "cfc.CFComponent"))
+				{
+					type_str = "component";
+				}
+				else
+				{
+					if (isInstanceOf(returnRef_obj, "cfc.CFInterface"))
+					{
+						type_str = "interface";
+					}
+					else
+					{
+						throw(message="Could not process hint for type #getMetadata(cfcMetadata_obj).name#.");
+					}
+				}
+			}
+		}
+
 		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
 		{
 			// we have a hint to parse from CFScript code, which must be isolated
-			search_str = "function #functionRef_obj.getName()#(";
+			search_str = type_str;
+			if (type_str = "property")
+			{
+				search_str &= "[^\n\r]*";
+				search_str &= returnRef_obj.getName();
+				search_str &= "\b";
+			}
+			else
+			{
+				if (type_str = "function")
+				{
+					search_str &= "[\n\r]*";
+					search_str &= returnRef_obj.getName();
+					search_str &= "[\s]*\(";
+				}
+				else
+				{
+					search_str &= "[^\n\r]*[\s]*\{";
+				}
+			}
+			
 			component_str = FileRead(metadataRef_struct.path);
-
-			component_str = left(component_str, find(search_str, component_str));
+			component_str = left(component_str, reFind(search_str, component_str));
 			reverse_str = reverse(component_str);
 			endFromLast_num = find("/*", reverse_str);
 			
@@ -195,17 +248,68 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						{
 							token_str = trim(removeChars(token_str, 1, 1));
 						}
-						
-						// parse hint line
-						if (find("@throws", token_str) eq 1)
+
+						// if we previously encountered @throws	or @see
+						// we check for new tokens or additional input lines
+						if (throwsTagFollow_bool)
 						{
-							functionRef_obj.addThrows(trim(removechars(token_str, 1, 7)));
+							if (left(token_str, 1) eq "@")
+							{
+								throwsTagFollow_bool = false;
+							}
+							else
+							{
+								token_str = "@throws " & token_str;
+							}
+						}
+						if (seeTagFollow_bool)
+						{
+							if (left(token_str, 1) eq "@")
+							{
+								seeTagFollow_bool = false;
+							}
+							else
+							{
+								token_str = "@see " & token_str;
+							}
+						}
+
+						// parse hint line
+						if (find("@", token_str) eq 1)
+						{
+							if (type_str = "function")
+							{
+								if (find("@throws", token_str) eq 1)
+								{
+									token_str = trim(removechars(token_str, 1, 7));
+									exception_struct = structNew();
+									exception_struct.type = getToken(token_str, 1);
+									exception_struct.description = trim(removechars(token_str, 1, len(exception_struct.type)));
+									returnRef_obj.addThrows(exception_struct);
+									throwsTagFollow_bool = true;
+								}
+							}
+							if (find("@see", token_str) eq 1)
+							{
+								returnRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
+								seeTagFollow_bool = true;
+							}
+							if (tag_str eq "@hint")
+							{
+								parsedHint_str = trim(removechars(token_str, 1, 7));
+								hintTag_bool = true;
+							}
+							if (tag_str eq "@internal")
+							{
+								hintTag_bool = true;
+							}
 						}
 						else
 						{
-							if (find("@see", token_str) eq 1)
+							if (not hintTag_bool)
 							{
-								functionRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
+								parsedHint_str &= token_str;
+								parsedHint_str &= " ";
 							}
 						}
 						i += 1;
@@ -217,82 +321,92 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				}
 			}
 		}
-		
-		// tag-based hint parsing
-		i = 1;
-		while (true)
+		else
 		{
-			token_str = getToken(hint_str, i, chr(10));
-			// getToken only returns an empty string if index i is larger than the number of tokens
-			if (len(token_str) > 0)
+			// tag-based hint parsing
+			i = 1;
+			while (true)
 			{
-				// get hint line
-				token_str = trim(token_str);
-				if (left(token_str, 1) eq "*")
+				token_str = getToken(hint_str, i, chr(10));
+				// getToken only returns an empty string if index i is larger than the number of tokens
+				if (len(token_str) > 0)
 				{
-					token_str = trim(removeChars(token_str, 1, 1));
-				}
-				
-				// parse hint line
-				if (find("@", token_str) eq 1)
-				{
-					tag_str = getToken(token_str, 1);
-					if (tag_str eq "@author")
+					// get hint line
+					token_str = trim(token_str);
+					if (left(token_str, 1) eq "*")
 					{
-						functionRef_obj.setAuthor(trim(removechars(token_str, 1, 7)));
+						token_str = trim(removeChars(token_str, 1, 1));
 					}
-					if (tag_str eq "@date")
+					
+					// parse hint line
+					if (find("@", token_str) eq 1)
 					{
-						functionRef_obj.setDate(trim(removechars(token_str, 1, 5)));
+						tag_str = getToken(token_str, 1);
+						if (tag_str eq "@author")
+						{
+							returnRef_obj.setAuthor(trim(removechars(token_str, 1, 7)));
+						}
+						if (tag_str eq "@date")
+						{
+							returnRef_obj.setDate(trim(removechars(token_str, 1, 5)));
+						}
+						if (tag_str eq "@hint")
+						{
+							parsedHint_str = trim(removechars(token_str, 1, 7));
+							hintTag_bool = true;
+						}
+						if (tag_str eq "@internal")
+						{
+							hintTag_bool = true;
+						}
+						if (tag_str eq "@private")
+						{
+							returnRef_obj.setPrivate(true);
+						}
+						if (tag_str eq "@see")
+						{
+							returnRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
+						}
+						if (type_str = "function")
+						{
+							if (tag_str eq "@return")
+							{
+								returnRef_obj.setReturnHint(trim(removechars(token_str, 1, 7)));
+							}
+							if (find("@throws", token_str) eq 1)
+							{
+								token_str = trim(removechars(token_str, 1, 7));
+								exception_struct = structNew();
+								exception_struct.type = getToken(token_str, 1);
+								exception_struct.description = trim(removechars(token_str, 1, len(exception_struct.type)));
+								returnRef_obj.addThrows(exception_struct);
+								throwsTagFollow_bool = true;
+							}
+							if (tag_str eq "@inheritDoc")
+							{
+								returnRef_obj.setInheritDoc(true);
+							}
+						}
 					}
-					if (tag_str eq "@return")
+					else
 					{
-						functionRef_obj.setReturnHint(trim(removechars(token_str, 1, 7)));
+						if (not hintTag_bool)
+						{
+							parsedHint_str &= token_str;
+							parsedHint_str &= " ";
+						}
 					}
-					if (tag_str eq "@throws")
-					{
-						functionRef_obj.addThrows(trim(removechars(token_str, 1, 7)));
-					}
-					if (tag_str eq "@hint")
-					{
-						parsedHint_str = trim(removechars(token_str, 1, 7));
-						hintTag_bool = true;
-					}
-					if (tag_str eq "@private")
-					{
-						functionRef_obj.setPrivate(true);
-					}
-					if (tag_str eq "@inheritDoc")
-					{
-						functionRef_obj.setInheritDoc(true);
-					}
-					if (tag_str eq "@see")
-					{
-						functionRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-					}
+					i += 1;
 				}
 				else
 				{
-					if (not hintTag_bool)
-					{
-						parsedHint_str &= token_str;
-						parsedHint_str &= " ";
-					}
+					break;
 				}
-				i += 1;
-			}
-			else
-			{
-				break;
 			}
 		}
 
 		// assignment of the remaining hint
-		parsedHint_str = trim(parsedHint_str);
-		if (len(parsedHint_str) > 0)
-		{
-			functionRef_obj.setHint(parsedHint_str);
-		}
+		returnRef_obj.setHint(trim(parsedHint_str));
 	}
 
 	/**
@@ -325,7 +439,8 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				{
 					hint_str &= functionsRef_arr[i].description;
 				}
-				_resolveFunctionHint(hint_str, metadataRef_struct, function_obj);
+				function_obj.setHint(hint_str);
+				_resolveHint(metadataRef_struct, function_obj);
 
 				arrayAppend(functionObjs_arr, function_obj);
 			}
@@ -386,139 +501,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	
 	/**
 		@private
-		Determines whether the hint contained @see tags that were removed by the parsing of 
-		CFScript code. If so, these are retrieved from the .cfc file and processed. 
-		Alternatively, for tag-based CF code, the tags in the hint are all parsed.
-	*/
-	private void function _resolvePropertyHint(required string hint, required struct metadata, required any propertyObject)
-	{
-		var search_str = "";
-		var component_str = "";
-		var reverse_str = "";
-		var endFromLast_num = 0;
-		var beginFromLast_num = 0;
-		var i = 0;
-		var token_str = "";
-		var tag_str = "";
-		var hintTag_bool = false;
-		var parsedHint_str = "";
-		var hint_str = arguments.hint;
-		var metadataRef_struct = arguments.metadata;
-		var propertyRef_obj = arguments.propertyObject;
-		
-		if (structKeyExists(metadataRef_struct, "see"))
-		{
-			// we have a hint to parse from CFScript code, which must be isolated
-			search_str = "property #propertyRef_obj.getName()#(";
-			component_str = FileRead(metadataRef_struct.path);
-
-			component_str = left(component_str, find(search_str, component_str));
-			reverse_str = reverse(component_str);
-			endFromLast_num = find("/*", reverse_str);
-			
-			if (endFromLast_num > 0 and endFromLast_num lt find("{", reverse_str))
-			{
-				beginFromLast_num = find("**/", reverse_str);
-				component_str = right(component_str, beginFromLast_num - 1);
-				component_str = left(component_str, beginFromLast_num - endFromLast_num - 2);
-
-				// parsing the hint one line after another
-				i = 1;
-				while (true)
-				{
-					token_str = getToken(component_str, i, chr(10));
-					// getToken only returns an empty string if index i is larger than the number of tokens
-					if (len(token_str) > 0)
-					{
-						// get hint line
-						token_str = trim(token_str);
-						if (left(token_str, 1) eq "*")
-						{
-							token_str = trim(removeChars(token_str, 1, 1));
-						}
-						
-						// parse hint line
-						if (find("@see", token_str) eq 1)
-						{
-							propertyRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-						}
-						i += 1;
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-		}
-		
-		// tag-based hint parsing
-		i = 1;
-		while (true)
-		{
-			token_str = getToken(hint_str, i, chr(10));
-			// getToken only returns an empty string if index i is larger than the number of tokens
-			if (len(token_str) > 0)
-			{
-				// get hint line
-				token_str = trim(token_str);
-				if (left(token_str, 1) eq "*")
-				{
-					token_str = trim(removeChars(token_str, 1, 1));
-				}
-				
-				// parse hint line
-				if (find("@", token_str) eq 1)
-				{
-					tag_str = getToken(token_str, 1);
-					if (tag_str eq "@author")
-					{
-						propertyRef_obj.setAuthor(trim(removechars(token_str, 1, 7)));
-					}
-					if (tag_str eq "@date")
-					{
-						propertyRef_obj.setDate(trim(removechars(token_str, 1, 5)));
-					}
-					if (tag_str eq "@hint")
-					{
-						parsedHint_str = trim(removechars(token_str, 1, 7));
-						hintTag_bool = true;
-					}
-					if (tag_str eq "@private")
-					{
-						propertyRef_obj.setPrivate(true);
-					}
-					if (tag_str eq "@see")
-					{
-						propertyRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-					}
-				}
-				else
-				{
-					if (not hintTag_bool)
-					{
-						parsedHint_str &= token_str;
-						parsedHint_str &= " ";
-					}
-				}
-				i += 1;
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		// assignment of the remaining hint
-		parsedHint_str = trim(parsedHint_str);
-		if (len(parsedHint_str) > 0)
-		{
-			propertyRef_obj.setHint(parsedHint_str);
-		}
-	}
-
-	/**
-		@private
 		Determines the properties of the component and sets the appropriate parameters.
 	*/
 	private void function _resolveProperties(required struct metadata, required any returnObject)
@@ -527,7 +509,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var propertyObjs_arr = arrayNew(1);
 		var property_obj = "";
 		var i = 0;
-		var hint_str = "";
 		var metadataRef_struct = arguments.metadata;
 		var returnRef_obj = arguments.returnObject;
 		
@@ -538,12 +519,15 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			{
 				property_obj = createPropertyObject(propertiesRef_arr[i]);
 
-				hint_str = "";
 				if (structKeyExists(propertiesRef_arr[i], "hint"))
 				{
-					hint_str = propertiesRef_arr[i].hint;
+					property_obj.setHint(propertiesRef_arr[i].hint);
 				}
-				_resolvePropertyHint(hint_str, metadataRef_struct, property_obj);
+				else
+				{
+					property_obj.setHint("");
+				}
+				_resolveHint(metadataRef_struct, property_obj);
 
 				arrayAppend(propertyObjs_arr, property_obj);
 			}
@@ -652,144 +636,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	}
 	
 	/**
-		@private
-		Determines whether the hint contained @see tags that were removed by the parsing of 
-		CFScript code. If so, these are retrieved from the .cfc file and processed. 
-		Alternatively, for tag-based CF code, the tags in the hint are all parsed.
-	*/
-	private void function _resolveComponentHint(required struct metadata, required any returnObject)
-	{
-		var search_str = "";
-		var component_str = "";
-		var reverse_str = "";
-		var endFromLast_num = 0;
-		var beginFromLast_num = 0;
-		var i = 0;
-		var token_str = "";
-		var tag_str = "";
-		var hintTag_bool = false;
-		var parsedHint_str = "";
-		var hint_str = "";
-		var metadataRef_struct = arguments.metadata;
-		var returnRef_obj = arguments.returnObject;
-		
-		if (structKeyExists(metadataRef_struct, "hint"))
-		{
-			hint_str = metadataRef_struct.hint;
-		}
-
-		if (structKeyExists(metadataRef_struct, "see"))
-		{
-			// we have a hint to parse from CFScript code, which must be isolated
-			search_str = "component #returnRef_obj.getName()#(";
-			component_str = FileRead(metadataRef_struct.path);
-
-			component_str = left(component_str, find(search_str, component_str));
-			reverse_str = reverse(component_str);
-			endFromLast_num = find("/*", reverse_str);
-			
-			if (endFromLast_num > 0 and endFromLast_num lt find("{", reverse_str))
-			{
-				beginFromLast_num = find("**/", reverse_str);
-				component_str = right(component_str, beginFromLast_num - 1);
-				component_str = left(component_str, beginFromLast_num - endFromLast_num - 2);
-
-				// parsing the hint one line after another
-				i = 1;
-				while (true)
-				{
-					token_str = getToken(component_str, i, chr(10));
-					// getToken only returns an empty string if index i is larger than the number of tokens
-					if (len(token_str) > 0)
-					{
-						// get hint line
-						token_str = trim(token_str);
-						if (left(token_str, 1) eq "*")
-						{
-							token_str = trim(removeChars(token_str, 1, 1));
-						}
-						
-						// parse hint line
-						if (find("@see", token_str) eq 1)
-						{
-							returnRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-						}
-						i += 1;
-					}
-					else
-					{
-						break;
-					}
-				}
-			}
-		}
-		
-		// tag-based hint parsing
-		i = 1;
-		while (true)
-		{
-			token_str = getToken(hint_str, i, chr(10));
-			// getToken only returns an empty string if index i is larger than the number of tokens
-			if (len(token_str) > 0)
-			{
-				// get hint line
-				token_str = trim(token_str);
-				if (left(token_str, 1) eq "*")
-				{
-					token_str = trim(removeChars(token_str, 1, 1));
-				}
-				
-				// parse hint line
-				if (find("@", token_str) eq 1)
-				{
-					tag_str = getToken(token_str, 1);
-					if (tag_str eq "@author")
-					{
-						returnRef_obj.setAuthor(trim(removechars(token_str, 1, 7)));
-					}
-					if (tag_str eq "@date")
-					{
-						returnRef_obj.setDate(trim(removechars(token_str, 1, 5)));
-					}
-					if (tag_str eq "@hint")
-					{
-						parsedHint_str = trim(removechars(token_str, 1, 7));
-						hintTag_bool = true;
-					}
-					if (tag_str eq "@private")
-					{
-						returnRef_obj.setPrivate(true);
-					}
-					if (tag_str eq "@see")
-					{
-						returnRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-					}
-				}
-				else
-				{
-					if (not hintTag_bool)
-					{
-						parsedHint_str &= token_str;
-						parsedHint_str &= " ";
-					}
-				}
-				i += 1;
-			}
-			else
-			{
-				break;
-			}
-		}
-
-		// assignment of the remaining hint
-		parsedHint_str = trim(parsedHint_str);
-		if (len(parsedHint_str) > 0)
-		{
-			returnRef_obj.setHint(parsedHint_str);
-		}
-	}
-
-	/**
 		Determines the data type, creates the appropriate object, and returns it.
 		
 		@metadata Metadata struct of the component, or interface.
@@ -862,7 +708,17 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			return_obj.setPrivate(metadataRef_struct.private);
 		}
 
-		_resolveComponentHint(metadataRef_struct, return_obj);
+		// initial version of the hint
+		if (structKeyExists(metadataRef_struct, "hint"))
+		{
+			return_obj.setHint(metadataRef_struct.hint);
+		}
+		else
+		{
+			return_obj.setHint("");
+		}
+
+		_resolveHint(metadataRef_struct, return_obj);
 		_resolveInheritance(metadataRef_struct, libraryRef_struct, return_obj);
 		_resolveProperties(metadataRef_struct, return_obj);
 		_resolveFunctions(metadataRef_struct, return_obj);

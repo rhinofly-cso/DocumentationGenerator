@@ -9,7 +9,7 @@ component displayname="cfc.cfcMetadata.CFFunction" extends="fly.Object" accessor
 	property name="name" type="string" hint="Name of the function.";
 	property name="access" type="string" hint="Indicates whether the function is private or public.";
 	property name="returnType" type="string" hint="Variable type of function output.";
-	property name="throws" type="string" hint="List of exception types that are possibly thrown by the function.";
+	property name="throws" type="array" hint="Array of structures of exception-type-description value pairs that are possibly thrown by the function.";
 	property name="parameters" type="array" hint="Metadata concerning arguments of the function.";
 
 	property name="inheritDoc" type="boolean" hint="Indicates whether the documentation should be copied from an identical function of an ancestor.";
@@ -21,16 +21,16 @@ component displayname="cfc.cfcMetadata.CFFunction" extends="fly.Object" accessor
 	property name="private" type="boolean" hint="Indicates whether the function should be documented.";
 	property name="related" type="string" hint="List of link expressions to related documentation pages.";
 	
-	public void function addThrows(required string exception)
+	public void function addThrows(required struct exception)
 	{
-		var throws_str = this.getThrows();
+		var throws_arr = this.getThrows();
 		
-		if (isNull(throws_str))
+		if (isNull(throws_arr))
 		{
-			throws_str = "";
+			throws_arr = arrayNew();
 		}
-		throws_str = listAppend(throws_str, arguments.exception);
-		this.setThrows(throws_str);
+		arrayAppend(throws_arr, arguments.exception);
+		this.setThrows(throws_arr);
 	}
 
 	public void function addRelated(required string link)

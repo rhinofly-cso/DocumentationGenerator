@@ -84,28 +84,6 @@
 		</tr>
 	</cfif>
 	
-	<cfif listLen(variables.extendedBy_str) gt 0>
-		<cfset started_bool = false />
-		<cfset subclassesLinks_str = "" />
-		<cfloop list="#variables.extendedBy_str#" index="child_str">
-			<cfif variables.started_bool>
-				<cfset subclassesLinks_str &= ", " />
-			<cfelse>
-				<cfset started_bool = true>
-			</cfif>
-			<cfset subclassesLinks_str &= variables.builder_obj.convertToLink(child_str, variables.libraryRef_struct, variables.rootPath_str, true) />
-		</cfloop>
-		
-		<tr>
-			<td class="classHeaderTableLabel">
-				Subclasses
-			</td>
-			<td>
-				#subclassesLinks_str#
-			</td>
-		</tr>
-	</cfif>
-	
 	<cfif variables.type_str eq "Component" and len(variables.implements_str) gt 0>
 		<cfset started_bool = false />
 		<cfset implements_str = "" />
@@ -146,6 +124,28 @@
 			</td>
 			<td>
 				#implementorsLinks_str#
+			</td>
+		</tr>
+	</cfif>
+
+	<cfif listLen(variables.extendedBy_str) gt 0>
+		<cfset started_bool = false />
+		<cfset subclassesLinks_str = "" />
+		<cfloop list="#variables.extendedBy_str#" index="child_str">
+			<cfif variables.started_bool>
+				<cfset subclassesLinks_str &= ", " />
+			<cfelse>
+				<cfset started_bool = true>
+			</cfif>
+			<cfset subclassesLinks_str &= variables.builder_obj.convertToLink(child_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+		</cfloop>
+		
+		<tr>
+			<td class="classHeaderTableLabel">
+				Subclasses
+			</td>
+			<td>
+				#subclassesLinks_str#
 			</td>
 		</tr>
 	</cfif>

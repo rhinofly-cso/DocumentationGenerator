@@ -71,10 +71,14 @@ Give the description for the return value of a function.
 
 <h3>@throws</h3>
 <p><code>
-@throws exception<br />
+@throws exceptionType hint<br />
 </code>
 Adds the exception to the list in the documentation page of exceptions that can be thrown by a 
-function.
+function, together with its description.
+CFScript: In CFBuilder, Adobe only allows you to use each distinct tag once. Therefore, in 
+order to establish multiple instances, put additional exception types and descriptions on 
+consecutive lines following the initial tag line. Each line will be treated as starting with 
+the @throws tag, until another tag is used.
 </p>
 
 <h3>@hint</h3>
@@ -90,7 +94,8 @@ property, instead of (the untagged part of) the entire comment.
 <p><code>
 @internal hint<br />
 </code>
-Provides hint text that is not included in the documentation.
+Provides hint text that is not included in the documentation. Also removes subsequent untagged 
+text from the documentation.
 </p>
 
 <h3>@private</h3>
@@ -115,6 +120,10 @@ or implements. Any tags used in addition to this one will be ignored.
 Adds the link to the list in the documentation page of related documentation. The expression 
 <i>link</i> can be an internet hyperlink, a component or interface from the same library, or a 
 Java component. Use a "#" followed by an ID to link to a certain section of a page.
+CFScript: In CFBuilder, Adobe only allows you to use each distinct tag once. Therefore, in 
+order to establish multiple instances, put additional links on consecutive lines following the 
+initial tag line. Each line will be treated as starting with the @see tag, until another tag 
+is used.
 </p>
 
 <h3>{@link}</h3>
