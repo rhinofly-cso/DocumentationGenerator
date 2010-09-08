@@ -1,5 +1,5 @@
 <!--- 
-	This template requires the metadata object cfcMetadata_obj of the component in the 
+	This template requires the metadata object cfMetadata_obj of the component in the 
 	variable scope.
 	Also, it requires (a reference to) a library structure libraryRef_struct containing 
 	component metadata objects for all components in the library.
@@ -9,24 +9,38 @@
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
-<cfset componentName_str = variables.cfcMetadata_obj.getName() />
+<cfif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFInterface")>
+	<cfset type_str = "Interface" />
+<cfelseif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFComponent")>
+	<cfset type_str = "Component" />
+<cfelse>
+	<cfthrow message="Error: unknown component type #getMetadata(cfMetadata_obj).name#.">
+</cfif>
+
+<cfset componentName_str = variables.cfMetadata_obj.getName() />
 <cfset componentPage_str = replace(variables.componentName_str, ".", "/", "all") & ".html" />
 <cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str), ".") />
 <cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
 
-<cfif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.CFInterface")>
-	<cfset type_str = "Interface" />
-<cfelseif isInstanceOf(cfcMetadata_obj, "cfc.cfcMetadata.CFComponent")>
-	<cfset type_str = "Component" />
-<cfelse>
-	<cfthrow message="Error: unknown component type #getMetadata(cfcMetadata_obj).name#.">
-</cfif>
+<cfset author_str = cfMetadata_obj.getAuthor() />
+<cfset date_str = cfMetadata_obj.getDate() />
+<cfset hint_str = cfMetadata_obj.getHint() />
+<cfset related_str = cfMetadata_obj.getRelated() />
 
-<cfset author_str = cfcMetadata_obj.getAuthor() />
-<cfset date_str = cfcMetadata_obj.getDate() />
-<cfset hint_str = cfcMetadata_obj.getHint() />
-<cfset related_str = cfcMetadata_obj.getRelated() />
+<cfset properties_arr = builder_obj.propertyArray(componentName_str, libraryRef_struct) />
+<cfset methods_arr = builder_obj.methodArray(componentName_str, libraryRef_struct) />
+<cfset publicMethods_bool = false />
+<cfset privateMethods_bool = false />
+<cfloop from="1" to="#arrayLen(variables.methods_arr)#" index="i">
+	<cfif not variables.methods_arr[i].metadata.getPrivate()>
+		<cfif variables.methods_arr[i].metadata.getAccess() eq "public">
+			<cfset publicMethods_bool = true />
+		<cfelseif variables.methods_arr[i].metadata.getAccess() eq "private">
+			<cfset privateMethods_bool = true />
+		</cfif>
+	</cfif>
+</cfloop>
 
 <cfoutput>
 	<head>
@@ -92,493 +106,172 @@
 			<td colspan="3"></td>
 		</tr>
 	</table>
-	
-	<script language="javascript" type="text/javascript" xml:space="preserve"><!--
-		if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME)
-		{
-			titleBar_setSubTitle("JobAPI");
-			titleBar_setSubNav(false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false);
-		}
-	--></script>
-	
-	<div xmlns:fn="http://www.w3.org/2005/xpath-functions" class="MainContent">
-	<table class="classHeaderTable" cellpadding="0" cellspacing="0">
-		<tr>
-			<td class="classHeaderTableLabel">
-				Package
-			</td>
-			<td>
-				<a href="package-detail.html"
-					onclick="javascript:loadClassListFrame('class-list.html')">
-					#variables.packageName_str#</a>
-			</td>
-		</tr>
-		<cfinclude template="./includes/dsp_inheritance.cfm" />
-	</table>
+</cfoutput>
 
-	<cfif not isNull(variables.author_str)>
-		<table cellpadding="0" cellspacing="0" border="0">
-			<tr>
-				<td style="white-space:nowrap" valign="top">
-					<b>Author:&nbsp;</b>
-				</td>
-				<td>
-					#variables.author_str#
-				</td>
-			</tr>
-		</table>
-	</cfif>
-	<cfif not isNull(variables.date_str)>
-		<table cellpadding="0" cellspacing="0" border="0">
-			<tr>
-				<td style="white-space:nowrap" valign="top">
-					<b>Date:&nbsp;</b>
-				</td>
-				<td>
-					#variables.date_str#
-				</td>
-			</tr>
-		</table>
-	</cfif>
-	<cfif not isNull(variables.hint_str)>
-		<p>
-			#variables.hint_str#
-		</p>
-	</cfif>
-	<cfif not isNull(variables.related_str)>
-		<cfset started_bool = false />
-		<cfset relatedLinks_str = "" />
-		<cfloop list="#variables.extendedBy_str#" index="component_str">
-			<cfif variables.started_bool>
-				<cfset relatedLinks_str &= ", " />
-			<cfelse>
-				<cfset started_bool = true>
-			</cfif>
-			<cfset relatedLinks_str &= variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true) />
-		</cfloop>
-		<p>
-			<span class="classHeaderTableLabel">See also</span>
-		</p>
-		<div class="seeAlso">#relatedLinks_str#</div>
-	</cfif>
-	<br /><hr>
-	</div>
+<script language="javascript" type="text/javascript" xml:space="preserve"><!--
+	if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME)
+	{
+		titleBar_setSubTitle("JobAPI");
+		titleBar_setSubNav(false,false,false,false,false,false,false,false,true,false,false,false,false,false,false,false);
+	}
+--></script>
 	
+<div xmlns:fn="http://www.w3.org/2005/xpath-functions" class="MainContent">
+<cfinclude template="./includes/dsp_classHeader.cfm" />
+<br /><hr>
+</div>
+
+<cfif arrayLen(properties_arr) gt 0 >
+	<a name="propertySummary"></a>
+	<div class="summarySection">
+		<cfinclude template="./includes/dsp_propertySummary.cfm">
+	</div>
+</cfif>
+<cfif publicMethods_bool>
 	<a name="methodSummary"></a>
 	<div class="summarySection">
+		<cfinclude template="./includes/dsp_methodSummary.cfm">
+	</div>
+</cfif>
+<cfif privateMethods_bool>
+	<a name="protectedMethodSummary"></a>
+	<div class="summarySection">
+		<cfinclude template="./includes/dsp_protectedMethodSummary.cfm">
+	</div>
+</cfif>
 
-	<div class="summaryTableTitle">
-		Public Methods
-	</div>
-	<div class="showHideLinks">
-		<div id="hideInheritedMethod" class="hideInheritedMethod">
-			<a class="showHideLink" 
-				href="#methodSummary" 
-				onclick="javascript:setInheritedVisible(false,'Method');">
-				<img class="showHideLinkImage" src="../../../../images/expanded.gif">
-				Hide Inherited Public Methods
-			</a>
-		</div>
-		<div id="showInheritedMethod" class="showInheritedMethod">
-			<a class="showHideLink" 
-				href="#methodSummary" 
-				onclick="javascript:setInheritedVisible(true,'Method');">
-				<img class="showHideLinkImage" src="../../../../images/collapsed.gif">
-				Show Inherited Public Methods
-			</a>
-		</div>
-	</div>
-	<table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableMethod">
-		<tr>
-			<th>
-				&nbsp;
-			</th>
-			<th colspan="2">
-				Method
-			</th>
-			<th class="summaryTableOwnerCol">
-				Defined By
-			</th>
-		</tr>
-		<tr class="hideInheritedMethod">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				<img src="../../../../images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="../../../../fly/cso/api/v1/API.html#getApiKey()"
-						class="signatureLink">
-						getApiKey
-					</a>
-					(username:String, password:String):String
-				</div>
-				<div class="summaryTableDescription">
-					Allows a user of the API to retrieve a key.
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				<a href="../../../../fly/cso/api/v1/API.html">
-					API
-				</a>
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#getJob()" class="signatureLink">
-						getJob
-					</a>
-					(apiKey:String, id:String):
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-						RemoteJob
-					</a>
-				</div>
-				<div class="summaryTableDescription">
-					Returns a completely filled single job
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#getJobCount()" class="signatureLink">
-						getJobCount
-					</a>
-					(apiKey:String, filter:
-					<a href="../../../../fly/cso/api/v1/filter/RemoteJobFilter.html">
-						RemoteJobFilter
-					</a>
-					):Number
-				</div>
-				<div class="summaryTableDescription">
-					Returns the number of jobs for the given filter
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#getJobEnumerations()" class="signatureLink">
-						getJobEnumerations
-					</a>
-					(apiKey:String):
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJobEnumerations.html">
-						RemoteJobEnumerations
-					</a>
-				</div>
-				<div class="summaryTableDescription">
-					Can be used to retrieve all used enumerations
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#getJobs()" class="signatureLink">
-						getJobs
-					</a>
-					(apiKey:String, filter:
-					<a href="../../../../fly/cso/api/v1/filter/RemoteJobFilter.html">
-						RemoteJobFilter
-					</a>
-					, fieldSelection:
-					<a href="../../../../fly/cso/api/v1/selection/RemoteJobFieldSelection.html">
-						RemoteJobFieldSelection
-					</a>
-					):Vector.&lt;
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-						RemoteJob
-					</a>
-					&gt;
-				</div>
-				<div class="summaryTableDescription">
-					Retrieves a set of jobs based on the given filter.
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#getOrganisations()" class="signatureLink">
-						getOrganisations
-					</a>
-					(apiKey:String, filter:
-					<a href="../../../../fly/cso/api/v1/filter/RemoteOrganisationFilter.html">
-						RemoteOrganisationFilter
-					</a>
-					):Vector.&lt;
-					<a href="../../../../fly/cso/api/v1/data/organisation/RemoteOrganisation.html">
-						RemoteOrganisation
-					</a>
-					&gt;
-				</div>
-				<div class="summaryTableDescription">
-					Can be used to retrieve all organisations
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="hideInheritedMethod">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				<img src="../../../../images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="../../../../fly/cso/api/v1/API.html#isValidApiKey()" class="signatureLink">
-						isValidApiKey
-					</a>
-					(apiKey:String):Boolean
-				</div>
-				<div class="summaryTableDescription">
-					Can be used to determine if an API key is still valid.
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				<a href="../../../../fly/cso/api/v1/API.html">
-					API
-				</a>
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#removeJob()" class="signatureLink">
-						removeJob
-					</a>
-					(apiKey:String, id:String):
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-						RemoteJob
-					</a>
-				</div>
-				<div class="summaryTableDescription">
-					Removes a job with the given id.
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-		<tr class="">
-			<td class="summaryTablePaddingCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableInheritanceCol">
-				&nbsp;
-			</td>
-			<td class="summaryTableSignatureCol">
-				<div class="summarySignature">
-					<a href="#saveJob()" class="signatureLink">
-						saveJob
-					</a>
-					(apiKey:String, job:
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-						RemoteJob
-					</a>
-					):
-					<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-						RemoteJob
-					</a>
-				</div>
-				<div class="summaryTableDescription">
-					Saves the given job.
-				</div>
-			</td>
-			<td class="summaryTableOwnerCol">
-				JobAPI
-			</td>
-		</tr>
-	</table>
-	</div>
-	
-	<script language="javascript" type="text/javascript"><!--
-		showHideInherited();
-	--></script>
-	
-	<div class="MainContent">
-	<a name="methodDetail"></a>
-	<div class="detailSectionHeader">
-		Method Detail
-	</div>
+<script language="javascript" type="text/javascript"><!--
+	showHideInherited();
+--></script>
 
-	<a name="getJob()"></a>
-	<a name="getJob(String,String)"></a>
-	<table class="detailHeader" cellpadding="0" cellspacing="0">
-		<tr>
-			<td class="detailHeaderName">
-				getJob
-			</td>
-			<td class="detailHeaderParens">
-				()
-			</td>
-			<td class="detailHeaderType">
-				method
-			</td>
-		</tr>
-	</table>
-	<div class="detailBody">
-		<code>
-			public function getJob(apiKey:String, id:String):
-			<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-				RemoteJob
-			</a>
-		</code>
-		<p>
-			Returns a completely filled single job
-		</p>
-		<p>
-			<span class="label">
-				Parameters
-			</span>
-			<table cellpadding="0" cellspacing="0" border="0">
-				<tr>
-					<td width="20px">
-					</td>
-					<td>
-						<code>
-							<span class="label">apiKey</span>:String
-						</code>
-						&mdash; The API key to identify the user
-					</td>
-				</tr>
-				<tr>
-					<td class="paramSpacer">
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td width="20px">
-					</td>
-					<td>
-						<code>
-							<span class="label">id</span>:String
-						</code>
-						&mdash; The id of the job
-					</td>
-				</tr>
-			</table>
-		</p>
-		<p>
-			<span class="label">
-				Returns
-			</span>
-			<table cellpadding="0" cellspacing="0" border="0">
-				<tr>
-					<td width="20">
-					</td>
-					<td>
-						<code>
-							<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-								RemoteJob
-							</a>
-						</code>
-						&mdash; a single job with the given id
-					</td>
-				</tr>
-			</table>
-		</p>
-		<p>
-			<span class="label">
-				Throws
-			</span>
-			<table cellpadding="0" cellspacing="0" border="0">
-				<tr>
-					<td width="20">
-					</td>
-					<td>
-						<code>
-							fly.cso.api.v1.exception:RemotePermissionDeniedException
-						</code>
-					</td>
-				</tr>
-				<tr>
-					<td class="paramSpacer">
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td width="20">
-					</td>
-					<td>
-						<code>
-							fly.cso.api.v1.exception:RemoteInvalidApiKeyException
-						</code>
-					</td>
-				</tr>
-				<tr>
-					<td class="paramSpacer">
-						&nbsp;
-					</td>
-				</tr>
-				<tr>
-					<td width="20">
-					</td>
-					<td>
-						<code>
-							fly.cso.api.v1.exception:RemoteJobNotFoundException
-						</code>
-					</td>
-				</tr>
-			</table>
-		</p>
-	</div>
-	
-	</div>
-	</body>
-</cfoutput>
+<div class="MainContent">
+<a name="methodDetail"></a>
+<div class="detailSectionHeader">
+	Method Detail
+</div>
+
+<a name="getJob()"></a>
+<a name="getJob(String,String)"></a>
+<table class="detailHeader" cellpadding="0" cellspacing="0">
+	<tr>
+		<td class="detailHeaderName">
+			getJob
+		</td>
+		<td class="detailHeaderParens">
+			()
+		</td>
+		<td class="detailHeaderType">
+			method
+		</td>
+	</tr>
+</table>
+<div class="detailBody">
+	<code>
+		public function getJob(apiKey:String, id:String):
+		<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
+			RemoteJob
+		</a>
+	</code>
+	<p>
+		Returns a completely filled single job
+	</p>
+	<p>
+		<span class="label">
+			Parameters
+		</span>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td width="20px">
+				</td>
+				<td>
+					<code>
+						<span class="label">apiKey</span>:String
+					</code>
+					&mdash; The API key to identify the user
+				</td>
+			</tr>
+			<tr>
+				<td class="paramSpacer">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td width="20px">
+				</td>
+				<td>
+					<code>
+						<span class="label">id</span>:String
+					</code>
+					&mdash; The id of the job
+				</td>
+			</tr>
+		</table>
+	</p>
+	<p>
+		<span class="label">
+			Returns
+		</span>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td width="20">
+				</td>
+				<td>
+					<code>
+						<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
+							RemoteJob
+						</a>
+					</code>
+					&mdash; a single job with the given id
+				</td>
+			</tr>
+		</table>
+	</p>
+	<p>
+		<span class="label">
+			Throws
+		</span>
+		<table cellpadding="0" cellspacing="0" border="0">
+			<tr>
+				<td width="20">
+				</td>
+				<td>
+					<code>
+						fly.cso.api.v1.exception:RemotePermissionDeniedException
+					</code>
+				</td>
+			</tr>
+			<tr>
+				<td class="paramSpacer">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td width="20">
+				</td>
+				<td>
+					<code>
+						fly.cso.api.v1.exception:RemoteInvalidApiKeyException
+					</code>
+				</td>
+			</tr>
+			<tr>
+				<td class="paramSpacer">
+					&nbsp;
+				</td>
+			</tr>
+			<tr>
+				<td width="20">
+				</td>
+				<td>
+					<code>
+						fly.cso.api.v1.exception:RemoteJobNotFoundException
+					</code>
+				</td>
+			</tr>
+		</table>
+	</p>
+</div>
+
+</div>
+</body>
 </html><!--<br/>dinsdag juni 29 2010, 05:27 N.M. +02:00  -->

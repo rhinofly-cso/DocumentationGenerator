@@ -1,8 +1,8 @@
 <!--- 
-	Creates rows for the component-details table including the component/interface name. The 
-	following variables are defined in the variables scope in componentDetail.cfm: 
-	componentName_str, componentPage_str, packageName_str, packagePath_str, rootPath_str, and 
-	type_str
+	Creates rows for the component-details table including the package, and 
+	component/interface name. The following variables are defined in the variables scope in 
+	componentDetail.cfm: componentName_str, componentPage_str, packageName_str, 
+	packagePath_str, rootPath_str, and type_str
  --->
 <cfset extends_str = cfcMetadata_obj.getExtends() />
 <cfif isNull(variables.extends_str)>
@@ -42,15 +42,27 @@
 	</cfloop>
 </cfif>
 
-<cfoutput>
-	<tr>
-		<td class="classHeaderTableLabel">
-			#variables.type_str#
-		</td>
-		<td class="classSignature">
-			#listLast(variables.componentName_str, ".") & variables.extendsLinks_str#
-		</td>
-	</tr>
+<table class="classHeaderTable" cellpadding="0" cellspacing="0">
+	<cfoutput>
+		<tr>
+			<td class="classHeaderTableLabel">
+				Package
+			</td>
+			<td>
+				<a href="package-detail.html"
+					onclick="javascript:loadClassListFrame('class-list.html')">
+					#variables.packageName_str#</a>
+			</td>
+		</tr>
+		<tr>
+			<td class="classHeaderTableLabel">
+				#variables.type_str#
+			</td>
+			<td class="classSignature">
+				#listLast(variables.componentName_str, ".") & variables.extendsLinks_str#
+			</td>
+		</tr>
+	</cfoutput>
 	
 	<!--- display inheritance info for components --->
 	<cfif variables.type_str eq "Component" and len(variables.extends_str) gt 0>
@@ -79,11 +91,13 @@
 				Inheritance
 			</td>
 			<td class="inheritanceList">
-				#inheritance_str#
+				<cfoutput>
+					#inheritance_str#
+				</cfoutput>	
 			</td>
 		</tr>
 	</cfif>
-	
+		
 	<cfif variables.type_str eq "Component" and len(variables.implements_str) gt 0>
 		<cfset started_bool = false />
 		<cfset implements_str = "" />
@@ -101,7 +115,9 @@
 				Implements
 			</td>
 			<td>
-				#implements_str#
+				<cfoutput>
+					#implements_str#
+				</cfoutput>
 			</td>
 		</tr>
 	</cfif>
@@ -123,11 +139,13 @@
 				Implementors
 			</td>
 			<td>
-				#implementorsLinks_str#
+				<cfoutput>
+					#implementorsLinks_str#
+				</cfoutput>
 			</td>
 		</tr>
 	</cfif>
-
+	
 	<cfif listLen(variables.extendedBy_str) gt 0>
 		<cfset started_bool = false />
 		<cfset subclassesLinks_str = "" />
@@ -145,8 +163,66 @@
 				Subclasses
 			</td>
 			<td>
-				#subclassesLinks_str#
+				<cfoutput>
+					#variables.subclassesLinks_str#
+				</cfoutput>
 			</td>
 		</tr>
 	</cfif>
-</cfoutput>
+</table>
+
+<cfif not isNull(variables.author_str)>
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td style="white-space:nowrap" valign="top">
+				<b>Author:&nbsp;</b>
+			</td>
+			<td>
+				<cfoutput>
+					#variables.author_str#
+				</cfoutput>
+			</td>
+		</tr>
+	</table>
+</cfif>
+<cfif not isNull(variables.date_str)>
+	<table cellpadding="0" cellspacing="0" border="0">
+		<tr>
+			<td style="white-space:nowrap" valign="top">
+				<b>Date:&nbsp;</b>
+			</td>
+			<td>
+				<cfoutput>
+					#variables.date_str#
+				</cfoutput>
+			</td>
+		</tr>
+	</table>
+</cfif>
+<cfif not isNull(variables.hint_str)>
+	<cfif len(variables.hint_str) gt 0>
+		<p>
+			<cfoutput>
+				#variables.hint_str#
+			</cfoutput>
+		</p>
+	</cfif>
+</cfif>
+<cfif not isNull(variables.related_str)>
+	<cfset started_bool = false />
+	<cfset relatedLinks_str = "" />
+	<cfloop list="#variables.extendedBy_str#" index="component_str">
+		<cfif variables.started_bool>
+			<cfset relatedLinks_str &= ", " />
+		<cfelse>
+			<cfset started_bool = true>
+		</cfif>
+		<cfset relatedLinks_str &= variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true) />
+	</cfloop>
+	<p>
+		<span class="classHeaderTableLabel">See also</span>
+	</p>
+	<cfoutput>
+		<div class="seeAlso">#relatedLinks_str#</div>
+	</cfoutput>
+</cfif>

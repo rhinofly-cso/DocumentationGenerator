@@ -1,3 +1,4 @@
+<cfscript>
 /**
 	Contains the methods to create metadata objects and assign its values.
 	
@@ -11,9 +12,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		
 		@argumentMetadata Metadata struct for a single argument from a function metadata struct.
 	*/
-	public cfc.cfcMetadata.CFArgument function createArgumentObject(required struct argumentMetadata)
+	public cfc.cfcData.CFArgument function createArgumentObject(required struct argumentMetadata)
 	{
-		var return_obj = createObject("component", "cfc.cfcMetadata.CFArgument").init();
+		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
 		var argumentRef_struct = arguments.argumentMetadata;
 
 		// the "required" property has a default value
@@ -80,9 +81,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		
 		@functionMetadata Metadata struct for a single function from getMetadata.
 	*/
-	public cfc.cfcMetadata.CFFunction function createFunctionObject(required struct functionMetadata)
+	public cfc.cfcData.CFFunction function createFunctionObject(required struct functionMetadata)
 	{
-		var return_obj = createObject("component", "cfc.cfcMetadata.CFFunction").init();
+		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
 		var functionRef_struct = arguments.functionMetadata;
 		
 		// the "access", "inheritDoc", and "private" properties have default values
@@ -148,99 +149,147 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		Determines whether the hint contained @throws and/or @see tags that were removed by
 		the parsing of CFScript code. If so, these are retrieved from the .cfc file and
 		processed. Alternatively, for tag-based CF code, the tags in the hint are all parsed.
+		
+		@path File path of the cfc that contains the code for the given metadata object.
 	*/
-	private void function _resolveHint(required struct metadata, required any returnObject)
+	private void function _resolveHint(required struct metadata, required any returnObject, required string path)
 	{
-		var type_str = "";
+		var hint_str = "";
 		var search_str = "";
-		var component_str = "";
+		var file_str = "";
+		var comment_str = "";
 		var reverse_str = "";
+		var defWords_str = "";
+		var token_str = "";
+		var tag_str = "";
+		var defStart_num = 0;
 		var endFromLast_num = 0;
 		var beginFromLast_num = 0;
 		var i = 0;
-		var token_str = "";
 		var exception_struct = "";
+		var commentFound_bool = false;
+		var functionHint_bool = false;
 		var throwsTagFollow_bool = false;
 		var seeTagFollow_bool = false;
-		var tag_str = "";
 		var hintTag_bool = false;
 		var parsedHint_str = "";
 		var metadataRef_struct = arguments.metadata;
 		var returnRef_obj = arguments.returnObject;
-		var hint_str = returnRef_obj.getHint();
-		
-		if (isInstanceOf(returnRef_obj, "cfc.CFProperty"))
+
+		// obtain the initial value of the hint
+		if (structKeyExists(metadataRef_struct, "hint"))
 		{
-			type_str = "property";
+			hint_str &= metadataRef_struct.hint;
+		}
+		if (structKeyExists(metadataRef_struct, "description"))
+		{
+			hint_str &= metadataRef_struct.description;
+		}
+
+		// determine type and matching search string
+		if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFProperty"))
+		{
+			// look for the word "property" and its name, on one or more lines 
+			// before encountering a semicolon 
+			search_str = "property\b[^;]*\b";
+			search_str &= returnRef_obj.getName();
+			search_str &= "\b";
 		}
 		else
 		{
-			if (isInstanceOf(returnRef_obj, "cfc.CFFunction"))
+			if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFFunction"))
 			{
-				type_str = "function";
+				// look for the word "function" and its name, on one or more lines
+				// before encountering a curly bracket
+				search_str = "function\b[^\{]*\b";
+				search_str &= returnRef_obj.getName();
+				search_str &= "\b";
+				functionHint_bool = true;
 			}
 			else
 			{
-				if (isInstanceOf(returnRef_obj, "cfc.CFComponent"))
+				if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFComponent"))
 				{
-					type_str = "component";
+					// look for the word "component" followed by a curly bracket
+					// either on the same line or at the start of the next
+					search_str = "component[^\n\r]*[\s]*\{";
 				}
 				else
 				{
-					if (isInstanceOf(returnRef_obj, "cfc.CFInterface"))
+					if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFInterface"))
 					{
-						type_str = "interface";
+						// look for the word "interface" followed by a curly bracket
+						// either on the same line or at the start of the next
+						search_str = "interface[^\n\r]*[\s]*\{";
 					}
 					else
 					{
-						throw(message="Could not process hint for type #getMetadata(cfcMetadata_obj).name#.");
+						throw(message="Could not process hint for type #getMetadata(returnRef_obj).name#.");
 					}
 				}
+
 			}
 		}
-
+		
 		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
 		{
-			// we have a hint to parse from CFScript code, which must be isolated
-			search_str = type_str;
-			if (type_str = "property")
+			// we have a hint to parse from CFScript code, which must be isolated by applying the search string
+			file_str = FileRead(arguments.path);
+			defStart_num = 1;
+
+			do
 			{
-				search_str &= "[^\n\r]*";
-				search_str &= returnRef_obj.getName();
-				search_str &= "\b";
-			}
-			else
-			{
-				if (type_str = "function")
+				// first, apply the search string and look for the nearest preceding comment
+				defStart_num = reFind(search_str, file_str, defStart_num + 1);
+				switch (defStart_num)
 				{
-					search_str &= "[\n\r]*";
-					search_str &= returnRef_obj.getName();
-					search_str &= "[\s]*\(";
+					case 0:
+						endFromLast_num = 0;
+						break;
+					case 1:
+						endFromLast_num = 0;
+						break;
+					default:
+						comment_str = trim(left(file_str, defStart_num - 1));
+						reverse_str = reverse(comment_str);
+						endFromLast_num = find("/*", reverse_str);
 				}
-				else
+
+				// next, extract the words in between the comment and the definition
+				// these must not contain curly brackets or semicolons
+				switch (endFromLast_num)
 				{
-					search_str &= "[^\n\r]*[\s]*\{";
+					case 0:
+						break;
+					case 1:
+						commentFound_bool = true;
+						break;
+					default:
+						defWords_str = right(comment_str, endFromLast_num - 1);
+						if (findOneOf("{};", defWords_str) eq 0)
+						{
+							commentFound_bool = true;
+						}
 				}
-			}
+			} while (defStart_num > 0 and not commentFound_bool);
 			
-			component_str = FileRead(metadataRef_struct.path);
-			component_str = left(component_str, reFind(search_str, component_str));
-			reverse_str = reverse(component_str);
-			endFromLast_num = find("/*", reverse_str);
-			
-			if (endFromLast_num > 0 and endFromLast_num lt find("{", reverse_str))
+			if (commentFound_bool)
 			{
 				beginFromLast_num = find("**/", reverse_str);
-				component_str = right(component_str, beginFromLast_num - 1);
-				component_str = left(component_str, beginFromLast_num - endFromLast_num - 2);
+				comment_str = right(comment_str, beginFromLast_num - 1);
+				comment_str = left(comment_str, beginFromLast_num - endFromLast_num - 2);
 
 				// parsing the hint one line after another
 				i = 1;
 				while (true)
 				{
-					token_str = getToken(component_str, i, chr(10));
+					token_str = getToken(comment_str, i, chr(10));
 					// getToken only returns an empty string if index i is larger than the number of tokens
-					if (len(token_str) > 0)
+					if (len(token_str) eq 0)
+					{
+						break;
+					}
+					else
 					{
 						// get hint line
 						token_str = trim(token_str);
@@ -277,7 +326,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						// parse hint line
 						if (find("@", token_str) eq 1)
 						{
-							if (type_str = "function")
+							if (functionHint_bool)
 							{
 								if (find("@throws", token_str) eq 1)
 								{
@@ -314,10 +363,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						}
 						i += 1;
 					}
-					else
-					{
-						break;
-					}
 				}
 			}
 		}
@@ -329,7 +374,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			{
 				token_str = getToken(hint_str, i, chr(10));
 				// getToken only returns an empty string if index i is larger than the number of tokens
-				if (len(token_str) > 0)
+				if (len(token_str) eq 0)
+				{
+					break;
+				}
+				else
 				{
 					// get hint line
 					token_str = trim(token_str);
@@ -367,7 +416,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						{
 							returnRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
 						}
-						if (type_str = "function")
+						if (functionHint_bool)
 						{
 							if (tag_str eq "@return")
 							{
@@ -398,10 +447,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 					}
 					i += 1;
 				}
-				else
-				{
-					break;
-				}
 			}
 		}
 
@@ -419,7 +464,6 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var functionObjs_arr = arrayNew(1);
 		var function_obj = "";
 		var i = 0;
-		var hint_str = "";
 		var metadataRef_struct = arguments.metadata;
 		var returnRef_obj = arguments.returnObject;
 		
@@ -429,18 +473,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			for (i = 1; i <= arrayLen(functionsRef_arr); i++)
 			{
 				function_obj = createFunctionObject(functionsRef_arr[i]);
-
-				hint_str = "";
-				if (structKeyExists(functionsRef_arr[i], "hint"))
-				{
-					hint_str &= functionsRef_arr[i].hint;
-				}
-				if (structKeyExists(functionsRef_arr[i], "description"))
-				{
-					hint_str &= functionsRef_arr[i].description;
-				}
-				function_obj.setHint(hint_str);
-				_resolveHint(metadataRef_struct, function_obj);
+				_resolveHint(functionsRef_arr[i], function_obj, metadataRef_struct.path);
 
 				arrayAppend(functionObjs_arr, function_obj);
 			}
@@ -452,11 +485,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	/**
 		Creates and returns a property metadata object from a struct.
 		
-		@functionMetadata Metadata struct for a single property from getMetadata.
+		@propertyMetadata Metadata struct for a single property from getMetadata.
 	*/
-	public cfc.cfcMetadata.CFProperty function createPropertyObject(required struct propertyMetadata)
+	public cfc.cfcData.CFProperty function createPropertyObject(required struct propertyMetadata)
 	{
-		var return_obj = createObject("component", "cfc.cfcMetadata.CFProperty").init();
+		var return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
 		var propertyRef_struct = arguments.propertyMetadata;
 		
 		// the "serializable", and "private" properties have default values
@@ -518,16 +551,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
 			{
 				property_obj = createPropertyObject(propertiesRef_arr[i]);
-
-				if (structKeyExists(propertiesRef_arr[i], "hint"))
-				{
-					property_obj.setHint(propertiesRef_arr[i].hint);
-				}
-				else
-				{
-					property_obj.setHint("");
-				}
-				_resolveHint(metadataRef_struct, property_obj);
+				_resolveHint(propertiesRef_arr[i], property_obj, metadataRef_struct.path);
 
 				arrayAppend(propertyObjs_arr, property_obj);
 			}
@@ -641,7 +665,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		@metadata Metadata struct of the component, or interface.
 		@library Reference to a struct in which the component objects and inheritance information will be stored.
 	*/
-	public cfc.CFCMetadata function createMetadataObject(required struct metadata, required struct library)
+	public cfc.cfcData.CFC function createMetadataObject(required struct metadata, required struct library)
 	{
 		var metadataRef_struct = arguments.metadata;
 		var libraryRef_struct = arguments.library;
@@ -661,7 +685,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// determine the type and create the appropriate object
 		if (metadataRef_struct.type eq "component")
 		{
-			return_obj = createObject("component", "cfc.cfcMetadata.CFComponent").init();
+			return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
 			
 			// the "serializable" property has a default value for components
 			return_obj.setSerializable(true);
@@ -670,7 +694,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		{
 			if (metadataRef_struct.type eq "interface")
 			{
-				return_obj = createObject("component", "cfc.cfcMetadata.CFInterface").init();
+				return_obj = createObject("component", "cfc.cfcData.CFInterface").init();
 			}
 			else
 			{
@@ -708,17 +732,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			return_obj.setPrivate(metadataRef_struct.private);
 		}
 
-		// initial version of the hint
-		if (structKeyExists(metadataRef_struct, "hint"))
-		{
-			return_obj.setHint(metadataRef_struct.hint);
-		}
-		else
-		{
-			return_obj.setHint("");
-		}
-
-		_resolveHint(metadataRef_struct, return_obj);
+		_resolveHint(metadataRef_struct, return_obj, metadataRef_struct.path);
 		_resolveInheritance(metadataRef_struct, libraryRef_struct, return_obj);
 		_resolveProperties(metadataRef_struct, return_obj);
 		_resolveFunctions(metadataRef_struct, return_obj);
@@ -726,6 +740,12 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		return return_obj;
 	}
 	
+	/**
+		Read directory and all subdirectories for .cfc files.
+		
+		@path Directory to be read.
+		@customTagPath Root directory of the library.
+	*/
 	public void function browseDirectory(required string path, required string customTagPath, required struct library, required struct packages)
 	{
 		var i = 0;
@@ -814,3 +834,4 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		}		
 	}
 }
+</cfscript>
