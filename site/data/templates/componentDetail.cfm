@@ -19,7 +19,7 @@
 
 <cfset componentName_str = variables.cfMetadata_obj.getName() />
 <cfset componentPage_str = replace(variables.componentName_str, ".", "/", "all") & ".html" />
-<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str), ".") />
+<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
 <cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
 

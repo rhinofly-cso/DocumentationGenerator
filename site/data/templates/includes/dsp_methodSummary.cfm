@@ -32,7 +32,7 @@
 	<cfloop from="1" to="#arrayLen(variables.methods_arr)#" index="i">
 		<cfset methodMetadata_obj = variables.methods_arr[i].metadata />
 		<cfif not methodMetadata_obj.getPrivate() and methodMetadata_obj.getAccess() eq "public">
-			<cfset methodSignature_str = builder_obj.convertToLink(variables.methodMetadata_obj.getReturnType(), variables.libraryRef_struct, variables.rootPath_str) />
+			<cfset methodSignature_str = builder_obj.convertToLink(variables.methodMetadata_obj.getReturnType(), variables.libraryRef_struct, variables.rootPath_str, true) />
 			<cfset methodSignature_str &= " <a href=""" />
 			<cfif variables.methods_arr[i].definedBy neq componentName_str>
 				<cfset methodSignature_str &= variables.rootPath_str />

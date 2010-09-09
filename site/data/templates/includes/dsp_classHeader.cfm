@@ -4,23 +4,23 @@
 	componentDetail.cfm: componentName_str, componentPage_str, packageName_str, 
 	packagePath_str, rootPath_str, and type_str
  --->
-<cfset extends_str = cfcMetadata_obj.getExtends() />
+<cfset extends_str = cfMetadata_obj.getExtends() />
 <cfif isNull(variables.extends_str)>
 	<cfset extends_str = "" />
 </cfif>
-<cfset extendedBy_str = cfcMetadata_obj.getExtendedBy() />
+<cfset extendedBy_str = cfMetadata_obj.getExtendedBy() />
 <cfif isNull(variables.extendedBy_str)>
 	<cfset extendedBy_str = "" />
 </cfif>
 
 <cfif variables.type_str eq "Component">
-	<cfset implements_str = cfcMetadata_obj.getImplements() />
+	<cfset implements_str = cfMetadata_obj.getImplements() />
 	<cfif isNull(variables.implements_str)>
 		<cfset implements_str = "" />
 	</cfif>
 </cfif>
 <cfif variables.type_str eq "Interface">
-	<cfset implementedBy_str = cfcMetadata_obj.getImplementedBy() />
+	<cfset implementedBy_str = cfMetadata_obj.getImplementedBy() />
 	<cfif isNull(variables.implementedBy_str)>
 		<cfset implementedBy_str = "" />
 	</cfif>
@@ -211,7 +211,7 @@
 <cfif not isNull(variables.related_str)>
 	<cfset started_bool = false />
 	<cfset relatedLinks_str = "" />
-	<cfloop list="#variables.extendedBy_str#" index="component_str">
+	<cfloop list="#variables.related_str#" index="component_str">
 		<cfif variables.started_bool>
 			<cfset relatedLinks_str &= ", " />
 		<cfelse>

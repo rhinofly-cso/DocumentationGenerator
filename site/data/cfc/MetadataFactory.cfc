@@ -191,9 +191,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		{
 			// look for the word "property" and its name, on one or more lines 
 			// before encountering a semicolon 
-			search_str = "property\b[^;]*\b";
+			search_str = "\bproperty\b[^;]*\b";
 			search_str &= returnRef_obj.getName();
-			search_str &= "\b";
+			search_str &= "[^\w\.=]";
 		}
 		else
 		{
@@ -201,7 +201,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			{
 				// look for the word "function" and its name, on one or more lines
 				// before encountering a curly bracket
-				search_str = "function\b[^\{]*\b";
+				search_str = "\bfunction\b[^\(]*\b";
 				search_str &= returnRef_obj.getName();
 				search_str &= "\b";
 				functionHint_bool = true;
@@ -212,7 +212,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				{
 					// look for the word "component" followed by a curly bracket
 					// either on the same line or at the start of the next
-					search_str = "component[^\n\r]*[\s]*\{";
+					search_str = "\bcomponent\b[^\n\r]*[\s]*\{";
 				}
 				else
 				{
@@ -220,7 +220,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 					{
 						// look for the word "interface" followed by a curly bracket
 						// either on the same line or at the start of the next
-						search_str = "interface[^\n\r]*[\s]*\{";
+						search_str = "\binterface\b[^\n\r]*[\s]*\{";
 					}
 					else
 					{
@@ -266,7 +266,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						break;
 					default:
 						defWords_str = right(comment_str, endFromLast_num - 1);
-						if (findOneOf("{};", defWords_str) eq 0)
+						if (functionHint_bool and findOneOf("{};", defWords_str) eq 0)
 						{
 							commentFound_bool = true;
 						}

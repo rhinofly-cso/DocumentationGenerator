@@ -32,7 +32,7 @@
 	<cfloop from="1" to="#arrayLen(variables.properties_arr)#" index="i">
 		<cfset propertyMetadata_obj = variables.properties_arr[i].metadata />
 		<cfif not propertyMetadata_obj.getPrivate()>
-			<cfset propertySignature_str = builder_obj.convertToLink(variables.propertyMetadata_obj.getType(), variables.libraryRef_struct, variables.rootPath_str) />
+			<cfset propertySignature_str = builder_obj.convertToLink(variables.propertyMetadata_obj.getType(), variables.libraryRef_struct, variables.rootPath_str, true) />
 			<cfset propertySignature_str &= " <a href=""" />
 			<cfif variables.properties_arr[i].definedBy neq componentName_str>
 				<cfset propertySignature_str &= variables.rootPath_str />

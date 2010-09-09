@@ -16,20 +16,43 @@
 <cfset factory_obj.browseDirectory(path_str, path_str, library_struct, packages_struct) />
 
 <cfset components_arr = builder_obj.descriptionArray(library_struct) />
-<cfset componentName_str = components_arr[3].name />
+<cfset componentName_str = components_arr[9].name />
 
 <cfset libraryRef_struct = library_struct />
 <cfset cfMetadata_obj = libraryRef_struct[componentName_str] />
 
+<cfif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFInterface")>
+	<cfset type_str = "Interface" />
+<cfelseif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFComponent")>
+	<cfset type_str = "Component" />
+<cfelse>
+	<cfthrow message="Error: unknown component type #getMetadata(cfMetadata_obj).name#.">
+</cfif>
+
 <cfset componentPage_str = replace(variables.componentName_str, ".", "/", "all") & ".html" />
-<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str), ".") />
+<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
 <cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
 <cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
+
+<cfset author_str = cfMetadata_obj.getAuthor() />
+<cfset date_str = cfMetadata_obj.getDate() />
+<cfset hint_str = cfMetadata_obj.getHint() />
+<cfset related_str = cfMetadata_obj.getRelated() />
+
 <cfset properties_arr = builder_obj.propertyArray(componentName_str, libraryRef_struct) />
+<cfset methods_arr = builder_obj.methodArray(componentName_str, libraryRef_struct) />
 <cfsavecontent variable="page_str">
-	<a name="methodSummary"></a>
+	<div xmlns:fn="http://www.w3.org/2005/xpath-functions" class="MainContent">
+		<cfinclude template="./templates/includes/dsp_classHeader.cfm" />
+		<br /><hr>
+	</div>
+	<a name="propertySummary"></a>
 	<div class="summarySection">
 		<cfinclude template="./templates/includes/dsp_PropertySummary.cfm">
+	</div>
+	<a name="methodSummary"></a>
+	<div class="summarySection">
+		<cfinclude template="./templates/includes/dsp_MethodSummary.cfm">
 	</div>
 </cfsavecontent>
 <cfoutput>#page_str#</cfoutput>

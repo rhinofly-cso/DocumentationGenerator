@@ -101,7 +101,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Inserts new property metadata objects into the allProperties struct for the properties 
 		of component and its ancestors.
 	*/
-	private void function _resolveProperties(required string component, required struct library, required struct allProperties)
+	private void function _collectProperties(required string component, required struct library, required struct allProperties)
 	{
 		var i = 0;
 		var propertyName_str = "";
@@ -136,7 +136,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 				componentName_str = listGetAt(extendsRef_str, i);
 				if (structKeyExists(libraryRef_struct, componentName_str))
 				{
-					_resolveProperties(componentName_str, libraryRef_struct, allPropertiesRef_struct);
+					_collectProperties(componentName_str, libraryRef_struct, allPropertiesRef_struct);
 				}
 			}
 		}
@@ -163,7 +163,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var componentName_str = arguments.component;
 		var libraryRef_struct = arguments.library;
 		
-		_resolveProperties(componentName_str, libraryRef_struct, allProperties_struct);
+		_collectProperties(componentName_str, libraryRef_struct, allProperties_struct);
 		
 		propertyList_str = structKeyList(allProperties_struct);
 		propertyList_str = listSort(propertyList_str, "textnocase");
@@ -183,7 +183,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Inserts new function metadata objects into the allMethods struct for the methods of 
 		component and its ancestors.
 	*/
-	private void function _resolveMethods(required string component, required struct library, required struct allMethods)
+	private void function _collectMethods(required string component, required struct library, required struct allMethods)
 	{
 		var i = 0;
 		var methodName_str = "";
@@ -230,7 +230,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 				componentName_str = listGetAt(extendsRef_str, i);
 				if (structKeyExists(libraryRef_struct, componentName_str))
 				{
-					_resolveMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
+					_collectMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
 				}
 			}
 		}
@@ -242,7 +242,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 				componentName_str = listGetAt(implementsRef_str, i);
 				if (structKeyExists(libraryRef_struct, componentName_str))
 				{
-					_resolveMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
+					_collectMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
 				}
 			}
 		}
@@ -271,7 +271,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var componentName_str = arguments.component;
 		var libraryRef_struct = arguments.library;
 		
-		_resolveMethods(componentName_str, libraryRef_struct, allMethods_struct);
+		_collectMethods(componentName_str, libraryRef_struct, allMethods_struct);
 		
 		methodList_str = structKeyList(allMethods_struct);
 		methodList_str = listSort(methodList_str, "textnocase");
@@ -298,8 +298,9 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	*/
 	public string function convertToLink(required string link, required struct library, string rootPath_str="", boolean componentLastName="false", boolean fromPackageRoot="false")
 	{
-		var componentName_str = "";
 		var componentLink_str = "";
+		var componentName_str = "";
+		var componentPageExists_bool = false;
 		var link_str = arguments.link;
 		var libraryRef_struct = arguments.library;
 		
@@ -316,6 +317,13 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		{
 			componentName_str = listFirst(link_str, chr(35));
 			if (structKeyExists(libraryRef_struct, componentName_str))
+			{
+				if (not libraryRef_struct[componentName_str].getPrivate())
+				{
+					componentPageExists_bool = true;
+				}
+			}
+			if (componentPageExists_bool)
 			{
 				componentLink_str = "<a href=""";
 				componentLink_str &= arguments.rootPath_str;
