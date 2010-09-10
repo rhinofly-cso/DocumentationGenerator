@@ -1,66 +1,59 @@
 <!--- 
 	This template requires the metadata object cfMetadata_obj of the component in the 
-	variable scope.
-	Also, it requires (a reference to) a library structure libraryRef_struct containing 
-	component metadata objects for all components in the library.
-	Finally, it requires an object builder_obj of the type cfc.DocumentBuilder for invoking 
-	its methods.
+	model scope.
+	Also, it requires an array of structs properties_arr containing the names of all 
+	properties of the component and its ancestors, together with their metadata object, and 
+	the name of the component they are defined by. Struct keys are "name", "metadata", and 
+	"definedBy".
+	A similar array of structs methods_arr is required for all methods. This includes an extra 
+	key "override" which designates that the method definition aoverrides an earlier 
+	definition.
+	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
-<cfif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFInterface")>
-	<cfset type_str = "Interface" />
-<cfelseif isInstanceOf(cfMetadata_obj, "cfc.cfcData.CFComponent")>
-	<cfset type_str = "Component" />
+<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFInterface")>
+	<cfset local.type_str = "Interface" />
+<cfelseif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFComponent")>
+	<cfset local.type_str = "Component" />
 <cfelse>
-	<cfthrow message="Error: unknown component type #getMetadata(cfMetadata_obj).name#.">
+	<cfthrow message="Error: unknown component type #getMetadata(model.cfMetadata_obj).name#.">
 </cfif>
 
-<cfset componentName_str = variables.cfMetadata_obj.getName() />
-<cfset componentPage_str = replace(variables.componentName_str, ".", "/", "all") & ".html" />
-<cfset packageName_str = listDeleteAt(variables.componentName_str, listLen(variables.componentName_str, "."), ".") />
-<cfset packagePath_str = replace(variables.packageName_str, ".", "/", "all") & "/" />
-<cfset rootPath_str = repeatString("../", listLen(variables.packageName_str, ".")) />
+<cfset local.componentName_str = model.cfMetadata_obj.getName() />
+<cfset local.componentPage_str = replace(local.componentName_str, ".", "/", "all") & ".html" />
+<cfset local.packageName_str = listDeleteAt(local.componentName_str, listLen(local.componentName_str, "."), ".") />
+<cfset local.packagePath_str = replace(local.packageName_str, ".", "/", "all") & "/" />
+<cfset local.rootPath_str = repeatString("../", listLen(local.packageName_str, ".")) />
 
-<cfset author_str = cfMetadata_obj.getAuthor() />
-<cfset date_str = cfMetadata_obj.getDate() />
-<cfset hint_str = cfMetadata_obj.getHint() />
-<cfset related_str = cfMetadata_obj.getRelated() />
-
-<cfset properties_arr = builder_obj.propertyArray(componentName_str, libraryRef_struct) />
-<cfset methods_arr = builder_obj.methodArray(componentName_str, libraryRef_struct) />
-<cfset publicMethods_bool = false />
-<cfset privateMethods_bool = false />
-<cfloop from="1" to="#arrayLen(variables.methods_arr)#" index="i">
-	<cfif not variables.methods_arr[i].metadata.getPrivate()>
-		<cfif variables.methods_arr[i].metadata.getAccess() eq "public">
-			<cfset publicMethods_bool = true />
-		<cfelseif variables.methods_arr[i].metadata.getAccess() eq "private">
-			<cfset privateMethods_bool = true />
-		</cfif>
-	</cfif>
-</cfloop>
+<!--- TODO: move to DocumentBuilder --->
+<cftry>
+	<cfset model.rendering_obj.parseObjectHint(model.cfMetadata_obj, model.libraryRef_struct, local.rootPath_str) />
+	<cfcatch type="any">
+		<cfthrow message="Please review the comments in component #local.componentName_str#." detail="#cfcatch.message#">
+	</cfcatch>
+</cftry>
 
 <cfoutput>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="stylesheet" href="#variables.rootPath_str#style.css" type="text/css" media="screen" />
-		<link rel="stylesheet" href="#variables.rootPath_str#print.css" type="text/css" media="print" />
-		<link rel="stylesheet" href="#variables.rootPath_str#override.css" type="text/css" />
-		<title>#variables.componentName_str#</title>
+		<link rel="stylesheet" href="#local.rootPath_str#style.css" type="text/css" media="screen" />
+		<link rel="stylesheet" href="#local.rootPath_str#print.css" type="text/css" media="print" />
+		<link rel="stylesheet" href="#local.rootPath_str#override.css" type="text/css" />
+		<title>#local.componentName_str#</title>
 	</head>
 
 	<body>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#asdoc.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#asdoc.js">
 	</script>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#help.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#help.js">
 	</script>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#cookies.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#cookies.js">
 	</script>
 	<script language="javascript" type="text/javascript"><!--
-		asdocTitle = '#listLast(variables.componentName_str, ".")# - CSO-API Documentation';
-		var baseRef = '#variables.rootPath_str#';
+		asdocTitle = '#listLast(local.componentName_str, ".")# - CSO-API Documentation';
+		var baseRef = '#local.rootPath_str#';
 		window.onload = configPage;
 	--></script>
 	<script type="text/javascript">
@@ -76,16 +69,16 @@
 				CSO-API Documentation
 			</td>
 			<td class="titleTableTopNav" align="right">
-				<a href="#variables.rootPath_str#package-summary.html" 
-					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
+				<a href="#local.rootPath_str#package-summary.html" 
+					onclick="loadClassListFrame('#local.rootPath_str#all-classes.html')">
 					All Packages</a>
 				|
-				<a href="#variables.rootPath_str#class-summary.html" 
-					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
+				<a href="#local.rootPath_str#class-summary.html" 
+					onclick="loadClassListFrame('#local.rootPath_str#all-classes.html')">
 					All Classes</a>
 				|
 				<a id="framesLink1" 
-					href="#variables.rootPath_str#index.html?#variables.componentPage_str#&amp;#variables.packagePath_str#class-list.html">
+					href="#local.rootPath_str#index.html?#local.componentPage_str#&amp;#local.packagePath_str#class-list.html">
 					Frames</a>
 				<a id="noFramesLink1" 
 					style="display:none" 
@@ -94,12 +87,12 @@
 					No Frames</a>
 			</td>
 			<td class="titleTableLogo" align="right" rowspan="3">
-				<img src="#variables.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">
+				<img src="#local.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">
 			</td>
 		</tr>
 		<tr class="titleTableRow2">
 			<td class="titleTableSubTitle" id="subTitle" align="left">
-				#listLast(variables.componentName_str, ".")#
+				#listLast(local.componentName_str, ".")#
 			</td>
 		</tr>
 		<tr class="titleTableRow3">
@@ -121,19 +114,24 @@
 <br /><hr>
 </div>
 
-<cfif arrayLen(properties_arr) gt 0 >
+<cfinclude template="./includes/act_collectProperties.cfm">
+<cfif arrayLen(model.properties_arr) gt 0 >
 	<a name="propertySummary"></a>
 	<div class="summarySection">
 		<cfinclude template="./includes/dsp_propertySummary.cfm">
 	</div>
 </cfif>
-<cfif publicMethods_bool>
+<cfinclude template="./includes/act_collectMethods.cfm">
+<cfif arrayLen(model.methods_arr) gt 0>
+	<cfinclude template="./includes/act_collectMethods.cfm">
+</cfif>
+<cfif local.publicMethods_bool>
 	<a name="methodSummary"></a>
 	<div class="summarySection">
 		<cfinclude template="./includes/dsp_methodSummary.cfm">
 	</div>
 </cfif>
-<cfif privateMethods_bool>
+<cfif local.privateMethods_bool>
 	<a name="protectedMethodSummary"></a>
 	<div class="summarySection">
 		<cfinclude template="./includes/dsp_protectedMethodSummary.cfm">
@@ -145,133 +143,14 @@
 --></script>
 
 <div class="MainContent">
-<a name="methodDetail"></a>
-<div class="detailSectionHeader">
-	Method Detail
-</div>
-
-<a name="getJob()"></a>
-<a name="getJob(String,String)"></a>
-<table class="detailHeader" cellpadding="0" cellspacing="0">
-	<tr>
-		<td class="detailHeaderName">
-			getJob
-		</td>
-		<td class="detailHeaderParens">
-			()
-		</td>
-		<td class="detailHeaderType">
-			method
-		</td>
-	</tr>
-</table>
-<div class="detailBody">
-	<code>
-		public function getJob(apiKey:String, id:String):
-		<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-			RemoteJob
-		</a>
-	</code>
-	<p>
-		Returns a completely filled single job
-	</p>
-	<p>
-		<span class="label">
-			Parameters
-		</span>
-		<table cellpadding="0" cellspacing="0" border="0">
-			<tr>
-				<td width="20px">
-				</td>
-				<td>
-					<code>
-						<span class="label">apiKey</span>:String
-					</code>
-					&mdash; The API key to identify the user
-				</td>
-			</tr>
-			<tr>
-				<td class="paramSpacer">
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td width="20px">
-				</td>
-				<td>
-					<code>
-						<span class="label">id</span>:String
-					</code>
-					&mdash; The id of the job
-				</td>
-			</tr>
-		</table>
-	</p>
-	<p>
-		<span class="label">
-			Returns
-		</span>
-		<table cellpadding="0" cellspacing="0" border="0">
-			<tr>
-				<td width="20">
-				</td>
-				<td>
-					<code>
-						<a href="../../../../fly/cso/api/v1/data/job/RemoteJob.html">
-							RemoteJob
-						</a>
-					</code>
-					&mdash; a single job with the given id
-				</td>
-			</tr>
-		</table>
-	</p>
-	<p>
-		<span class="label">
-			Throws
-		</span>
-		<table cellpadding="0" cellspacing="0" border="0">
-			<tr>
-				<td width="20">
-				</td>
-				<td>
-					<code>
-						fly.cso.api.v1.exception:RemotePermissionDeniedException
-					</code>
-				</td>
-			</tr>
-			<tr>
-				<td class="paramSpacer">
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td width="20">
-				</td>
-				<td>
-					<code>
-						fly.cso.api.v1.exception:RemoteInvalidApiKeyException
-					</code>
-				</td>
-			</tr>
-			<tr>
-				<td class="paramSpacer">
-					&nbsp;
-				</td>
-			</tr>
-			<tr>
-				<td width="20">
-				</td>
-				<td>
-					<code>
-						fly.cso.api.v1.exception:RemoteJobNotFoundException
-					</code>
-				</td>
-			</tr>
-		</table>
-	</p>
-</div>
-
+<cfif local.nonInheritedProperties_bool >
+	<a name="propertyDetail"></a>
+	<cfinclude template="./includes/dsp_propertyDetail.cfm">
+</cfif>
+<cfif local.nonInheritedMethods_bool >
+	<a name="methodDetail"></a>
+	<cfinclude template="./includes/dsp_methodDetail.cfm">
+</cfif>
 </div>
 </body>
-</html><!--<br/>dinsdag juni 29 2010, 05:27 N.M. +02:00  -->
+</html>

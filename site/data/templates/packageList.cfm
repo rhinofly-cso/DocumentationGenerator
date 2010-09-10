@@ -1,5 +1,5 @@
 <!--- 
-	This template requires a list packages_str in the variables scope containing the names of 
+	This template requires a list packages_str in the model scope containing the names of 
 	all packages. A package is a collection of components found in a single directory. These 
 	components all have the same name up to the last dot. The package name is then given by 
 	this collective path name.
@@ -29,13 +29,12 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="variables.packages_str" index="packageName_str">
-			<cfset packagePath_str = replace(packageName_str, ".", "/", "all") & "/" />
+		<cfloop list="model.packages_str" index="local.packageName_str">
+			<cfset local.packagePath_str = replace(local.packageName_str, ".", "/", "all") & "/" />
 			<li>
-				<!--- <a href="#variables.packagePath_str#package-detail.html?listPackageClasses"> --->
-				<a href="#variables.packagePath_str#package-detail.html"
-					onclick="javascript:loadClassListFrame('#variables.packagePath_str#class-list.html');">
-					#packageName_str#
+				<a href="#local.packagePath_str#package-detail.html"
+					onclick="javascript:loadClassListFrame('#local.packagePath_str#class-list.html');">
+					#local.packageName_str#
 				</a>
 			</li>
 		</cfloop>

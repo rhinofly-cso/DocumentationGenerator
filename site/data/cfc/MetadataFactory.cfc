@@ -17,8 +17,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
 		var argumentRef_struct = arguments.argumentMetadata;
 
-		// the "required" property has a default value
+		// the "required" and "hint" properties have default values
 		return_obj.setRequired(false);
+		return_obj.setHint("");
 		
 		// name		
 		return_obj.setName(argumentRef_struct.name);
@@ -56,24 +57,20 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	private void function _resolveParameters(required struct functionMetadata, required any functionObject)
 	{
-		var parametersRef_arr = "";
 		var i = 0;
 		var argument_obj = "";
 		var argumentObjs_arr = arrayNew(1);
 		var functionRef_struct = arguments.functionMetadata;
+		var parametersRef_arr = functionRef_struct.parameters;
 		var functionRef_obj = arguments.functionObject;
 		
-		if (structKeyExists(functionRef_struct, "parameters"))
+		for (i = 1; i <= arrayLen(parametersRef_arr); i++)
 		{
-			parametersRef_arr = functionRef_struct.parameters;
-			for (i = 1; i <= arrayLen(parametersRef_arr); i++)
-			{
-				argument_obj = createArgumentObject(parametersRef_arr[i]);
-				arrayAppend(argumentObjs_arr, argument_obj);
-			}
-			
-			functionRef_obj.setParameters(argumentObjs_arr);
-		}		
+			argument_obj = createArgumentObject(parametersRef_arr[i]);
+			arrayAppend(argumentObjs_arr, argument_obj);
+		}
+		
+		functionRef_obj.setParameters(argumentObjs_arr);
 	}
 
 	/**
@@ -139,6 +136,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		if (structKeyExists(functionRef_struct, "parameters"))
 		{
 			_resolveParameters(functionRef_struct, return_obj);
+		}
+		else
+		{
+			return_obj.setParameters(arrayNew(1));
 		}
 		
 		return return_obj;

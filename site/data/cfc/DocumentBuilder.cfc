@@ -171,9 +171,12 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		for (i = 1; i <= listLen(propertyList_str); i++)
 		{
 			propertyName_str = listGetAt(propertyList_str, i);
-			property_struct = structCopy(allProperties_struct[propertyName_str]);
-			structInsert(property_struct, "name", propertyName_str);
-			arrayAppend(return_arr, property_struct);
+			if (not allProperties_struct[propertyName_str].metadata.getPrivate())
+			{
+				property_struct = structCopy(allProperties_struct[propertyName_str]);
+				structInsert(property_struct, "name", propertyName_str);
+				arrayAppend(return_arr, property_struct);
+			}
 		}
 		return return_arr;
 	}
@@ -279,108 +282,103 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		for (i = 1; i <= listLen(methodList_str); i++)
 		{
 			methodName_str = listGetAt(methodList_str, i);
-			method_struct = structCopy(allMethods_struct[methodName_str]);
-			structInsert(method_struct, "name", methodName_str);
-			arrayAppend(return_arr, method_struct);
+			if (not allMethods_struct[methodName_str].metadata.getPrivate())
+			{
+				method_struct = structCopy(allMethods_struct[methodName_str]);
+				structInsert(method_struct, "name", methodName_str);
+				arrayAppend(return_arr, method_struct);
+			}
 		}
 		return return_arr;
 	}
 	
 	/**
-		Converts a piece of string to a hyperlink, or text, depending wether such a link would 
-		lead somewhere.
-		
-		@link String to be converted to a hyperlink.
-		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
-		@rootPath If not present in the webroot, all links to local pages are prepended by this root path.
-		@componentLastName Displays the link as the name behind the last dot of the full component name.
-		@fromPackageRoot Treats the current package directory as the webroot and strips links to components of the package path.
+		Collects the hint from the metadata object and replaces all &#123;@link&#125; tags, 
+		together with their subsequent links, with hyperlinks.
 	*/
-	public string function convertToLink(required string link, required struct library, string rootPath_str="", boolean componentLastName="false", boolean fromPackageRoot="false")
+	public void function parseObjectHint(required any metadataObject, required struct library, string rootPath="")
 	{
-		var componentLink_str = "";
-		var componentName_str = "";
-		var componentPageExists_bool = false;
-		var link_str = arguments.link;
+		var i = 0;
+		var started_bool = false;
+		var token_str = "";
+		var punctuationMark_str = "";
+		var parsedHint_str = "";
+		var metadataRef_obj = arguments.metadataObject;
+		var hint_str = metadataRef_obj.getHint();
 		var libraryRef_struct = arguments.library;
 		
-		if (left(link_str, 7) eq "http://")
+		i = 1;
+		while (true)
 		{
-			componentLink_str = "<a href=""";
-			componentLink_str &= link_str;
-			componentLink_str &= """>";
-			componentLink_str &= link_str;
-			componentLink_str &= "</a>";
-			return componentLink_str;
-		}
-		else
-		{
-			componentName_str = listFirst(link_str, chr(35));
-			if (structKeyExists(libraryRef_struct, componentName_str))
+			token_str = getToken(hint_str, i);
+			if (len(token_str) eq 0)
 			{
-				if (not libraryRef_struct[componentName_str].getPrivate())
-				{
-					componentPageExists_bool = true;
-				}
-			}
-			if (componentPageExists_bool)
-			{
-				componentLink_str = "<a href=""";
-				componentLink_str &= arguments.rootPath_str;
-				if (fromPackageRoot)
-				{
-					componentLink_str &= listLast(componentName_str, ".");
-				}
-				else
-				{
-					componentLink_str &= replace(componentName_str, ".", "/", "all");
-				}
-				componentLink_str &= ".html";
-				if (len(link_str) > len(componentName_str))
-				{
-					componentLink_str &= removechars(link_str, 1, len(componentName_str));
-				}
-				componentLink_str &= """";
-				if (arguments.componentLastName)
-				{
-					componentLink_str &= " title=""";
-					componentLink_str &= componentName_str;
-					componentLink_str &= """>";
-					componentLink_str &= listLast(componentName_str, ".");
-				}
-				else
-				{
-					componentLink_str &= ">";
-					componentLink_str &= componentName_str;
-				}
-				componentLink_str &= "</a>";
-				if (componentLastName and isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFInterface"))
-				{
-					componentLink_str = "<i>" & componentLink_str & "</i>";
-				}
-				return componentLink_str;
+				break;
 			}
 			else
 			{
-				if (listFirst(componentName_str, ".") eq "java")
+				if (started_bool)
 				{
-					componentLink_str = "<a href=""";
-					componentLink_str &= "http://download.oracle.com/javase/6/docs/api/";
-					componentLink_str &= replace(componentName_str, ".", "/", "all");
-					componentLink_str &= "/package-summary.html";
-					if (len(link_str) > len(componentName_str))
-					{
-						componentLink_str &= removechars(link_str, 1, len(componentName_str));
-					}
-					componentLink_str &= """>";
-					componentLink_str &= componentName_str;
-					componentLink_str &= "</a>";
-					return componentLink_str;
+					parsedHint_str &= " ";
 				}
 				else
 				{
-					return componentName_str;
+					started_bool = true;
 				}
+
+				if (token_str eq "{@link}")
+				{
+					i += 1;
+					token_str = getToken(hint_str, i);
+					punctuationMark_str = right(token_str, 1);
+					if (findOneOf("!?)}]>:;.,", punctuationMark_str))
+					{
+						token_str = removeChars(token_str, len(token_str), 1);
+						token_str = convertToLink(token_str, libraryRef_struct, arguments.rootPath);
+						token_str &= punctuationMark_str;
+					}
+					else
+					{
+						token_str = convertToLink(token_str, libraryRef_struct, arguments.rootPath);
+					}
+				}
+				else
+				{
+					if (reFind("@link{.*}", token_str))
+					{
+						throw(message="Error: incorrect usage of the @link tag in the hint of #metadataRef_obj.getName()#.");
+					}
+				}
+				parsedHint_str &= token_str;
+				i += 1;
+			}
+		}
+		metadataRef_obj.setHint(parsedHint_str);
+	}
+	
+	/**
+	*/
+	public void function writePackageDocumentation(required string packagePath, required struct package_struct, required struct library_struct)
+	{
+		var i = 0;
+		var packageRef_struct = arguments.package_struct;
+
+		if (not directoryExists(arguments.packagePath))
+		{
+			directoryCreate(arguments.packagePath);
+		}
+
+		if (structKeyExists(packageRef_struct, "interface"))
+		{
+			for (i = 1; i <= listLen(packageRef_struct.interface); i++)
+			{
+			}
+		}
+		
+		if (structKeyExists(packageRef_struct, "component"))
+		{
+			for (i = 1; i <= listLen(packageRef_struct.component); i++)
+			{
 			}
 		}
 	}

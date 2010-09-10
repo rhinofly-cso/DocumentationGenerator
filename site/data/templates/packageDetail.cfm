@@ -1,35 +1,36 @@
 <!--- 
-	This template requires the name packageName_str of the package.
-	Also, it requires an array of structs components_arr in the variables scope containing the 
-	names of all components in the package, together with their short descriptions and a 
-	similar array of structs interfaces_arr for the interfaces. Struct keys for both array 
-	structs are "name" and "description". Elements are sorted alphabetically by name.
+	This template requires the name packageName_str of the package in the model scope.
+	Also, it requires an array of structs components_arr containing the names of all 
+	components in the package, together with their short descriptions and a similar array of 
+	structs interfaces_arr for the interfaces. Struct keys for both array structs are "name" 
+	and "description". Elements are sorted alphabetically by name.
+	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
-<cfset rootPath_str = repeatString("../", listLen(packageName_str, ".")) />
-<cfset packagePath_str = replace(packageName_str, ".", "/", "all") & "/" />
+<cfset local.rootPath_str = repeatString("../", listLen(model.packageName_str, ".")) />
+<cfset local.packagePath_str = replace(model.packageName_str, ".", "/", "all") & "/" />
 
 <cfoutput>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-		<link rel="stylesheet" href="#variables.rootPath_str#style.css" type="text/css" media="screen" />
-		<link rel="stylesheet" href="#variables.rootPath_str#print.css" type="text/css" media="print" />
-		<link rel="stylesheet" href="#variables.rootPath_str#override.css" type="text/css" />
-		<title>#packageName_str# Summary</title>
+		<link rel="stylesheet" href="#local.rootPath_str#style.css" type="text/css" media="screen" />
+		<link rel="stylesheet" href="#local.rootPath_str#print.css" type="text/css" media="print" />
+		<link rel="stylesheet" href="#local.rootPath_str#override.css" type="text/css" />
+		<title>#model.packageName_str# Summary</title>
 	</head>
 
 	<body>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#asdoc.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#asdoc.js">
 	</script>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#help.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#help.js">
 	</script>
-	<script language="javascript" type="text/javascript" src="#variables.rootPath_str#cookies.js">
+	<script language="javascript" type="text/javascript" src="#local.rootPath_str#cookies.js">
 	</script>
 	<script language="javascript" type="text/javascript"><!--
 		asdocTitle = '#packageName_str# package - API Documentation';
-		var baseRef = '#variables.rootPath_str#';
+		var baseRef = '#local.rootPath_str#';
 		window.onload = configPage;
 	--></script>
 	<script type="text/javascript">
@@ -46,16 +47,16 @@
 				CSO-API Documentation
 			</td>
 			<td class="titleTableTopNav" align="right">
-				<a href="#variables.rootPath_str#package-summary.html" 
-					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
+				<a href="#local.rootPath_str#package-summary.html" 
+					onclick="loadClassListFrame('#local.rootPath_str#all-classes.html')">
 					All Packages</a>
 				|
-				<a href="#variables.rootPath_str#class-summary.html" 
-					onclick="loadClassListFrame('#variables.rootPath_str#all-classes.html')">
+				<a href="#local.rootPath_str#class-summary.html" 
+					onclick="loadClassListFrame('#local.rootPath_str#all-classes.html')">
 					All Classes</a>
 				|
 				<a id="framesLink1" 
-					href="#variables.rootPath_str#index.html?#variables.packagePath_str#package-detail.html&amp;#variables.packagePath_str#class-list.html">
+					href="#local.rootPath_str#index.html?#local.packagePath_str#package-detail.html&amp;#local.packagePath_str#class-list.html">
 					Frames</a>
 				<a id="noFramesLink1" 
 					style="display:none" 
@@ -64,7 +65,7 @@
 					No Frames</a>
 			</td>
 			<td class="titleTableLogo" align="right" rowspan="3">
-				<img src="#variables.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">
+				<img src="#local.rootPath_str#images/logo.png" class="logoImage" title="Rhinofly Logo" alt="Rhinofly Logo">
 			</td>
 		</tr>
 		<tr class="titleTableRow2">
@@ -90,7 +91,7 @@
 	
 <div class="MainContent">
 
-<cfif arrayLen(variables.interfaces_arr) gt 0>
+<cfif arrayLen(model.interfaces_arr) gt 0>
 	<a name="interfaceSummary"></a>
 	<div class="summaryTableTitle">
 		Interfaces
@@ -109,36 +110,36 @@
 			</th>
 		</tr>
 
-		<cfset rowOdd_num = 0 />
+		<cfset local.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="arrayLen(variables.interfaces_arr)" index="i">
-			<cfif variables.rowOdd_num>
-				<cfset rowOdd_num = 0 />
+		<cfloop from="1" to="arrayLen(model.interfaces_arr)" index="local.row_num">
+			<cfif local.rowOdd_num>
+				<cfset local.rowOdd_num = 0 />
 			<cfelse>
-				<cfset rowOdd_num = 1 />
+				<cfset local.rowOdd_num = 1 />
 			</cfif>
 			<cfoutput>
-				<tr class="prow#variables.rowOdd_num#">
+				<tr class="prow#local.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#variables.builder_obj.convertToLink(variables.interfaces_arr[i].name, variables.libraryRef_struct, "", true, true)#
+						#model.rendering_obj.convertToLink(model.interfaces_arr[local.row_num].name, "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
-						#variables.interfaces_arr[i].description#
+						#model.interfaces_arr[local.row_num].description#
 					</td>
 				</tr>
 			</cfoutput>
 		</cfloop>
 	</table>
 
-	<cfif arrayLen(variables.components_arr) gt 0>
+	<cfif arrayLen(model.components_arr) gt 0>
 		<br />
 	</cfif>
 </cfif>
 
-<cfif arrayLen(variables.components_arr) gt 0>
+<cfif arrayLen(model.components_arr) gt 0>
 	<a name="componentSummary"></a>
 	<div class="summaryTableTitle">
 		Components
@@ -157,24 +158,24 @@
 			</th>
 		</tr>
 
-		<cfset rowOdd_num = 0 />
+		<cfset local.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="arrayLen(variables.components_arr)" index="i">
-			<cfif variables.rowOdd_num>
-				<cfset rowOdd_num = 0 />
+		<cfloop from="1" to="arrayLen(model.components_arr)" index="local.row_num">
+			<cfif local.rowOdd_num>
+				<cfset local.rowOdd_num = 0 />
 			<cfelse>
-				<cfset rowOdd_num = 1 />
+				<cfset local.rowOdd_num = 1 />
 			</cfif>
 			<cfoutput>
-				<tr class="prow#variables.rowOdd_num#">
+				<tr class="prow#local.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#variables.builder_obj.convertToLink(variables.components_arr[i].name, variables.libraryRef_struct, "", true, true)#
+						#model.rendering_obj.convertToLink(model.components_arr[local.row_num].name, "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
-						#variables.components_arr[i].description#
+						#model.components_arr[local.row_num].description#
 					</td>
 				</tr>
 			</cfoutput>

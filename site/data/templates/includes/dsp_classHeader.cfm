@@ -26,6 +26,11 @@
 	</cfif>
 </cfif>
 
+<cfset author_str = cfMetadata_obj.getAuthor() />
+<cfset date_str = cfMetadata_obj.getDate() />
+<cfset hint_str = cfMetadata_obj.getHint() />
+<cfset related_str = cfMetadata_obj.getRelated() />
+
 <cfset extendsLinks_str = "" />
 
 <!--- append the component description with inheritance info for interfaces --->
@@ -91,9 +96,7 @@
 				Inheritance
 			</td>
 			<td class="inheritanceList">
-				<cfoutput>
-					#inheritance_str#
-				</cfoutput>	
+				<cfoutput>#inheritance_str#</cfoutput>	
 			</td>
 		</tr>
 	</cfif>
@@ -115,9 +118,7 @@
 				Implements
 			</td>
 			<td>
-				<cfoutput>
-					#implements_str#
-				</cfoutput>
+				<cfoutput>#implements_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
@@ -139,9 +140,7 @@
 				Implementors
 			</td>
 			<td>
-				<cfoutput>
-					#implementorsLinks_str#
-				</cfoutput>
+				<cfoutput>#implementorsLinks_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
@@ -163,9 +162,7 @@
 				Subclasses
 			</td>
 			<td>
-				<cfoutput>
-					#variables.subclassesLinks_str#
-				</cfoutput>
+				<cfoutput>#variables.subclassesLinks_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
@@ -178,9 +175,7 @@
 				<b>Author:&nbsp;</b>
 			</td>
 			<td>
-				<cfoutput>
-					#variables.author_str#
-				</cfoutput>
+				<cfoutput>#variables.author_str#</cfoutput>
 			</td>
 		</tr>
 	</table>
@@ -192,9 +187,7 @@
 				<b>Date:&nbsp;</b>
 			</td>
 			<td>
-				<cfoutput>
-					#variables.date_str#
-				</cfoutput>
+				<cfoutput>#variables.date_str#</cfoutput>
 			</td>
 		</tr>
 	</table>
@@ -202,9 +195,7 @@
 <cfif not isNull(variables.hint_str)>
 	<cfif len(variables.hint_str) gt 0>
 		<p>
-			<cfoutput>
-				#variables.hint_str#
-			</cfoutput>
+			<cfoutput>#variables.hint_str#</cfoutput>
 		</p>
 	</cfif>
 </cfif>
@@ -212,17 +203,24 @@
 	<cfset started_bool = false />
 	<cfset relatedLinks_str = "" />
 	<cfloop list="#variables.related_str#" index="component_str">
-		<cfif variables.started_bool>
-			<cfset relatedLinks_str &= ", " />
-		<cfelse>
-			<cfset started_bool = true>
+		<cfset componentRelated_str = variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true, true) />
+		<cfif not isNull(variables.componentRelated_str)>
+			<cfif variables.started_bool>
+				<cfset relatedLinks_str &= ", " />
+			<cfelse>
+				<cfset started_bool = true />
+			</cfif>
+			<cfset relatedLinks_str &= variables.componentRelated_str />
 		</cfif>
-		<cfset relatedLinks_str &= variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true) />
 	</cfloop>
-	<p>
-		<span class="classHeaderTableLabel">See also</span>
-	</p>
-	<cfoutput>
-		<div class="seeAlso">#relatedLinks_str#</div>
-	</cfoutput>
+	<cfif len(variables.relatedLinks_str) gt 0>
+		<cfoutput>
+			<p>
+				<span class="classHeaderTableLabel">See also</span>
+			</p>
+			<div class="seeAlso">
+				#relatedLinks_str#
+			</div>
+		</cfoutput>
+	</cfif>
 </cfif>

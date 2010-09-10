@@ -8,7 +8,7 @@ component displayname="cfc.cfcData.CFComponent" extends="cfc.cfcData.CFC" access
 {
 	/**
 		Name of the interface that is implemented by the component.
-		@see cfc.cfcMetadata.CFInterface
+		@see cfc.cfcData.CFInterface
 	*/
 	property name="implements" type="string";
 	property name="serializable" type="boolean" hint="Indicates whether the component is serializable.";

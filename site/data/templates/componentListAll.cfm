@@ -1,8 +1,7 @@
 <!--- 
-	This template requires a list components_str in the variables scope containing the names of 
+	This template requires a list components_str in the model scope containing the names of 
 	all components ordered alphabetically by last name.
-	Also, it requires (a reference to) a library structure libraryRef_struct containing 
-	component metadata objects for all components in the library.
+	Also, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
@@ -24,9 +23,9 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="variables.components_str" index="componentName_str">
+		<cfloop list="model.components_str" index="local.componentName_str">
 			<li>
-				#variables.builder_obj.convertToLink(componentName_str, variables.libraryRef_struct, "", true)#
+				#model.rendering_obj.convertToLink(local.componentName_str, "", true)#
 			</li>
 		</cfloop>
 	</cfoutput>
