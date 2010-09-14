@@ -1,49 +1,59 @@
 <!--- 
-	Creates rows for the component-details table including the package, and 
-	component/interface name. The following variables are defined in the variables scope in 
-	componentDetail.cfm: componentName_str, componentPage_str, packageName_str, 
-	packagePath_str, rootPath_str, and type_str
+	Creates rows for the component-detail table including the package and component/interface 
+	name. The following variables are defined in the local scope in componentDetail.cfm: 
+	componentName_str, componentPage_str, packageName_str, packagePath_str, rootPath_str, and 
+	type_str
  --->
-<cfset extends_str = cfMetadata_obj.getExtends() />
-<cfif isNull(variables.extends_str)>
-	<cfset extends_str = "" />
+<cfset local.extends_str = model.cfMetadata_obj.getExtends() />
+<cfset local.extendedBy_str = model.cfMetadata_obj.getExtendedBy() />
+
+<cfif local.type_str eq "Component">
+	<cfset local.implements_str = model.cfMetadata_obj.getImplements() />
 </cfif>
-<cfset extendedBy_str = cfMetadata_obj.getExtendedBy() />
-<cfif isNull(variables.extendedBy_str)>
-	<cfset extendedBy_str = "" />
+<cfif local.type_str eq "Interface">
+	<cfset local.implementedBy_str = model.cfMetadata_obj.getImplementedBy() />
 </cfif>
 
-<cfif variables.type_str eq "Component">
-	<cfset implements_str = cfMetadata_obj.getImplements() />
-	<cfif isNull(variables.implements_str)>
-		<cfset implements_str = "" />
-	</cfif>
-</cfif>
-<cfif variables.type_str eq "Interface">
-	<cfset implementedBy_str = cfMetadata_obj.getImplementedBy() />
-	<cfif isNull(variables.implementedBy_str)>
-		<cfset implementedBy_str = "" />
-	</cfif>
-</cfif>
+<cfset local.author_str = model.cfMetadata_obj.getAuthor() />
+<cfset local.date_str = model.cfMetadata_obj.getDate() />
+<cftry>
+	<cfset local.hint_str = model.rendering_obj.renderHint(model.cfMetadata_obj, local.rootPath_str) />
+	<cfcatch type="any">
+		<cfthrow message="Please review the comments in component #local.componentName_str#." detail="#cfcatch.message#">
+	</cfcatch>
+</cftry>
+<cfset local.related_str = model.cfMetadata_obj.getRelated() />
 
-<cfset author_str = cfMetadata_obj.getAuthor() />
-<cfset date_str = cfMetadata_obj.getDate() />
-<cfset hint_str = cfMetadata_obj.getHint() />
-<cfset related_str = cfMetadata_obj.getRelated() />
-
-<cfset extendsLinks_str = "" />
+<cfset local.extendsLinks_str = "" />
 
 <!--- append the component description with inheritance info for interfaces --->
-<cfif variables.type_str eq "Interface" and listLen(variables.extends_str) gt 0>
-	<cfset started_bool = false />
-	<cfset extendsLinks_str = " extends " />
-	<cfloop list="#variables.extends_str#" index="parent_str">
-		<cfif variables.started_bool>
-			<cfset extendsLinks_str &= ", " />
+<cfif local.type_str eq "Interface" and not isNull(local.extends_str)>
+	<cfset local.started_bool = false />
+	<cfset local.extendsLinks_str = " extends " />
+	<cfloop list="#local.extends_str#" index="local.parent_str">
+		<cfif local.started_bool>
+			<cfset local.extendsLinks_str &= ", " />
 		<cfelse>
-			<cfset started_bool = true>
+			<cfset local.started_bool = true>
 		</cfif>
-		<cfset extendsLinks_str &= variables.builder_obj.convertToLink(parent_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+		<cfset local.extendsLinks_str &= model.rendering_obj.convertToLink(local.parent_str, local.rootPath_str, true) />
+	</cfloop>
+</cfif>
+
+<!--- render the links in the part "See Also" --->
+<cfset local.relatedLinks_str = "" />
+<cfif not isNull(local.related_str)>
+	<cfset local.started_bool = false />
+	<cfloop list="#local.related_str#" index="local.component_str">
+		<cfset local.componentRelated_str = model.rendering_obj.convertToLink(trim(local.component_str), local.rootPath_str, true, true) />
+		<cfif not isNull(local.componentRelated_str)>
+			<cfif local.started_bool>
+				<cfset local.relatedLinks_str &= ", " />
+			<cfelse>
+				<cfset local.started_bool = true />
+			</cfif>
+			<cfset local.relatedLinks_str &= local.componentRelated_str />
+		</cfif>
 	</cfloop>
 </cfif>
 
@@ -56,34 +66,34 @@
 			<td>
 				<a href="package-detail.html"
 					onclick="javascript:loadClassListFrame('class-list.html')">
-					#variables.packageName_str#</a>
+					#local.packageName_str#</a>
 			</td>
 		</tr>
 		<tr>
 			<td class="classHeaderTableLabel">
-				#variables.type_str#
+				#local.type_str#
 			</td>
 			<td class="classSignature">
-				#listLast(variables.componentName_str, ".") & variables.extendsLinks_str#
+				#listLast(local.componentName_str, ".") & local.extendsLinks_str#
 			</td>
 		</tr>
 	</cfoutput>
 	
 	<!--- display inheritance info for components --->
-	<cfif variables.type_str eq "Component" and len(variables.extends_str) gt 0>
-		<cfset inheritance_str = listLast(componentName_str, ".") />
-		<cfset parent_str = variables.extends_str />
+	<cfif local.type_str eq "Component" and not isNull(local.extends_str)>
+		<cfset local.inheritance_str = listLast(local.componentName_str, ".") />
+		<cfset local.parent_str = local.extends_str />
 		<cfloop condition="true">
-			<cfset inheritance_str &= " <img src=""" />
-			<cfset inheritance_str &= variables.rootPath_str />
-			<cfset inheritance_str &= "images/inherit-arrow.gif"" title=""Inheritance"" alt=""Inheritance"" class=""inheritArrow""> " />
-			<cfset inheritance_str &= variables.builder_obj.convertToLink(variables.parent_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+			<cfset local.inheritance_str &= " <img src=""" />
+			<cfset local.inheritance_str &= local.rootPath_str />
+			<cfset local.inheritance_str &= "images/inherit-arrow.gif"" title=""Inheritance"" alt=""Inheritance"" class=""inheritArrow""> " />
+			<cfset local.inheritance_str &= model.rendering_obj.convertToLink(local.parent_str, local.rootPath_str, true) />
 	
 			<!--- break the loop if either the ancestor is not present in the library --->
-			<cfif structKeyExists(variables.libraryRef_struct, parent_str)>
-				<cfset parent_str = variables.libraryRef_struct[parent_str].getExtends() />
+			<cfif structKeyExists(model.libraryRef_struct, local.parent_str)>
+				<cfset local.parent_str = model.libraryRef_struct[local.parent_str].getExtends() />
 				<!--- if for some reason, the ancestor doesn't extend anything, we break the loop --->
-				<cfif isNull(variables.parent_str)>
+				<cfif isNull(local.parent_str)>
 					<cfbreak />
 				</cfif>
 			<cfelse>
@@ -96,21 +106,21 @@
 				Inheritance
 			</td>
 			<td class="inheritanceList">
-				<cfoutput>#inheritance_str#</cfoutput>	
+				<cfoutput>#local.inheritance_str#</cfoutput>	
 			</td>
 		</tr>
 	</cfif>
 		
-	<cfif variables.type_str eq "Component" and len(variables.implements_str) gt 0>
-		<cfset started_bool = false />
-		<cfset implements_str = "" />
-		<cfloop list="#variables.implements_str#" index="interface_str">
-			<cfif variables.started_bool>
-				<cfset implements_str &= ", " />
+	<cfif local.type_str eq "Component" and not isNull(local.implements_str)>
+		<cfset local.started_bool = false />
+		<cfset local.implements_str = "" />
+		<cfloop list="#local.implements_str#" index="local.interface_str">
+			<cfif local.started_bool>
+				<cfset local.implements_str &= ", " />
 			<cfelse>
-				<cfset started_bool = true>
+				<cfset local.started_bool = true>
 			</cfif>
-			<cfset implements_str &= variables.builder_obj.convertToLink(interface_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+			<cfset local.implements_str &= model.rendering_obj.convertToLink(local.interface_str, local.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -118,21 +128,21 @@
 				Implements
 			</td>
 			<td>
-				<cfoutput>#implements_str#</cfoutput>
+				<cfoutput>#local.implements_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
 	
-	<cfif variables.type_str eq "Interface" and len(variables.implementedBy_str) gt 0>
-		<cfset started_bool = false />
-		<cfset implementorsLinks_str = "" />
-		<cfloop list="#variables.implementedBy_str#" index="component_str">
-			<cfif variables.started_bool>
-				<cfset implementorsLinks_str &= ", " />
+	<cfif local.type_str eq "Interface" and not isNull(local.implementedBy_str)>
+		<cfset local.started_bool = false />
+		<cfset local.implementorsLinks_str = "" />
+		<cfloop list="#local.implementedBy_str#" index="local.component_str">
+			<cfif local.started_bool>
+				<cfset local.implementorsLinks_str &= ", " />
 			<cfelse>
-				<cfset started_bool = true>
+				<cfset local.started_bool = true>
 			</cfif>
-			<cfset implementorsLinks_str &= variables.builder_obj.convertToLink(component_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+			<cfset local.implementorsLinks_str &= model.rendering_obj.convertToLink(local.component_str, local.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -140,21 +150,21 @@
 				Implementors
 			</td>
 			<td>
-				<cfoutput>#implementorsLinks_str#</cfoutput>
+				<cfoutput>#local.implementorsLinks_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
 	
-	<cfif listLen(variables.extendedBy_str) gt 0>
-		<cfset started_bool = false />
-		<cfset subclassesLinks_str = "" />
-		<cfloop list="#variables.extendedBy_str#" index="child_str">
-			<cfif variables.started_bool>
-				<cfset subclassesLinks_str &= ", " />
+	<cfif not isNull(local.extendedBy_str)>
+		<cfset local.started_bool = false />
+		<cfset local.subclassesLinks_str = "" />
+		<cfloop list="#local.extendedBy_str#" index="local.child_str">
+			<cfif local.started_bool>
+				<cfset local.subclassesLinks_str &= ", " />
 			<cfelse>
-				<cfset started_bool = true>
+				<cfset local.started_bool = true>
 			</cfif>
-			<cfset subclassesLinks_str &= variables.builder_obj.convertToLink(child_str, variables.libraryRef_struct, variables.rootPath_str, true) />
+			<cfset local.subclassesLinks_str &= model.rendering_obj.convertToLink(local.child_str, local.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -162,65 +172,52 @@
 				Subclasses
 			</td>
 			<td>
-				<cfoutput>#variables.subclassesLinks_str#</cfoutput>
+				<cfoutput>#local.subclassesLinks_str#</cfoutput>
+			</td>
+		</tr>
+	</cfif>
+
+	<cfif not model.cfMetadata_obj.getSerializable()>
+		<tr>
+			<td class="classHeaderTableLabel">
+				Not serializable
+			</td>
+		</tr>
+	</cfif>
+	
+	<cfif not isNull(local.author_str)>
+		<tr>
+			<td class="classHeaderTableLabel">
+				Author
+			</td>
+			<td>
+				<cfoutput>#local.author_str#</cfoutput>
+			</td>
+		</tr>
+	</cfif>
+	<cfif not isNull(local.date_str)>
+		<tr>
+			<td class="classHeaderTableLabel">
+				Date
+			</td>
+			<td>
+				<cfoutput>#local.date_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
 </table>
 
-<cfif not isNull(variables.author_str)>
-	<table cellpadding="0" cellspacing="0" border="0">
-		<tr>
-			<td style="white-space:nowrap" valign="top">
-				<b>Author:&nbsp;</b>
-			</td>
-			<td>
-				<cfoutput>#variables.author_str#</cfoutput>
-			</td>
-		</tr>
-	</table>
+<cfif len(local.hint_str) gt 0>
+	<p>
+		<cfoutput>#local.hint_str#</cfoutput>
+	</p>
 </cfif>
-<cfif not isNull(variables.date_str)>
-	<table cellpadding="0" cellspacing="0" border="0">
-		<tr>
-			<td style="white-space:nowrap" valign="top">
-				<b>Date:&nbsp;</b>
-			</td>
-			<td>
-				<cfoutput>#variables.date_str#</cfoutput>
-			</td>
-		</tr>
-	</table>
-</cfif>
-<cfif not isNull(variables.hint_str)>
-	<cfif len(variables.hint_str) gt 0>
+
+<cfif len(local.relatedLinks_str) gt 0>
 		<p>
-			<cfoutput>#variables.hint_str#</cfoutput>
+			<span class="classHeaderTableLabel">See also</span>
 		</p>
-	</cfif>
-</cfif>
-<cfif not isNull(variables.related_str)>
-	<cfset started_bool = false />
-	<cfset relatedLinks_str = "" />
-	<cfloop list="#variables.related_str#" index="component_str">
-		<cfset componentRelated_str = variables.builder_obj.convertToLink(trim(component_str), variables.libraryRef_struct, variables.rootPath_str, true, true) />
-		<cfif not isNull(variables.componentRelated_str)>
-			<cfif variables.started_bool>
-				<cfset relatedLinks_str &= ", " />
-			<cfelse>
-				<cfset started_bool = true />
-			</cfif>
-			<cfset relatedLinks_str &= variables.componentRelated_str />
-		</cfif>
-	</cfloop>
-	<cfif len(variables.relatedLinks_str) gt 0>
-		<cfoutput>
-			<p>
-				<span class="classHeaderTableLabel">See also</span>
-			</p>
-			<div class="seeAlso">
-				#relatedLinks_str#
-			</div>
-		</cfoutput>
-	</cfif>
+		<div class="seeAlso">
+			<cfoutput>#local.relatedLinks_str#</cfoutput>
+		</div>
 </cfif>

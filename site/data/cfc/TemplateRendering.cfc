@@ -7,7 +7,7 @@
 	
 	@see cfc.MetadataFactory
 */
-component displayname="cfc.TemplateRendering" extends="fly.Object" output="false"
+component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="true" output="false"
 {
 	/**
 		Structure containing component metadata objects for all components in the library.
@@ -32,7 +32,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" output="false
 		var componentName_str = "";
 		var componentPageExists_bool = false;
 		var link_str = arguments.link;
-		var libraryRef_struct = this.getLibrary;
+		var libraryRef_struct = this.getLibrary();
 		
 		if (left(link_str, 7) eq "http://")
 		{
@@ -120,6 +120,99 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" output="false
 				}
 			}
 		}
+	}
+
+	/**
+		Collects the hint from the metadata object and replaces all &#123;@link&#125; tags, 
+		together with their subsequent links, with hyperlinks. For example,	{@link} 
+		cfc.TemplateRendering is a link to the current page.
+		
+		@metadataObject Metadata object from which to take the hint.
+		@rootPath Path to the webroot.
+		@type Obtains this type of hint: full (default), short, return, or throws.
+	*/
+	public string function renderHint(required any metadataObject, string rootPath="", string type="full")
+	{
+		var i = 0;
+		var started_bool = false;
+		var token_str = "";
+		var punctuationMark_str = "";
+		var parsedHint_str = "";
+		var metadataRef_obj = arguments.metadataObject;
+		var hint_str = metadataRef_obj.getHint();
+		var libraryRef_struct = this.getLibrary();
+		
+		if (arguments.type eq "short")
+		{
+			hint_str = metadataRef_obj.getShortHint();
+		}
+		else
+		{
+			if (arguments.type eq "return")
+			{
+				hint_str = metadataRef_obj.getReturnHint();
+			}
+			else
+			{
+				if (arguments.type eq "throws")
+				{
+					// in this case the metadata object actually is a struct
+					hint_str = metadataRef_obj.description;
+				}
+				else
+				{
+					hint_str = metadataRef_obj.getHint();
+				}
+			}
+		}
+
+		i = 1;
+		while (true)
+		{
+			token_str = getToken(hint_str, i);
+			if (len(token_str) eq 0)
+			{
+				break;
+			}
+			else
+			{
+				if (started_bool)
+				{
+					parsedHint_str &= " ";
+				}
+				else
+				{
+					started_bool = true;
+				}
+
+				if (token_str eq "{@link}")
+				{
+					i += 1;
+					token_str = getToken(hint_str, i);
+					punctuationMark_str = right(token_str, 1);
+					if (findOneOf("!?)}]>:;.,", punctuationMark_str))
+					{
+						token_str = removeChars(token_str, len(token_str), 1);
+						token_str = convertToLink(token_str, arguments.rootPath);
+						token_str &= punctuationMark_str;
+					}
+					else
+					{
+						token_str = convertToLink(token_str, arguments.rootPath);
+					}
+				}
+				else
+				{
+					if (reFind("@link{.*}", token_str))
+					{
+						throw(message="Error: incorrect usage of the @link tag in the hint of #metadataRef_obj.getName()#.");
+					}
+				}
+				parsedHint_str &= token_str;
+				i += 1;
+			}
+		}
+		return parsedHint_str;
 	}
 }
 </cfscript>

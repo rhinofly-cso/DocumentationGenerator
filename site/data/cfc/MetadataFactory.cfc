@@ -83,10 +83,12 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
 		var functionRef_struct = arguments.functionMetadata;
 		
-		// the "access", "inheritDoc", and "private" properties have default values
+		// the "access", "returnHint", "inheritDoc", and "private" properties have default values
 		return_obj.setAccess("public");
+		return_obj.setReturnHint("");
 		return_obj.setInheritDoc(false);
 		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in _resolveHint()
 		
 		// name		
 		return_obj.setName(functionRef_struct.name);
@@ -496,6 +498,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// the "serializable", and "private" properties have default values
 		return_obj.setSerializable(true);
 		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in _resolveHint()
 		
 		// name		
 		return_obj.setName(propertyRef_struct.name);
@@ -703,8 +706,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 		}
 		
-		// the "private" property has a default value
+		// the "serializable", and "private" properties have default values
+		return_obj.setSerializable(true);
 		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in _resolveHint()
 		
 		// name		
 		return_obj.setName(name_str);

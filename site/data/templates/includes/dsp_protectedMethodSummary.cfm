@@ -2,20 +2,22 @@
 	Private Methods
 </div>
 <div class="showHideLinks">
-	<div id="hideInheritedProtectedMethod" class="hideInheritedProtectedMethod">
-		<a class="showHideLink" 
-			href="##protectedMethodSummary" 
-			onclick="javascript:setInheritedVisible(false,'ProtectedMethod');">
-			<img class="showHideLinkImage" src="#rootPath_str#images/expanded.gif">
-			Hide Inherited Private Methods</a>
-	</div>
-	<div id="showInheritedProtectedMethod" class="showInheritedProtectedMethod">
-		<a class="showHideLink" 
-			href="##protectedMethodSummary" 
-			onclick="javascript:setInheritedVisible(true,'ProtectedMethod');">
-			<img class="showHideLinkImage" src="#rootPath_str#images/collapsed.gif">
-			Show Inherited Private Methods</a>
-	</div>
+	<cfoutput>
+		<div id="hideInheritedProtectedMethod" class="hideInheritedProtectedMethod">
+			<a class="showHideLink" 
+				href="##protectedMethodSummary" 
+				onclick="javascript:setInheritedVisible(false,'ProtectedMethod');">
+				<img class="showHideLinkImage" src="#local.rootPath_str#images/expanded.gif">
+				Hide Inherited Private Methods</a>
+		</div>
+		<div id="showInheritedProtectedMethod" class="showInheritedProtectedMethod">
+			<a class="showHideLink" 
+				href="##protectedMethodSummary" 
+				onclick="javascript:setInheritedVisible(true,'ProtectedMethod');">
+				<img class="showHideLinkImage" src="#local.rootPath_str#images/collapsed.gif">
+				Show Inherited Private Methods</a>
+		</div>
+	</cfoutput>
 </div>
 <table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableMethod">
 	<tr>
@@ -29,5 +31,120 @@
 			Defined By
 		</th>
 	</tr>
-	<cfoutput>#variables.protectedMethodSummaryRows_str#</cfoutput>
+
+	<cfloop from="1" to="#arrayLen(local.methods_struct.protectedMethodSummaryRows)#" index="local.row_num">
+		<cfset local.methodMetadata_obj = local.methods_struct.protectedMethodSummaryRows[local.row_num].metadata />
+	
+		<cfset local.methodSignature_str = model.rendering_obj.convertToLink(local.methodMetadata_obj.getReturnType(), local.rootPath_str, true) />
+		<cfset local.methodSignature_str &= " <a href=""" />
+		<cfif local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy neq local.componentName_str>
+			<cfset local.methodSignature_str &= local.rootPath_str />
+			<cfset local.methodSignature_str &= replace(local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy, ".", "/", "all") />
+			<cfset local.methodSignature_str &= ".html" />
+		<cfelse>
+			<cfset nonInheritedMethods_bool = true />
+		</cfif>
+		<!--- append a pound sign --->
+		<cfset local.methodSignature_str &= chr(35) />
+		<cfset local.methodSignature_str &= local.methods_struct.protectedMethodSummaryRows[local.row_num].name />
+		<cfset local.methodSignature_str &= "()"" class=""signatureLink"">" />
+		<cfset local.methodSignature_str &= local.methods_struct.protectedMethodSummaryRows[local.row_num].name />
+		<cfset local.methodSignature_str &= "</a>" />
+	
+		<cfset local.methodSignature_str &= "(" />
+		<cfset local.parameters_arr = local.methodMetadata_obj.getParameters() />
+		<cfset local.paramStarted_bool = false />
+		<cfloop from="1" to="#arrayLen(local.parameters_arr)#" index="local.param_num">
+			<cfset model.rendering_obj.renderHint(local.parameters_arr[local.param_num], local.rootPath_str) />
+			<cfset local.argumentType_str = local.parameters_arr[local.param_num].getType() />
+			<cfset local.argumentDefault = local.parameters_arr[local.param_num].getDefault() />
+			<cfif local.paramStarted_bool>
+				<cfset local.methodSignature_str &= ", " />
+			<cfelse>
+				<cfset local.paramStarted_bool = true>
+			</cfif>
+			<cfif local.parameters_arr[local.param_num].getRequired()>
+				<cfset local.methodSignature_str &= "required " />
+			</cfif>
+			<cfset local.methodSignature_str &= model.rendering_obj.convertToLink(local.argumentType_str, local.rootPath_str, true) />
+			<cfset local.methodSignature_str &= " " />
+			<cfset local.methodSignature_str &= local.parameters_arr[local.param_num].getName() />
+			<cfif not isNull(local.argumentDefault)>
+				<cfset local.methodSignature_str &= "=" />
+				<cfif local.argumentType_str eq "string">
+					<cfset local.methodSignature_str &= """" />
+					<cfset local.methodSignature_str &= local.argumentDefault />
+					<cfset local.methodSignature_str &= """" />
+				<cfelseif local.argumentType_str eq "date">
+					<cfset local.methodSignature_str &= """" />
+					<cfset local.methodSignature_str &= """" />
+				<cfelseif local.argumentType_str eq "numeric">
+					<cfset local.methodSignature_str &= local.argumentDefault />
+				<cfelseif local.argumentType_str eq "boolean">
+					<cfif local.argumentDefault>
+						<cfset local.methodSignature_str &= "true" />
+					<cfelse>
+						<cfset local.methodSignature_str &= "false" />
+					</cfif>
+				<cfelseif local.argumentType_str eq "variableName">
+					<cfset local.methodSignature_str &= local.argumentDefault />
+				<cfelse>
+					<cfset local.methodSignature_str &= "&lt;<i>" />
+					<cfset local.methodSignature_str &= local.argumentType_str />
+					<cfset local.methodSignature_str &= "</i>&gt;" />
+				</cfif>
+			</cfif>
+		</cfloop>
+		<cfset local.methodSignature_str &= ")" />
+	
+		<cfoutput>
+			<cfif local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy eq local.componentName_str>
+				<tr class="">
+					<td class="summaryTablePaddingCol">
+						&nbsp;
+					</td>
+					<td class="summaryTableInheritanceCol">
+						&nbsp;
+					</td>
+					<td class="summaryTableSignatureCol">
+						<div class="summarySignature">
+							#local.methodSignature_str#
+						</div>
+						<div class="summaryTableDescription">
+							<cfif local.methods_struct.methodSummaryRows[local.row_num].override>
+								[override]
+							</cfif>
+							#model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str, true)#
+						</div>
+					</td>
+					<td class="summaryTableOwnerCol">
+						#listLast(local.componentName_str, ".")#
+					</td>
+				</tr>
+			<cfelse>
+				<tr class="hideInheritedProtectedMethod">
+					<td class="summaryTablePaddingCol">
+						&nbsp;
+					</td>
+					<td class="summaryTableInheritanceCol">
+						<img src="#local.rootPath_str#images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
+					</td>
+					<td class="summaryTableSignatureCol">
+						<div class="summarySignature">
+							#local.methodSignature_str#
+						</div>
+						<div class="summaryTableDescription">
+							<cfif local.methods_struct.methodSummaryRows[local.row_num].override>
+								[override]
+							</cfif>
+							#model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str, true)#
+						</div>
+					</td>
+					<td class="summaryTableOwnerCol">
+						#local.rendering_obj.convertToLink(local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy, local.rootPath_str, true)#
+					</td>
+				</tr>
+			</cfif>
+		</cfoutput>
+	</cfloop>
 </table>
