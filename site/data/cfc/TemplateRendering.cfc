@@ -6,6 +6,7 @@
 	@date 10 September 2010
 	
 	@see cfc.MetadataFactory
+		cfc.DocumentBuilder
 */
 component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="true" output="false"
 {
@@ -122,6 +123,45 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		}
 	}
 
+	/**
+		Returns the hyperlink belonging to the package-detail page.
+		
+		@packageName Name of the package to which the hyperlink refers.
+	*/
+	public string function packageLink(required string packageName)
+	{
+		var packagePath_str = "";
+		var return_str = "";
+		var packageName_str = arguments.packageName;
+		
+		if (packageName_str eq "_topLevel")
+		{
+			packageName_str = "";
+		}
+		else
+		{
+			packagePath_str = replace(packageName_str, ".", "/", "all");
+			packagePath_str &= "/";
+		}
+
+		return_str = "<a href=""";
+		return_str &= packagePath_str;
+		return_str &= "package-detail.html"" onclick=""javascript:loadClassListFrame('";
+		return_str &= packagePath_str;
+		return_str &= "class-list.html');"">";
+		if (len(packageName_str) > 0)
+		{
+			return_str &= packageName_str;
+		}
+		else
+		{
+			return_str &= "Top Level";
+		}
+		return_str &= "</a>";
+		
+		return return_str;
+	}
+	
 	/**
 		Collects the hint from the metadata object and replaces all &#123;@link&#125; tags, 
 		together with their subsequent links, with hyperlinks. For example,	{@link} 

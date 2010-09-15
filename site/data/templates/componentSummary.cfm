@@ -1,7 +1,6 @@
 <!--- 
-	This template requires an array of structs components_arr in the model scope containing 
-	the names of all components in the library (ordered alphabetically by last name), 
-	together with their short descriptions. Struct keys are "name" and "description".
+	This template requires an alphabetically sorted array of metadata objects components_arr 
+	in the model scope for all components in the library (sorted by last name).
 	Also, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -101,32 +100,29 @@
 			</th>
 		</tr>
 
-		<cfset rowOdd_num = 0 />
+		<cfset localVar.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="arrayLen(model.components_arr)" index="local.row_num">
-			<cfset local.componentName_str = model.components_arr[local.row_num].name />
-			<cfset local.packageName_str = listDeleteAt(local.componentName_str, listLen(local.componentName_str, "."), ".") />
-			<cfset local.packagePath_str = replace(local.packageName_str, ".", "/", "all") & "/" />
-			<cfif local.rowOdd_num>
-				<cfset local.rowOdd_num = 0 />
+		<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
+			<cfset localVar.componentName_str = model.components_arr[localVar.row_num].getName() />
+			<cfset localVar.packageName_str = listDeleteAt(localVar.componentName_str, listLen(localVar.componentName_str, "."), ".") />
+			<cfif localVar.rowOdd_num>
+				<cfset localVar.rowOdd_num = 0 />
 			<cfelse>
-				<cfset local.rowOdd_num = 1 />
+				<cfset localVar.rowOdd_num = 1 />
 			</cfif>
 			<cfoutput>
-				<tr class="prow#local.rowOdd_num#">
+				<tr class="prow#localVar.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering_obj.convertToLink(local.componentName_str, "", true)#
+						#model.rendering_obj.convertToLink(localVar.componentName_str, "", true)#
 					</td>
 					<td class="summaryTableCol">
-						<a href="#local.packagePath_str#package-detail.html" 
-							onclick="javascript:loadClassListFrame('#local.packagePath_str#class-list.html');">
-							#local.packageName_str#</a>
+						#model.rendering_obj.packageLink(localVar.packageName_str)#
 					</td>
 					<td class="summaryTableLastCol">
-						#model.components_arr[local.row_num].description#
+						#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], "", "short")#
 					</td>
 				</tr>
 			</cfoutput>

@@ -1,5 +1,5 @@
 /**
-	Contains the properties and functions to store and access argument metadata from arguments.
+	Contains the properties and functions to store and access argument metadata from CF components.
 	
 	@author Eelco Eggen
 	@date 17 August 2010

@@ -17,8 +17,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
 		var argumentRef_struct = arguments.argumentMetadata;
 
-		// the "required" and "hint" properties have default values
+		// the "required", "type", and "hint" properties have default values
 		return_obj.setRequired(false);
+		return_obj.setType("any");
 		return_obj.setHint("");
 		
 		// name		
@@ -828,7 +829,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		dirs_qry = directoryList(path_str, false, "query");
 		for (i = 1; i <= dirs_qry.recordCount; i++)
 		{
-			if (dirs_qry.type[i] eq "Dir")
+			if (dirs_qry.type[i] eq "Dir" and left(dirs_qry.name[i], 1) neq ".")
 			{
 				// we use directoryPath_str for an actual path again
 				directoryPath_str = path_str;

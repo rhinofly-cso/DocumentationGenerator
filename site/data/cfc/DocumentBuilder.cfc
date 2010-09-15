@@ -20,7 +20,6 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var j = 0;
 		var componentName_str = "";
 		var reverseName_str = "";
-//		var reverseList_str = "";
 		var word_str = "";
 		var components_str = arguments.componentList;
 
@@ -59,37 +58,35 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	}
 	
 	/**
-		Creates an array of structures containing name and description keys. The names are 
-		component names from the list given in the componentList argument and descriptions are 
-		taken from the library structure. This structure must contain component metadata 
-		objects.
+		Creates an array containing metadata objects. These are alphabetically order by last 
+		name of the componenent names. The names of the contributing components are given in 
+		the componentList argument and descriptions (references to) the metadata objects are 
+		taken from the library structure.
 		
 		@componentList List of component names.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
-		@see cfc.cfcData.CFC
+		@see cfc.MetadataFactory
+			cfc.cfcData.CFC
 	*/
-	public array function descriptionArray(required struct library)
+	public array function componentArray(required string componentList, required struct library)
 	{
 		var return_arr = arrayNew(1);
 		var i = 0;
 		var componentName_str = "";
-		var component_struct = "";
+		var components_str = sortByLastName(arguments.componentList);
 		var libraryRef_struct = arguments.library;
-		var components_str = structKeyList(libraryRef_struct);
 
-		components_str = sortByLastName(components_str);
-		
 		for (i = 1; i <= listLen(components_str); i++)
 		{
 			componentName_str = listGetAt(components_str, i);
-			if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFC"))
+			if (structKeyExists(libraryRef_struct, componentName_str))
 			{
-				if (not libraryRef_struct[componentName_str].getPrivate())
+				if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFC"))
 				{
-					component_struct = structNew();
-					structInsert(component_struct, "name", componentName_str);
-					structInsert(component_struct, "description", libraryRef_struct[componentName_str].getShortHint());
-					arrayAppend(return_arr, component_struct);
+					if (not libraryRef_struct[componentName_str].getPrivate())
+					{
+						arrayAppend(return_arr, libraryRef_struct[componentName_str]);
+					}
 				}
 			}
 		}
@@ -293,28 +290,247 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	}
 	
 	/**
+		Creates documentation pages for all interfaces and components in a package.
+		
+		@packageName Name of the package for which to generate documentation.
+		@documentRoot Directory path into which all documentation is put. Contains the index.html file.
+		@packages Structure that contains lists of interface and component names for all packages. Created by {@link} cfc.MetadataFactory#browseDirectory().
+		@library Structure that contains metadata objects for all components in the library.
 	*/
-	public void function writePackageDocumentation(required string packagePath, required struct package_struct, required struct library_struct)
+	public void function writePackageDocumentation(required string packageName, required string documentRoot, required struct packages, required struct library)
 	{
 		var i = 0;
-		var packageRef_struct = arguments.package_struct;
+		var model = structNew();
+		var localVar = structNew();
+		var page_str = "";
+		var componentName_str = "";
+		var packagePath_str = "";
+		var packageName_str = arguments.packageName;
+		var packageRef_struct = arguments.packages[packageName_str];
+		var libraryRef_struct = arguments.library;
+		
+		// initialize a number of variables in the model scope
+		structInsert(model, "interfaces_arr", arrayNew(1));
+		structInsert(model, "components_arr", arrayNew(1));
+		structInsert(model, "cfMetadata_obj", "");
+		structInsert(model, "properties_arr", "");
+		structInsert(model, "methods_arr", "");
 
-		if (not directoryExists(arguments.packagePath))
+		structInsert(model, "packageName_str", packageName_str);
+		structInsert(model, "libraryRef_struct", libraryRef_struct);
+		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
+		model.rendering_obj.setLibrary(libraryRef_struct);
+
+		// determine the correct path to the package documentation directory
+		packagePath_str = reReplace(arguments.documentRoot, "[/\\]+", "/", "all");
+		if (right(packagePath_str, 1) neq "/")
 		{
-			directoryCreate(arguments.packagePath);
+			packagePath_str &= "/";
+		}
+		if (packageName_str neq "_topLevel")
+		{
+			packagePath_str &= replace(packageName_str, ".", "/", "all");
+			packagePath_str &= "/";
+		}
+		// make sure the directory exists
+		if (not directoryExists(packagePath_str))
+		{
+			directoryCreate(packagePath_str);
 		}
 
+		// generate interface pages
 		if (structKeyExists(packageRef_struct, "interface"))
 		{
+			model.interfaces_arr = componentArray(packageRef_struct.interface, libraryRef_struct);
 			for (i = 1; i <= listLen(packageRef_struct.interface); i++)
 			{
+				componentName_str = listGetAt(packageRef_struct.interface, i);
+				model.cfMetadata_obj = libraryRef_struct[componentName_str];
+				if (not model.cfMetadata_obj.getPrivate())
+				{
+					model.properties_arr = propertyArray(componentName_str, libraryRef_struct);
+					model.methods_arr = methodArray(componentName_str, libraryRef_struct);
+					savecontent variable="page_str"
+					{
+						include "/templates/componentDetail.cfm";
+					}
+					fileName_str = packagePath_str;
+					fileName_str &= listLast(componentName_str, ".");
+					fileName_str &= ".html";
+					fileWrite(fileName_str, page_str);
+				}
 			}
 		}
 		
+		// generate component pages
 		if (structKeyExists(packageRef_struct, "component"))
 		{
+			model.components_arr = componentArray(packageRef_struct.component, libraryRef_struct);
 			for (i = 1; i <= listLen(packageRef_struct.component); i++)
 			{
+				componentName_str = listGetAt(packageRef_struct.component, i);
+				model.cfMetadata_obj = libraryRef_struct[componentName_str];
+				if (not model.cfMetadata_obj.getPrivate())
+				{
+					model.properties_arr = propertyArray(componentName_str, libraryRef_struct);
+					model.methods_arr = methodArray(componentName_str, libraryRef_struct);
+					savecontent variable="page_str"
+					{
+						include "/templates/componentDetail.cfm";
+					}
+					fileName_str = packagePath_str;
+					fileName_str &= listLast(componentName_str, ".");
+					fileName_str &= ".html";
+					fileWrite(fileName_str, page_str);
+				}
+			}
+		}
+		
+		if (model.packageName_str eq "_topLevel")
+		{
+			model.packageName_str = "";
+		}
+
+		// generate component list
+		savecontent variable="page_str"
+		{
+			include "/templates/componentList.cfm";
+		}
+		fileName_str = packagePath_str;
+		fileName_str &= "class-list.html";
+		fileWrite(fileName_str, page_str);
+
+		// generate package-detail page
+		savecontent variable="page_str"
+		{
+			include "/templates/packageDetail.cfm";
+		}
+		fileName_str = packagePath_str;
+		fileName_str &= "package-detail.html";
+		fileWrite(fileName_str, page_str);
+	}
+
+	/**
+		@documentRoot Directory path into which all documentation is put. Contains the index.html file.
+		@packages Structure that contains lists of interface and component names for all packages. Created by {@link} cfc.MetadataFactory#browseDirectory().
+		@library Structure that contains metadata objects for all components in the library.
+	*/
+	public void function generateDocumentation(required string documentRoot, required struct packages, required struct library)
+	{
+		var i = 0;
+		var model = structNew();
+		var localVar = structNew();
+		var page_str = "";
+		var packageName_str = "";
+		var apiDocSource_str = "";
+		var documentRoot_str = arguments.documentRoot;
+		var packages_struct = arguments.packages;
+		var packageList_str = structKeyList(packages_struct);
+		var libraryRef_struct = arguments.library;
+		
+		// initialize a number of variables in the model scope
+		structInsert(model, "packages_struct", packages_struct);
+		structInsert(model, "libraryRef_struct", libraryRef_struct);
+		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
+		model.rendering_obj.setLibrary(libraryRef_struct);
+		
+		structInsert(model, "components_arr", componentArray(structKeyList(libraryRef_struct), libraryRef_struct));
+
+		// set the correct source directory for the basic files
+		apiDocSource_str = reReplace(getBaseTemplatePath(), "[/\\]+", "/", "all");
+		apiDocSource_str = listDeleteAt(apiDocSource_str, listLen(apiDocSource_str, "/"), "/");
+		apiDocSource_str &= "/apiDoc/";
+		
+		// check that the document root has the correct format
+		documentRoot_str = reReplace(documentRoot_str, "[/\\]+", "/", "all");
+		if (right(documentRoot_str, 1) neq "/")
+		{
+			documentRoot_str &= "/";
+		}
+		
+		// copy basic files
+		_copyBasicFiles(apiDocSource_str, documentRoot_str);
+		
+		// write all package documentation
+		for (i = 1; i <= listLen(packageList_str); i++)
+		{
+			packageName_str = listGetAt(packageList_str, i);
+			writePackageDocumentation(packageName_str, documentRoot_str, packages_struct, libraryRef_struct);
+		}
+
+		// write lists and summaries for all classes and packages
+		savecontent variable="page_str"
+		{
+			include "/templates/componentListAll.cfm";
+		}
+		fileName_str = documentRoot_str;
+		fileName_str &= "all-classes.html";
+		fileWrite(fileName_str, page_str);
+
+		savecontent variable="page_str"
+		{
+			include "/templates/componentSummary.cfm";
+		}
+		fileName_str = documentRoot_str;
+		fileName_str &= "class-summary.html";
+		fileWrite(fileName_str, page_str);
+
+		savecontent variable="page_str"
+		{
+			include "/templates/packageList.cfm";
+		}
+		fileName_str = documentRoot_str;
+		fileName_str &= "package-list.html";
+		fileWrite(fileName_str, page_str);
+
+		savecontent variable="page_str"
+		{
+			include "/templates/packageSummary.cfm";
+		}
+		fileName_str = documentRoot_str;
+		fileName_str &= "package-summary.html";
+		fileWrite(fileName_str, page_str);
+	}
+	
+	/**
+		Copies all files in the source folder to a destination folder.
+	*/
+	private void function _copyBasicFiles(required sourcePath, required destinationPath)
+	{
+		var i = 0;
+		var dirList_qry = "";
+		var newSource_str = "";
+		var newDestination_str = "";
+		var source_str = arguments.sourcePath;
+		var destination_str = arguments.destinationPath;
+	
+		if (not directoryExists(destination_str))
+		{
+			directoryCreate(destination_str);
+		}
+
+		dirList_qry = directoryList(source_str, false, "query");
+		for (i = 1; i <= dirList_qry.recordCount; i++)
+		{
+			if (left(dirList_qry.name[i], 1) neq ".")
+			{
+				if (dirList_qry.type[i] eq "Dir")
+				{
+					newSource_str = source_str;
+					newSource_str &= dirList_qry.name[i];
+					newSource_str &= "/";
+					newDestination_str = destination_str;
+					newDestination_str &= dirList_qry.name[i];
+					newDestination_str &= "/";
+					
+					_copyBasicFiles(newSource_str, newDestination_str);
+				}
+				else
+				{
+					newSource_str = source_str;
+					newSource_str &= dirList_qry.name[i];
+					FileCopy(newSource_str, destination_str);
+				}
 			}
 		}
 	}

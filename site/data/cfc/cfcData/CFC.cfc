@@ -1,5 +1,5 @@
 /**
-	Contains the properties and functions to store and access metadata from CF components.
+	Contains the properties and functions to store and access metadata from CFCs.
 	
 	@author Eelco Eggen
 	@date 17 August 2010

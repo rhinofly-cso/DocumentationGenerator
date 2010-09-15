@@ -1,6 +1,6 @@
 <!--- 
-	This template requires a list components_str in the model scope containing the names of 
-	all components ordered alphabetically by last name.
+	This template requires an alphabetically sorted array of metadata objects components_arr 
+	in the model scope for all components in the library (sorted by last name).
 	Also, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -23,9 +23,10 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="model.components_str" index="local.componentName_str">
+		<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
+			<cfset localVar.componentName_str = model.components_arr[localVar.row_num].getName() />
 			<li>
-				#model.rendering_obj.convertToLink(local.componentName_str, "", true)#
+				#model.rendering_obj.convertToLink(localVar.componentName_str, "", true)#
 			</li>
 		</cfloop>
 	</cfoutput>

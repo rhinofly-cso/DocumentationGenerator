@@ -1,9 +1,12 @@
 <!--- 
-	This template requires a list packages_str in the model scope containing the names of 
-	all packages. Although this template creates a summary-like page, there are no 
+	This template requires a struct packages_struct in the model scope containing the names 
+	of all packages as keys. Although this template creates a summary-like page, there are no 
 	descriptions for packages. Therefore, essentially, this is the same list as constructed in 
 	packageList.cfm.
+	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
+<cfset localVar.packages_str = listSort(structKeyList(model.packages_struct), "textnocase") />
+
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 <head>
@@ -92,25 +95,21 @@
 			</th>
 		</tr>
 
-		<cfset local.rowOdd_num = 0 />
+		<cfset localVar.rowOdd_num = 0 />
 		
 		<cfoutput>
-			<cfloop list="model.packages_str" index="local.packageName_str">
-				<cfset local.packagePath_str = replace(local.packageName_str, ".", "/", "all") & "/" />
-				<cfif local.rowOdd_num>
-					<cfset local.rowOdd_num = 0 />
+			<cfloop list="#localVar.packages_str#" index="localVar.packageName_str">
+				<cfif localVar.rowOdd_num>
+					<cfset localVar.rowOdd_num = 0 />
 				<cfelse>
-					<cfset local.rowOdd_num = 1 />
+					<cfset localVar.rowOdd_num = 1 />
 				</cfif>
-				<tr class="prow#local.rowOdd_num#">
+				<tr class="prow#localVar.rowOdd_num#">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						<a href="#local.packagePath_str#package-detail.html" 
-							onclick="javascript:loadClassListFrame('#local.packagePath_str#class-list.html');">
-							#local.packageName_str#
-						</a>
+						#model.rendering_obj.packageLink(localVar.packageName_str)#
 					</td>
 					<td class="summaryTableLastCol">
 					</td>

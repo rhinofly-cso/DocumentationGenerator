@@ -1,78 +1,77 @@
-<a name="methodDetail"></a>
 <div class="detailSectionHeader">
 	Method Detail
 </div>
 
-<cfset local.started_bool = false />
+<cfset localVar.started_bool = false />
 
-<cfloop from="1" to="#arrayLen(local.methods_struct.methodDetailItems)#" index="local.row_num">
-	<cfset local.methodMetadata_obj = local.methods_struct.methodDetailItems[local.row_num].metadata />
+<cfloop from="1" to="#arrayLen(localVar.methods_struct.methodDetailItems)#" index="localVar.row_num">
+	<cfset localVar.methodMetadata_obj = localVar.methods_struct.methodDetailItems[localVar.row_num].metadata />
 
-	<cfset local.methodReturnType_str = local.methodMetadata_obj.getReturnType() />
-	<cfset local.methodReturnHint_str = model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str, "return") />
-	<cfset local.methodThrows_arr = local.methodMetadata_obj.getThrows() />
-	<cfset local.methodRelated_str = local.methodMetadata_obj.getRelated() />
+	<cfset localVar.methodReturnType_str = localVar.methodMetadata_obj.getReturnType() />
+	<cfset localVar.methodReturnHint_str = model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "return") />
+	<cfset localVar.methodThrows_arr = localVar.methodMetadata_obj.getThrows() />
+	<cfset localVar.methodRelated_str = localVar.methodMetadata_obj.getRelated() />
 
-	<cfset local.methodSignature_str = local.methodMetadata_obj.getAccess() />
-	<cfset local.methodSignature_str &= " " />
-	<cfset local.methodSignature_str &= model.rendering_obj.convertToLink(local.methodReturnType_str, local.rootPath_str, true) />
-	<cfif local.methods_struct.methodDetailItems[local.row_num].override>
-		<cfset local.methodSignature_str &= " override" />
+	<cfset localVar.methodSignature_str = localVar.methodMetadata_obj.getAccess() />
+	<cfset localVar.methodSignature_str &= " " />
+	<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true) />
+	<cfif localVar.methods_struct.methodDetailItems[localVar.row_num].override>
+		<cfset localVar.methodSignature_str &= " override" />
 	</cfif>
-	<cfset local.methodSignature_str &= " function " />
-	<cfset local.methodSignature_str &= local.methods_struct.methodDetailItems[local.row_num].name />
+	<cfset localVar.methodSignature_str &= " function " />
+	<cfset localVar.methodSignature_str &= localVar.methods_struct.methodDetailItems[localVar.row_num].name />
 
-	<cfset local.methodSignature_str &= "(" />
-	<cfset local.parameters_arr = local.methodMetadata_obj.getParameters() />
-	<cfset local.paramStarted_bool = false />
-	<cfloop from="1" to="#arrayLen(local.parameters_arr)#" index="local.param_num">
-		<cfset local.argumentType_str = local.parameters_arr[local.param_num].getType() />
-		<cfset local.argumentDefault = local.parameters_arr[local.param_num].getDefault() />
-		<cfif local.paramStarted_bool>
-			<cfset local.methodSignature_str &= ", " />
+	<cfset localVar.methodSignature_str &= "(" />
+	<cfset localVar.parameters_arr = localVar.methodMetadata_obj.getParameters() />
+	<cfset localVar.paramStarted_bool = false />
+	<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
+		<cfset localVar.argumentType_str = localVar.parameters_arr[localVar.param_num].getType() />
+		<cfset localVar.argumentDefault = localVar.parameters_arr[localVar.param_num].getDefault() />
+		<cfif localVar.paramStarted_bool>
+			<cfset localVar.methodSignature_str &= ", " />
 		<cfelse>
-			<cfset local.paramStarted_bool = true>
+			<cfset localVar.paramStarted_bool = true>
 		</cfif>
-		<cfif local.parameters_arr[local.param_num].getRequired()>
-			<cfset local.methodSignature_str &= "required " />
+		<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
+			<cfset localVar.methodSignature_str &= "required " />
 		</cfif>
-		<cfset local.methodSignature_str &= model.rendering_obj.convertToLink(local.argumentType_str, local.rootPath_str, true) />
-		<cfset local.methodSignature_str &= " " />
-		<cfset local.methodSignature_str &= local.parameters_arr[local.param_num].getName() />
-		<cfif not isNull(local.argumentDefault)>
-			<cfset local.methodSignature_str &= "=" />
-			<cfif local.argumentType_str eq "string">
-				<cfset local.methodSignature_str &= """" />
-				<cfset local.methodSignature_str &= local.argumentDefault />
-				<cfset local.methodSignature_str &= """" />
-			<cfelseif local.argumentType_str eq "date">
-				<cfset local.methodSignature_str &= """" />
-				<cfset local.methodSignature_str &= """" />
-			<cfelseif local.argumentType_str eq "numeric">
-				<cfset local.methodSignature_str &= local.argumentDefault />
-			<cfelseif local.argumentType_str eq "boolean">
-				<cfif local.argumentDefault>
-					<cfset local.methodSignature_str &= "true" />
+		<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
+		<cfset localVar.methodSignature_str &= " " />
+		<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
+		<cfif not isNull(localVar.argumentDefault)>
+			<cfset localVar.methodSignature_str &= "=" />
+			<cfif localVar.argumentType_str eq "string">
+				<cfset localVar.methodSignature_str &= """" />
+				<cfset localVar.methodSignature_str &= localVar.argumentDefault />
+				<cfset localVar.methodSignature_str &= """" />
+			<cfelseif localVar.argumentType_str eq "date">
+				<cfset localVar.methodSignature_str &= """" />
+				<cfset localVar.methodSignature_str &= """" />
+			<cfelseif localVar.argumentType_str eq "numeric">
+				<cfset localVar.methodSignature_str &= localVar.argumentDefault />
+			<cfelseif localVar.argumentType_str eq "boolean">
+				<cfif localVar.argumentDefault>
+					<cfset localVar.methodSignature_str &= "true" />
 				<cfelse>
-					<cfset local.methodSignature_str &= "false" />
+					<cfset localVar.methodSignature_str &= "false" />
 				</cfif>
-			<cfelseif local.argumentType_str eq "variableName">
-				<cfset local.methodSignature_str &= local.argumentDefault />
+			<cfelseif localVar.argumentType_str eq "variableName">
+				<cfset localVar.methodSignature_str &= localVar.argumentDefault />
 			<cfelse>
-				<cfset local.methodSignature_str &= "&lt;<i>" />
-				<cfset local.methodSignature_str &= local.argumentType_str />
-				<cfset local.methodSignature_str &= "</i>&gt;" />
+				<cfset localVar.methodSignature_str &= "&lt;<i>" />
+				<cfset localVar.methodSignature_str &= localVar.argumentType_str />
+				<cfset localVar.methodSignature_str &= "</i>&gt;" />
 			</cfif>
 		</cfif>
 	</cfloop>
-	<cfset local.methodSignature_str &= ")" />
+	<cfset localVar.methodSignature_str &= ")" />
 
 	<cfoutput>
-		<a name="#local.methods_struct.methodDetailItems[local.row_num].name#()"></a>
+		<a name="#localVar.methods_struct.methodDetailItems[localVar.row_num].name#()"></a>
 		<table class="detailHeader" cellpadding="0" cellspacing="0">
 			<tr>
 				<td class="detailHeaderName">
-					#local.methods_struct.methodDetailItems[local.row_num].name#
+					#localVar.methods_struct.methodDetailItems[localVar.row_num].name#
 				</td>
 				<td class="detailHeaderParens">
 					()
@@ -80,92 +79,92 @@
 				<td class="detailHeaderType">
 					method
 				</td>
-				<cfif local.started_bool>
+				<cfif localVar.started_bool>
 					<td class="detailHeaderRule"></td>
 				<cfelse>
-					<cfset local.started_bool = true />
+					<cfset localVar.started_bool = true />
 				</cfif>
 			</tr>
 		</table>
 		<div class="detailBody">
-			<code>#local.methodSignature_str#</code>
+			<code>#localVar.methodSignature_str#</code>
 			<p>
-				#model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str)#
+				#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str)#
 			</p>
-			<cfif arrayLen(local.parameters_arr) gt 0>
+			<cfif arrayLen(localVar.parameters_arr) gt 0>
 				<p>
 					<span class="label">Parameters</span>
 					<table cellpadding="0" cellspacing="0" border="0">
-						<cfloop from="1" to="#arrayLen(local.parameters_arr)#" index="local.param_num">
-							<cfset local.argumentHint_str = model.rendering_obj.renderHint(local.parameters_arr[local.param_num], local.rootPath_str) />
+						<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
+							<cfset localVar.argumentHint_str = model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
 							<tr>
 								<td width="20px"></td>
 								<td>
-									<code>#local.parameters_arr[local.param_num].getType()# #local.parameters_arr[local.param_num].getName()#</code>
-									<cfif len(local.argumentHint_str) gt 0>
-										&mdash; #local.argumentHint_str#
+									<code>#localVar.parameters_arr[localVar.param_num].getType()# #localVar.parameters_arr[localVar.param_num].getName()#</code>
+									<cfif len(localVar.argumentHint_str) gt 0>
+										&mdash; #localVar.argumentHint_str#
 									</cfif>
 								</td>
 							</tr>
 						</cfloop>
-					<table>
+					</table>
 				</p>
 			</cfif>
-			<cfif local.methodReturnType_str neq "void">
+			<cfif localVar.methodReturnType_str neq "void">
 				<p>
 					<span class="label">Returns</span>
 					<table cellpadding="0" cellspacing="0" border="0">
 						<tr>
 							<td width="20px"></td>
 							<td>
-								<code>#model.rendering_obj.convertToLink(local.methodReturnType_str, local.rootPath_str, true)#</code>
-								<cfif len(local.methodReturnHint_str) gt 0>
-									&mdash; #local.methodReturnHint_str#
+								<code>#model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true)#</code>
+								<cfif len(localVar.methodReturnHint_str) gt 0>
+									&mdash; #localVar.methodReturnHint_str#
 								</cfif>
 							</td>
 						</tr>
-					<table>
+					</table>
 				</p>
 			</cfif>
-			<cfif not isNull(local.methodThrows_arr)>
+			<cfif not isNull(localVar.methodThrows_arr)>
 				<p>
 					<span class="label">Throws</span>
 					<table cellpadding="0" cellspacing="0" border="0">
-						<cfloop from="1" to="#arrayLen(local.methodThrows_arr)#" index="local.throws_num">
-							<cfset local.throwsHint_str = model.rendering_obj.renderHint(local.methodThrows_arr[local.throws_num], local.rootPath_str, "throws") />
+						<cfloop from="1" to="#arrayLen(localVar.methodThrows_arr)#" index="localVar.throws_num">
+							<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str, "throws") />
 							<tr>
 								<td width="20px"></td>
 								<td>
-									<code>#local.methodThrows_arr[local.throws_num].type#</code>
-									<cfif len(local.throwsHint_str) gt 0>
-										&mdash; #local.throwsHint_str#
+									<code>#localVar.methodThrows_arr[localVar.throws_num].type#</code>
+									<cfif len(localVar.throwsHint_str) gt 0>
+										&mdash; #localVar.throwsHint_str#
 									</cfif>
 								</td>
 							</tr>
 						</cfloop>
-					<table>
+					</table>
 				</p>
 			</cfif>
-			<cfif not isNull(local.methodRelated_str)>
-				<cfset local.relatedStarted_bool = false />
-				<cfset local.relatedLinks_str = "" />
-				<cfloop list="#local.methodRelated_str#" index="local.component_str">
-					<cfset local.methodRelated_str = model.rendering_obj.convertToLink(trim(local.component_str), local.rootPath_str, true, true) />
-					<cfif not isNull(local.methodRelated_str)>
-						<cfif local.relatedStarted_bool>
-							<cfset local.relatedLinks_str &= ", " />
+			<cfif not isNull(localVar.methodRelated_str)>
+				<cfset localVar.relatedStarted_bool = false />
+				<cfset localVar.relatedLinks_str = "" />
+				<cfloop list="#localVar.methodRelated_str#" index="localVar.component_str">
+					<cfset localVar.methodRelated_str = model.rendering_obj.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
+					<cfif not isNull(localVar.methodRelated_str)>
+						<cfif localVar.relatedStarted_bool>
+							<cfset localVar.relatedLinks_str &= ", " />
 						<cfelse>
-							<cfset local.relatedStarted_bool = true />
+							<cfset localVar.relatedStarted_bool = true />
 						</cfif>
-						<cfset local.relatedLinks_str &= local.methodRelated_str />
+						<cfset localVar.relatedLinks_str &= localVar.methodRelated_str />
 					</cfif>
 				</cfloop>
-				<cfif len(local.relatedLinks_str) gt 0>
+				<cfif len(localVar.relatedLinks_str) gt 0>
 					<p>
 						<span class="label">See also</span>
 					</p>
 					<div class="seeAlso">
-						#local.relatedLinks_str#
+						#localVar.relatedLinks_str#
 					</div>
 				</cfif>
 			</cfif>

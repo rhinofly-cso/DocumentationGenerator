@@ -1,9 +1,12 @@
 <!--- 
-	This template requires a list packages_str in the model scope containing the names of 
-	all packages. A package is a collection of components found in a single directory. These 
-	components all have the same name up to the last dot. The package name is then given by 
-	this collective path name.
+	This template requires a struct packages_struct in the model scope containing the names 
+	of all packages as keys. A package is a collection of components found in a single 
+	directory. These components all have the same name up to the last dot. The package name is 
+	then given by this collective path name.
+	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
+<cfset localVar.packages_str = listSort(structKeyList(model.packages_struct), "textnocase") />
+
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 <head>
@@ -29,13 +32,9 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="model.packages_str" index="local.packageName_str">
-			<cfset local.packagePath_str = replace(local.packageName_str, ".", "/", "all") & "/" />
+		<cfloop list="#localVar.packages_str#" index="localVar.packageName_str">
 			<li>
-				<a href="#local.packagePath_str#package-detail.html"
-					onclick="javascript:loadClassListFrame('#local.packagePath_str#class-list.html');">
-					#local.packageName_str#
-				</a>
+				#model.rendering_obj.packageLink(localVar.packageName_str)#
 			</li>
 		</cfloop>
 	</cfoutput>

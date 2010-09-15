@@ -7,14 +7,14 @@
 			<a class="showHideLink" 
 				href="##protectedMethodSummary" 
 				onclick="javascript:setInheritedVisible(false,'ProtectedMethod');">
-				<img class="showHideLinkImage" src="#local.rootPath_str#images/expanded.gif">
+				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/expanded.gif">
 				Hide Inherited Private Methods</a>
 		</div>
 		<div id="showInheritedProtectedMethod" class="showInheritedProtectedMethod">
 			<a class="showHideLink" 
 				href="##protectedMethodSummary" 
 				onclick="javascript:setInheritedVisible(true,'ProtectedMethod');">
-				<img class="showHideLinkImage" src="#local.rootPath_str#images/collapsed.gif">
+				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/collapsed.gif">
 				Show Inherited Private Methods</a>
 		</div>
 	</cfoutput>
@@ -32,73 +32,73 @@
 		</th>
 	</tr>
 
-	<cfloop from="1" to="#arrayLen(local.methods_struct.protectedMethodSummaryRows)#" index="local.row_num">
-		<cfset local.methodMetadata_obj = local.methods_struct.protectedMethodSummaryRows[local.row_num].metadata />
+	<cfloop from="1" to="#arrayLen(localVar.methods_struct.protectedMethodSummaryRows)#" index="localVar.row_num">
+		<cfset localVar.methodMetadata_obj = localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].metadata />
 	
-		<cfset local.methodSignature_str = model.rendering_obj.convertToLink(local.methodMetadata_obj.getReturnType(), local.rootPath_str, true) />
-		<cfset local.methodSignature_str &= " <a href=""" />
-		<cfif local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy neq local.componentName_str>
-			<cfset local.methodSignature_str &= local.rootPath_str />
-			<cfset local.methodSignature_str &= replace(local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy, ".", "/", "all") />
-			<cfset local.methodSignature_str &= ".html" />
+		<cfset localVar.methodSignature_str = model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true) />
+		<cfset localVar.methodSignature_str &= " <a href=""" />
+		<cfif localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy neq localVar.componentName_str>
+			<cfset localVar.methodSignature_str &= localVar.rootPath_str />
+			<cfset localVar.methodSignature_str &= replace(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, ".", "/", "all") />
+			<cfset localVar.methodSignature_str &= ".html" />
 		<cfelse>
 			<cfset nonInheritedMethods_bool = true />
 		</cfif>
 		<!--- append a pound sign --->
-		<cfset local.methodSignature_str &= chr(35) />
-		<cfset local.methodSignature_str &= local.methods_struct.protectedMethodSummaryRows[local.row_num].name />
-		<cfset local.methodSignature_str &= "()"" class=""signatureLink"">" />
-		<cfset local.methodSignature_str &= local.methods_struct.protectedMethodSummaryRows[local.row_num].name />
-		<cfset local.methodSignature_str &= "</a>" />
+		<cfset localVar.methodSignature_str &= chr(35) />
+		<cfset localVar.methodSignature_str &= localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].name />
+		<cfset localVar.methodSignature_str &= "()"" class=""signatureLink"">" />
+		<cfset localVar.methodSignature_str &= localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].name />
+		<cfset localVar.methodSignature_str &= "</a>" />
 	
-		<cfset local.methodSignature_str &= "(" />
-		<cfset local.parameters_arr = local.methodMetadata_obj.getParameters() />
-		<cfset local.paramStarted_bool = false />
-		<cfloop from="1" to="#arrayLen(local.parameters_arr)#" index="local.param_num">
-			<cfset model.rendering_obj.renderHint(local.parameters_arr[local.param_num], local.rootPath_str) />
-			<cfset local.argumentType_str = local.parameters_arr[local.param_num].getType() />
-			<cfset local.argumentDefault = local.parameters_arr[local.param_num].getDefault() />
-			<cfif local.paramStarted_bool>
-				<cfset local.methodSignature_str &= ", " />
+		<cfset localVar.methodSignature_str &= "(" />
+		<cfset localVar.parameters_arr = localVar.methodMetadata_obj.getParameters() />
+		<cfset localVar.paramStarted_bool = false />
+		<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
+			<cfset model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+			<cfset localVar.argumentType_str = localVar.parameters_arr[localVar.param_num].getType() />
+			<cfset localVar.argumentDefault = localVar.parameters_arr[localVar.param_num].getDefault() />
+			<cfif localVar.paramStarted_bool>
+				<cfset localVar.methodSignature_str &= ", " />
 			<cfelse>
-				<cfset local.paramStarted_bool = true>
+				<cfset localVar.paramStarted_bool = true>
 			</cfif>
-			<cfif local.parameters_arr[local.param_num].getRequired()>
-				<cfset local.methodSignature_str &= "required " />
+			<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
+				<cfset localVar.methodSignature_str &= "required " />
 			</cfif>
-			<cfset local.methodSignature_str &= model.rendering_obj.convertToLink(local.argumentType_str, local.rootPath_str, true) />
-			<cfset local.methodSignature_str &= " " />
-			<cfset local.methodSignature_str &= local.parameters_arr[local.param_num].getName() />
-			<cfif not isNull(local.argumentDefault)>
-				<cfset local.methodSignature_str &= "=" />
-				<cfif local.argumentType_str eq "string">
-					<cfset local.methodSignature_str &= """" />
-					<cfset local.methodSignature_str &= local.argumentDefault />
-					<cfset local.methodSignature_str &= """" />
-				<cfelseif local.argumentType_str eq "date">
-					<cfset local.methodSignature_str &= """" />
-					<cfset local.methodSignature_str &= """" />
-				<cfelseif local.argumentType_str eq "numeric">
-					<cfset local.methodSignature_str &= local.argumentDefault />
-				<cfelseif local.argumentType_str eq "boolean">
-					<cfif local.argumentDefault>
-						<cfset local.methodSignature_str &= "true" />
+			<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
+			<cfset localVar.methodSignature_str &= " " />
+			<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
+			<cfif not isNull(localVar.argumentDefault)>
+				<cfset localVar.methodSignature_str &= "=" />
+				<cfif localVar.argumentType_str eq "string">
+					<cfset localVar.methodSignature_str &= """" />
+					<cfset localVar.methodSignature_str &= localVar.argumentDefault />
+					<cfset localVar.methodSignature_str &= """" />
+				<cfelseif localVar.argumentType_str eq "date">
+					<cfset localVar.methodSignature_str &= """" />
+					<cfset localVar.methodSignature_str &= """" />
+				<cfelseif localVar.argumentType_str eq "numeric">
+					<cfset localVar.methodSignature_str &= localVar.argumentDefault />
+				<cfelseif localVar.argumentType_str eq "boolean">
+					<cfif localVar.argumentDefault>
+						<cfset localVar.methodSignature_str &= "true" />
 					<cfelse>
-						<cfset local.methodSignature_str &= "false" />
+						<cfset localVar.methodSignature_str &= "false" />
 					</cfif>
-				<cfelseif local.argumentType_str eq "variableName">
-					<cfset local.methodSignature_str &= local.argumentDefault />
+				<cfelseif localVar.argumentType_str eq "variableName">
+					<cfset localVar.methodSignature_str &= localVar.argumentDefault />
 				<cfelse>
-					<cfset local.methodSignature_str &= "&lt;<i>" />
-					<cfset local.methodSignature_str &= local.argumentType_str />
-					<cfset local.methodSignature_str &= "</i>&gt;" />
+					<cfset localVar.methodSignature_str &= "&lt;<i>" />
+					<cfset localVar.methodSignature_str &= localVar.argumentType_str />
+					<cfset localVar.methodSignature_str &= "</i>&gt;" />
 				</cfif>
 			</cfif>
 		</cfloop>
-		<cfset local.methodSignature_str &= ")" />
+		<cfset localVar.methodSignature_str &= ")" />
 	
 		<cfoutput>
-			<cfif local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy eq local.componentName_str>
+			<cfif localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy eq localVar.componentName_str>
 				<tr class="">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
@@ -108,17 +108,17 @@
 					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">
-							#local.methodSignature_str#
+							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif local.methods_struct.methodSummaryRows[local.row_num].override>
+							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str, true)#
+							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#listLast(local.componentName_str, ".")#
+						#listLast(localVar.componentName_str, ".")#
 					</td>
 				</tr>
 			<cfelse>
@@ -127,21 +127,21 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableInheritanceCol">
-						<img src="#local.rootPath_str#images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
+						<img src="#localVar.rootPath_str#images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
 					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">
-							#local.methodSignature_str#
+							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif local.methods_struct.methodSummaryRows[local.row_num].override>
+							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(local.methodMetadata_obj, local.rootPath_str, true)#
+							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#local.rendering_obj.convertToLink(local.methods_struct.protectedMethodSummaryRows[local.row_num].definedBy, local.rootPath_str, true)#
+						#localVar.rendering_obj.convertToLink(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>
