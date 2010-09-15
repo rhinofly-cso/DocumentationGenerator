@@ -306,7 +306,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						// we check for new tokens or additional input lines
 						if (throwsTagFollow_bool)
 						{
-							if (left(token_str, 1) eq "@")
+							if (left(token_str, 1) eq "@" or len(token_str) eq 0)
 							{
 								throwsTagFollow_bool = false;
 							}
@@ -317,7 +317,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						}
 						if (seeTagFollow_bool)
 						{
-							if (left(token_str, 1) eq "@")
+							if (left(token_str, 1) eq "@" or len(token_str) eq 0)
 							{
 								seeTagFollow_bool = false;
 							}

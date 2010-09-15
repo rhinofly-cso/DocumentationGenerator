@@ -2,7 +2,7 @@ component
 {
 	this.name = "DocumentationGenerator";
 	
-	this.customTagPaths = "C:\development\libraries\RhinoflyLibrary\src,C:\development\libraries\TICC2Library\src";
+	this.customTagPaths = "C:\development\libraries\CSOShared";
 	
 	public void function onRequestStart(string target)
 	{
