@@ -254,6 +254,12 @@ html>body .summaryTable {
 .showInheritedMethod {
 	display: inline;
 }
+.hideInheritedRemoteMethod {
+	display: none;
+}
+.showInheritedRemoteMethod {
+	display: inline;
+}
 .hideInheritedProtectedMethod {
 	display: none;
 }

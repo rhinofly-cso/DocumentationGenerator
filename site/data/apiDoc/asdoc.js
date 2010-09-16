@@ -25,6 +25,7 @@ function isEclipse() {
 function configPage() {
     setRowColorsInitial(true, "Property");
     setRowColorsInitial(true, "Method");
+    setRowColorsInitial(true, "RemoteMethod");   
     setRowColorsInitial(true, "ProtectedMethod");   
     setRowColorsInitial(true, "Event");
     setRowColorsInitial(true, "Style");
@@ -200,6 +201,7 @@ function showHideInherited()
     setInheritedVisible(getCookie("showInheritedProperty") == "true", "Property");
     setInheritedVisible(getCookie("showInheritedProtectedProperty") == "true", "ProtectedProperty");
     setInheritedVisible(getCookie("showInheritedMethod") == "true", "Method");
+    setInheritedVisible(getCookie("showInheritedRemoteMethod") == "true", "RemoteMethod");
     setInheritedVisible(getCookie("showInheritedProtectedMethod") == "true", "ProtectedMethod");
     setInheritedVisible(getCookie("showInheritedEvent") == "true", "Event");
     setInheritedVisible(getCookie("showInheritedStyle") == "true", "Style");

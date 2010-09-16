@@ -138,6 +138,12 @@
 		<cfinclude template="./includes/dsp_methodSummary.cfm">
 	</div>
 </cfif>
+<cfif arrayLen(localVar.methods_struct.remoteMethodSummaryRows) gt 0>
+	<a name="remoteMethodSummary"></a>
+	<div class="summarySection">
+		<cfinclude template="./includes/dsp_remoteMethodSummary.cfm">
+	</div>
+</cfif>
 <cfif arrayLen(localVar.methods_struct.protectedMethodSummaryRows) gt 0>
 	<a name="protectedMethodSummary"></a>
 	<div class="summarySection">
