@@ -151,10 +151,6 @@
 	</div>
 </cfif>
 
-<script language="javascript" type="text/javascript"><!--
-	showHideInherited();
---></script>
-
 <div class="MainContent">
 	<!--- the boolean for non-inherited properties is defined in act_collectProperties.cfm --->
 	<cfif arrayLen(localVar.properties_struct.propertyDetailItems) gt 0>

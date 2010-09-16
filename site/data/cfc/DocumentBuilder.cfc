@@ -313,6 +313,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var packageName_str = arguments.packageName;
 		var packageRef_struct = arguments.packages[packageName_str];
 		var libraryRef_struct = arguments.library;
+		var libraryList_str = structKeyList(libraryRef_struct);
 		
 		// initialize a number of variables in the model scope
 		structInsert(model, "interfaces_arr", arrayNew(1));
@@ -325,6 +326,11 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		structInsert(model, "libraryRef_struct", libraryRef_struct);
 		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
 		model.rendering_obj.setLibrary(libraryRef_struct);
+		for (i = 1; i <= listLen(libraryList_str); i++)
+		{
+			libraryList_str = listSetAt(libraryList_str, i, listLast(listGetAt(libraryList_str, i), "."));
+		}
+		model.rendering_obj.setLastNameList(libraryList_str);
 
 		// determine the correct path to the package documentation directory
 		packagePath_str = reReplace(arguments.documentRoot, "[/\\]+", "/", "all");
@@ -432,12 +438,19 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var packages_struct = arguments.packages;
 		var packageList_str = structKeyList(packages_struct);
 		var libraryRef_struct = arguments.library;
+		var libraryList_str = structKeyList(libraryRef_struct);
 		
 		// initialize a number of variables in the model scope
 		structInsert(model, "packages_struct", packages_struct);
 		structInsert(model, "libraryRef_struct", libraryRef_struct);
 		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
 		model.rendering_obj.setLibrary(libraryRef_struct);
+		
+		for (i = 1; i <= listLen(libraryList_str); i++)
+		{
+			libraryList_str = listSetAt(libraryList_str, i, listLast(listGetAt(libraryList_str, i), "."));
+		}
+		model.rendering_obj.setLastNameList(libraryList_str);
 		
 		structInsert(model, "components_arr", componentArray(structKeyList(libraryRef_struct), libraryRef_struct));
 

@@ -76,9 +76,6 @@
 				<td class="detailHeaderParens">
 					()
 				</td>
-				<td class="detailHeaderType">
-					method
-				</td>
 				<cfif localVar.started_bool>
 					<td class="detailHeaderRule"></td>
 				<cfelse>

@@ -12,6 +12,8 @@
 	<link rel="stylesheet" href="style.css" type="text/css" media="screen" />
 	<link rel="stylesheet" href="print.css" type="text/css" media="print" />
 	<link rel="stylesheet" href="override.css" type="text/css" />
+	<script language="javascript" src="asdoc.js" type="text/javascript">
+	</script>
 </head>
 
 <body class="classFrameContent">

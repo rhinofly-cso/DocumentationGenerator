@@ -598,6 +598,15 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			{
 				extends_str = structKeyList(metadataRef_struct.extends);
 			}
+			for (i = 1; i <= listLen(extends_str); i++)
+			{
+				// TODO: Why doesn't this work?
+				if (listGetAt(extends_str, i) eq "WEB-INF.cftags.component" or listGetAt(extends_str, i) eq "WEB-INF.cftags.interface")
+				{
+					listDeleteAt(extends_str, i);
+					break;
+				}
+			}
 			returnRef_obj.setExtends(extends_str);
 	
 			// set the inheritance info for components extended by the current one

@@ -1,30 +1,12 @@
 <div class="summaryTableTitle">
 	Properties
 </div>
-<div class="showHideLinks">
-	<cfoutput>
-		<div id="hideInheritedProperty" class="hideInheritedProperty">
-			<a class="showHideLink" 
-				href="##propertySummary" 
-				onclick="javascript:setInheritedVisible(false,'Property');">
-				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/expanded.gif">
-				Hide Inherited Properties</a>
-		</div>
-		<div id="showInheritedProperty" class="showInheritedProperty">
-			<a class="showHideLink" 
-				href="##propertySummary" 
-				onclick="javascript:setInheritedVisible(true,'Property');">
-				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/collapsed.gif">
-				Show Inherited Properties</a>
-		</div>
-	</cfoutput>
-</div>
-<table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableMethod">
+<table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableProperty">
 	<tr>
 		<th>
 			&nbsp;
 		</th>
-		<th colspan="2">
+		<th colspan="3">
 			Property
 		</th>
 		<th class="summaryTableOwnerCol">
@@ -35,8 +17,7 @@
 	<cfloop from="1" to="#arrayLen(localVar.properties_struct.propertySummaryRows)#" index="localVar.row_num">
 		<cfset localVar.propertyMetadata_obj = localVar.properties_struct.propertySummaryRows[localVar.row_num].metadata />
 
-		<cfset localVar.propertySignature_str = model.rendering_obj.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true) />
-		<cfset localVar.propertySignature_str &= " <a href=""" />
+		<cfset localVar.propertySignature_str = "<a href=""" />
 		<cfif localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy neq localVar.componentName_str>
 			<cfset localVar.propertySignature_str &= localVar.rootPath_str />
 			<cfset localVar.propertySignature_str &= replace(localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy, ".", "/", "all") />
@@ -58,6 +39,11 @@
 					<td class="summaryTableInheritanceCol">
 						&nbsp;
 					</td>
+					<td class="summaryTableTypeCol">
+						<div class="summarySignature">
+							#model.rendering_obj.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+						</div>
+					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">
 							#localVar.propertySignature_str#
@@ -71,12 +57,17 @@
 					</td>
 				</tr>
 			<cfelse>
-				<tr class="hideInheritedProperty">
+				<tr class="">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableInheritanceCol">
 						<img src="#localVar.rootPath_str#images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
+					</td>
+					<td class="summaryTableTypeCol">
+						<div class="summarySignature">
+							#model.rendering_obj.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">

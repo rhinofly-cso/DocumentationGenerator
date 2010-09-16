@@ -1,30 +1,12 @@
 <div class="summaryTableTitle">
 	Remote Methods
 </div>
-<div class="showHideLinks">
-	<cfoutput>
-		<div id="hideInheritedRemoteMethod" class="hideInheritedRemoteMethod">
-			<a class="showHideLink" 
-				href="##remoteMethodSummary" 
-				onclick="javascript:setInheritedVisible(false,'RemoteMethod');">
-				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/expanded.gif">
-				Hide Inherited Remote Methods</a>
-		</div>
-		<div id="showInheritedRemoteMethod" class="showInheritedRemoteMethod">
-			<a class="showHideLink" 
-				href="##remoteMethodSummary" 
-				onclick="javascript:setInheritedVisible(true,'RemoteMethod');">
-				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/collapsed.gif">
-				Show Inherited Remote Methods</a>
-		</div>
-	</cfoutput>
-</div>
-<table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableMethod">
+<table cellspacing="0" cellpadding="3" class="summaryTable " id="summaryTableRemoteMethod">
 	<tr>
 		<th>
 			&nbsp;
 		</th>
-		<th colspan="2">
+		<th colspan="3">
 			Method
 		</th>
 		<th class="summaryTableOwnerCol">
@@ -35,8 +17,7 @@
 	<cfloop from="1" to="#arrayLen(localVar.methods_struct.remoteMethodSummaryRows)#" index="localVar.row_num">
 		<cfset localVar.methodMetadata_obj = localVar.methods_struct.remoteMethodSummaryRows[localVar.row_num].metadata />
 	
-		<cfset localVar.methodSignature_str = model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true) />
-		<cfset localVar.methodSignature_str &= " <a href=""" />
+		<cfset localVar.methodSignature_str = "<a href=""" />
 		<cfif localVar.methods_struct.remoteMethodSummaryRows[localVar.row_num].definedBy neq localVar.componentName_str>
 			<cfset localVar.methodSignature_str &= localVar.rootPath_str />
 			<cfset localVar.methodSignature_str &= replace(localVar.methods_struct.remoteMethodSummaryRows[localVar.row_num].definedBy, ".", "/", "all") />
@@ -106,6 +87,11 @@
 					<td class="summaryTableInheritanceCol">
 						&nbsp;
 					</td>
+					<td class="summaryTableTypeCol">
+						<div class="summarySignature">
+							#model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+						</div>
+					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">
 							#localVar.methodSignature_str#
@@ -122,12 +108,17 @@
 					</td>
 				</tr>
 			<cfelse>
-				<tr class="hideInheritedRemoteMethod">
+				<tr class="">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>
 					<td class="summaryTableInheritanceCol">
 						<img src="#localVar.rootPath_str#images/inheritedSummary.gif" alt="Inherited" title="Inherited" class="inheritedSummaryImage">
+					</td>
+					<td class="summaryTableTypeCol">
+						<div class="summarySignature">
+							#model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
 						<div class="summarySignature">

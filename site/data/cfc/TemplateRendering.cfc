@@ -18,6 +18,11 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	property struct library;
 	
 	/**
+		List of the library struct keys, converted to last name by removing the package name.
+	*/
+	property string lastNameList;
+
+	/**
 		Converts a piece of string to a hyperlink, or text, depending whether such a link would 
 		lead somewhere.
 		
@@ -31,10 +36,14 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	{
 		var componentLink_str = "";
 		var componentName_str = "";
+		var libraryList_str = "";
+		var listCount_num = 0;
+		var typeArray_bool = false;
 		var componentPageExists_bool = false;
 		var link_str = arguments.link;
 		var libraryRef_struct = this.getLibrary();
-		
+		var lastNameList_str = this.getLastNameList();
+
 		if (left(link_str, 7) eq "http://")
 		{
 			componentLink_str = "<a href=""";
@@ -47,6 +56,19 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		else
 		{
 			componentName_str = listFirst(link_str, chr(35));
+			if (right(componentName_str, 2) eq "[]")
+			{
+				componentName_str = removeChars(componentName_str, len(componentName_str) - 1, 2);
+				typeArray_bool = true;
+			}
+
+			// check whether the component name can be determined uniquely from its last name
+			if (listValueCount(lastNameList_str, componentName_str) eq 1)
+			{
+				libraryList_str = structKeyList(libraryRef_struct);
+				componentName_str = listGetAt(libraryList_str, listFind(lastNameList_str, componentName_str));
+			}
+			
 			if (structKeyExists(libraryRef_struct, componentName_str))
 			{
 				if (not libraryRef_struct[componentName_str].getPrivate())
@@ -71,7 +93,14 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 				{
 					componentLink_str &= removechars(link_str, 1, len(componentName_str));
 				}
-				componentLink_str &= """";
+				componentLink_str &= """ onclick=""javascript:loadClassListFrame('";
+				if (not arguments.fromPackageRoot)
+				{
+					componentLink_str &= arguments.rootPath;
+					componentLink_str &= replace(listDeleteAt(componentName_str, listLen(componentName_str, "."), "."), ".", "/", "all");
+					componentLink_str &= "/";
+				}
+				componentLink_str &= "class-list.html');""";
 				if (arguments.componentLastName)
 				{
 					componentLink_str &= " title=""";
@@ -85,6 +114,10 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 					componentLink_str &= componentName_str;
 				}
 				componentLink_str &= "</a>";
+				if (typeArray_bool)
+				{
+					componentLink_str &= "[]";
+				}
 				if (componentLastName and isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFInterface"))
 				{
 					componentLink_str = "<i>" & componentLink_str & "</i>";
@@ -106,6 +139,10 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 					componentLink_str &= """>";
 					componentLink_str &= componentName_str;
 					componentLink_str &= "</a>";
+					if (typeArray_bool)
+					{
+						componentLink_str &= "[]";
+					}
 					return componentLink_str;
 				}
 				else
@@ -116,6 +153,10 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 					}
 					else
 					{
+						if (typeArray_bool)
+						{
+							componentName_str &= "[]";
+						}
 						return componentName_str;
 					}
 				}

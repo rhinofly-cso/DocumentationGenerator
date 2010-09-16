@@ -19,9 +19,6 @@
 				<td class="detailHeaderName">
 					#localVar.properties_struct.propertyDetailItems[localVar.row_num].name#
 				</td>
-				<td class="detailHeaderType">
-					property
-				</td>
 				<cfif localVar.started_bool>
 					<td class="detailHeaderRule"></td>
 				<cfelse>
