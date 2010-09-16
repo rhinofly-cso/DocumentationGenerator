@@ -131,11 +131,11 @@
 					<span class="label">Throws</span>
 					<table cellpadding="0" cellspacing="0" border="0">
 						<cfloop from="1" to="#arrayLen(localVar.methodThrows_arr)#" index="localVar.throws_num">
-							<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str, "throws") />
+							<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
 							<tr>
 								<td width="20px"></td>
 								<td>
-									<code>#localVar.methodThrows_arr[localVar.throws_num].type#</code>
+									<code>#localVar.methodThrows_arr[localVar.throws_num].getName()#</code>
 									<cfif len(localVar.throwsHint_str) gt 0>
 										&mdash; #localVar.throwsHint_str#
 									</cfif>

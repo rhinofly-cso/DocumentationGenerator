@@ -1,7 +1,7 @@
 <cfset factory_obj = createObject("component", "cfc.MetadataFactory") />
 <cfset builder_obj = createObject("component", "cfc.DocumentBuilder") />
 
-<cfset test_obj = createObject("component", "fly.cso.cvInternship.controllers.CVInternshipController") />
+<!--- <cfset test_obj = createObject("component", "fly.cso.domain.letter.Letter") /> --->
 
 <cfset documentRoot_str = "C:\development\docGen\test" />
 <cfset library_struct = structNew() />

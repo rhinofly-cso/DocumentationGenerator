@@ -111,7 +111,7 @@
 							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
+							<cfif localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
 							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
@@ -134,14 +134,14 @@
 							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
+							<cfif localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
 							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#localVar.rendering_obj.convertToLink(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
+						#model.rendering_obj.convertToLink(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

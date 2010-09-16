@@ -84,8 +84,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
 		var functionRef_struct = arguments.functionMetadata;
 		
-		// the "access", "returnHint", "inheritDoc", and "private" properties have default values
+		// the "access", "returnType", "returnHint", "inheritDoc", and "private" properties have default values
 		return_obj.setAccess("public");
+		return_obj.setReturnType("any");
 		return_obj.setReturnHint("");
 		return_obj.setInheritDoc(false);
 		return_obj.setPrivate(false);
@@ -170,7 +171,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var endFromLast_num = 0;
 		var beginFromLast_num = 0;
 		var i = 0;
-		var exception_struct = "";
+		var exceptionMetadata_obj = "";
 		var commentFound_bool = false;
 		var functionHint_bool = false;
 		var throwsTagFollow_bool = false;
@@ -335,10 +336,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 								if (find("@throws", token_str) eq 1)
 								{
 									token_str = trim(removechars(token_str, 1, 7));
-									exception_struct = structNew();
-									exception_struct.type = getToken(token_str, 1);
-									exception_struct.description = trim(removechars(token_str, 1, len(exception_struct.type)));
-									returnRef_obj.addThrows(exception_struct);
+									exceptionMetadata_obj = createObject("component", "cfc.cfcData.CFMetadata");
+									exceptionMetadata_obj.setName(getToken(token_str, 1));
+									exceptionMetadata_obj.setHint(trim(removechars(token_str, 1, len(getToken(token_str, 1)))));
+									returnRef_obj.addThrows(exceptionMetadata_obj);
 									throwsTagFollow_bool = true;
 								}
 							}
@@ -429,10 +430,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 							if (find("@throws", token_str) eq 1)
 							{
 								token_str = trim(removechars(token_str, 1, 7));
-								exception_struct = structNew();
-								exception_struct.type = getToken(token_str, 1);
-								exception_struct.description = trim(removechars(token_str, 1, len(exception_struct.type)));
-								returnRef_obj.addThrows(exception_struct);
+								exceptionMetadata_obj = createObject("component", "cfc.cfcData.CFMetadata");
+								exceptionMetadata_obj.setName(getToken(token_str, 1));
+								exceptionMetadata_obj.setHint(trim(removechars(token_str, 1, len(getToken(token_str, 1)))));
+								returnRef_obj.addThrows(exceptionMetadata_obj);
 								throwsTagFollow_bool = true;
 							}
 							if (tag_str eq "@inheritDoc")
@@ -496,7 +497,8 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
 		var propertyRef_struct = arguments.propertyMetadata;
 		
-		// the "serializable", and "private" properties have default values
+		// the "type", "serializable", and "private" properties have default values
+		return_obj.setType("any");
 		return_obj.setSerializable(true);
 		return_obj.setPrivate(false);
 		// additionally, the "hint" property is set to "" by default in _resolveHint()
@@ -707,8 +709,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 		}
 		
-		// the "serializable", and "private" properties have default values
-		return_obj.setSerializable(true);
+		// the "private" property has a default value for both components and interfaces
 		return_obj.setPrivate(false);
 		// additionally, the "hint" property is set to "" by default in _resolveHint()
 		
@@ -829,7 +830,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		dirs_qry = directoryList(path_str, false, "query");
 		for (i = 1; i <= dirs_qry.recordCount; i++)
 		{
-			if (dirs_qry.type[i] eq "Dir" and left(dirs_qry.name[i], 1) neq ".")
+			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludedFolders, dirs_qry.name[i]))
 			{
 				// we use directoryPath_str for an actual path again
 				directoryPath_str = path_str;

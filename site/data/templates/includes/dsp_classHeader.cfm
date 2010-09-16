@@ -113,14 +113,14 @@
 		
 	<cfif localVar.type_str eq "Component" and not isNull(localVar.implements_str)>
 		<cfset localVar.started_bool = false />
-		<cfset localVar.implements_str = "" />
+		<cfset localVar.implementsLinks_str = "" />
 		<cfloop list="#localVar.implements_str#" index="localVar.interface_str">
 			<cfif localVar.started_bool>
-				<cfset localVar.implements_str &= ", " />
+				<cfset localVar.implementsLinks_str &= ", " />
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implements_str &= model.rendering_obj.convertToLink(localVar.interface_str, localVar.rootPath_str, true) />
+			<cfset localVar.implementsLinks_str &= model.rendering_obj.convertToLink(localVar.interface_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -128,7 +128,7 @@
 				Implements
 			</td>
 			<td>
-				<cfoutput>#localVar.implements_str#</cfoutput>
+				<cfoutput>#localVar.implementsLinks_str#</cfoutput>
 			</td>
 		</tr>
 	</cfif>
@@ -177,12 +177,14 @@
 		</tr>
 	</cfif>
 
-	<cfif not model.cfMetadata_obj.getSerializable()>
-		<tr>
-			<td class="classHeaderTableLabel">
-				Not serializable
-			</td>
-		</tr>
+	<cfif localVar.type_str eq "Component">
+		<cfif not model.cfMetadata_obj.getSerializable()>
+			<tr>
+				<td class="classHeaderTableLabel">
+					Not serializable
+				</td>
+			</tr>
+		</cfif>
 	</cfif>
 	
 	<cfif not isNull(localVar.author_str)>

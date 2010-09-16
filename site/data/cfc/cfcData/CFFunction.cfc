@@ -8,7 +8,7 @@ component displayname="cfc.cfcData.CFFunction" extends="cfc.cfcData.CFMetadata" 
 {
 	property name="access" type="string" hint="Indicates whether the function is private or public.";
 	property name="returnType" type="string" hint="Variable type of function output.";
-	property name="throws" type="array" hint="Array of structures of exception-type-description value pairs that are possibly thrown by the function.";
+	property name="throws" type="array" hint="Array of (generic) metadata objects that are named after the exception type the function might throw and have the description as the hint property.";
 	property name="parameters" type="array" hint="Metadata concerning arguments of the function.";
 
 	property name="inheritDoc" type="boolean" hint="Indicates whether the documentation should be copied from an identical function of an ancestor.";
@@ -19,7 +19,7 @@ component displayname="cfc.cfcData.CFFunction" extends="cfc.cfcData.CFMetadata" 
 	property name="private" type="boolean" hint="Indicates whether the function should be documented.";
 	property name="related" type="string" hint="List of link expressions to related documentation pages.";
 	
-	public void function addThrows(required struct exception)
+	public void function addThrows(required any exception)
 	{
 		var throws_arr = this.getThrows();
 		

@@ -10,7 +10,7 @@
 				<img class="showHideLinkImage" src="#localVar.rootPath_str#images/expanded.gif">
 				Hide Inherited Properties</a>
 		</div>
-		<div id="showInheritedProperty" class="showInheritedMProperty">
+		<div id="showInheritedProperty" class="showInheritedProperty">
 			<a class="showHideLink" 
 				href="##propertySummary" 
 				onclick="javascript:setInheritedVisible(true,'Property');">
@@ -71,7 +71,7 @@
 					</td>
 				</tr>
 			<cfelse>
-				<tr class="hideInheritedMethod">
+				<tr class="hideInheritedProperty">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
 					</td>

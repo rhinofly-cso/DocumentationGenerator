@@ -175,11 +175,11 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	{
 		var i = 0;
 		var started_bool = false;
+		var hint_str = "";
 		var token_str = "";
 		var punctuationMark_str = "";
 		var parsedHint_str = "";
 		var metadataRef_obj = arguments.metadataObject;
-		var hint_str = metadataRef_obj.getHint();
 		var libraryRef_struct = this.getLibrary();
 		
 		if (arguments.type eq "short")
@@ -194,15 +194,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			}
 			else
 			{
-				if (arguments.type eq "throws")
-				{
-					// in this case the metadata object actually is a struct
-					hint_str = metadataRef_obj.description;
-				}
-				else
-				{
-					hint_str = metadataRef_obj.getHint();
-				}
+				hint_str = metadataRef_obj.getHint();
 			}
 		}
 

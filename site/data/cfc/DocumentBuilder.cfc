@@ -188,11 +188,12 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var i = 0;
 		var methodName_str = "";
 		var method_struct = "";
+		var ancestor_str = "";
+		var implementsRef_str = "";
 		var componentName_str = arguments.component;
 		var libraryRef_struct = arguments.library;
-		var functionsRef_arr = libraryRef_struct[componentName_str].getFunctions();
 		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
-		var implementsRef_str = libraryRef_struct[componentName_str].getImplements();
+		var functionsRef_arr = libraryRef_struct[componentName_str].getFunctions();
 		var allMethodsRef_struct = arguments.allMethods;
 		
 		if (not isNull(functionsRef_arr))
@@ -227,22 +228,26 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		{
 			for (i = 1; i <= listLen(extendsRef_str); i++)
 			{
-				componentName_str = listGetAt(extendsRef_str, i);
-				if (structKeyExists(libraryRef_struct, componentName_str))
+				ancestor_str = listGetAt(extendsRef_str, i);
+				if (structKeyExists(libraryRef_struct, ancestor_str))
 				{
-					_collectMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
+					_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
 				}
 			}
 		}
 
-		if (not isNull(implementsRef_str))
+		if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFComponent"))
 		{
-			for (i = 1; i <= listLen(implementsRef_str); i++)
+			implementsRef_str = libraryRef_struct[componentName_str].getImplements();
+			if (not isNull(implementsRef_str))
 			{
-				componentName_str = listGetAt(implementsRef_str, i);
-				if (structKeyExists(libraryRef_struct, componentName_str))
+				for (i = 1; i <= listLen(implementsRef_str); i++)
 				{
-					_collectMethods(componentName_str, libraryRef_struct, allMethodsRef_struct);
+					ancestor_str = listGetAt(implementsRef_str, i);
+					if (structKeyExists(libraryRef_struct, ancestor_str))
+					{
+						_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
+					}
 				}
 			}
 		}
@@ -348,7 +353,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 				model.cfMetadata_obj = libraryRef_struct[componentName_str];
 				if (not model.cfMetadata_obj.getPrivate())
 				{
-					model.properties_arr = propertyArray(componentName_str, libraryRef_struct);
+					model.properties_arr = arrayNew(1);
 					model.methods_arr = methodArray(componentName_str, libraryRef_struct);
 					savecontent variable="page_str"
 					{

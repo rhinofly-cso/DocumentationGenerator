@@ -7,7 +7,7 @@
 */
 component displayname="cfc.cfcData.CFMetadata" extends="fly.Object" accessors="true" output="false"
 {
-	property name="name" type="string" hint="Display name of the component. Must always correspond to its path.";
+	property name="name" type="string" hint="Display name of the thing associated with the metadata.";
 	property name="hint" type="string" hint="Hint that accompanies the component code.";
 
 	/**
