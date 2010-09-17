@@ -191,53 +191,53 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			hint_str &= metadataRef_struct.description;
 		}
 
-		// determine type and matching search string
-		if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFProperty"))
+		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
 		{
-			// look for the word "property" and its name, on one or more lines 
-			// before encountering a semicolon 
-			search_str = "\bproperty\b[^;]*\b";
-			search_str &= returnRef_obj.getName();
-			search_str &= "[^\w\.=]";
-		}
-		else
-		{
-			if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFFunction"))
+			// determine type and matching search string
+			if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFProperty"))
 			{
-				// look for the word "function" and its name, on one or more lines
-				// before encountering a curly bracket
-				search_str = "\bfunction\b[^\(]*\b";
+				// look for the word "property" and its name, on one or more lines 
+				// before encountering a semicolon 
+				search_str = "\bproperty\b[^;]*\b";
 				search_str &= returnRef_obj.getName();
-				search_str &= "\b";
-				functionHint_bool = true;
+				search_str &= "[^\w\.=]";
 			}
 			else
 			{
-				if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFComponent"))
+				if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFFunction"))
 				{
-					// look for the word "component" followed by a curly bracket
-					// either on the same line or at the start of the next
-					search_str = "\bcomponent\b[^\n\r]*[\s]*\{";
+					// look for the word "function" and its name, on one or more lines
+					// before encountering a curly bracket
+					search_str = "\bfunction\b[^\(]*\b";
+					search_str &= returnRef_obj.getName();
+					search_str &= "\b";
+					functionHint_bool = true;
 				}
 				else
 				{
-					if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFInterface"))
+					if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFComponent"))
 					{
-						// look for the word "interface" followed by a curly bracket
+						// look for the word "component" followed by a curly bracket
 						// either on the same line or at the start of the next
-						search_str = "\binterface\b[^\n\r]*[\s]*\{";
+						search_str = "\bcomponent\b[^\n\r]*[\s]*\{";
 					}
 					else
 					{
-						throw(message="Could not process hint for type #getMetadata(returnRef_obj).name#.");
+						if (isInstanceOf(returnRef_obj, "cfc.cfcData.CFInterface"))
+						{
+							// look for the word "interface" followed by a curly bracket
+							// either on the same line or at the start of the next
+							search_str = "\binterface\b[^\n\r]*[\s]*\{";
+						}
+						else
+						{
+							throw(message="Could not process hint for type #getMetadata(returnRef_obj).name#.");
+						}
 					}
+	
 				}
-
 			}
-		}
-		
-		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
-		{
+			
 			// we have a hint to parse from CFScript code, which must be isolated by applying the search string
 			file_str = FileRead(arguments.path);
 			defStart_num = 1;
@@ -600,14 +600,16 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 			for (i = 1; i <= listLen(extends_str); i++)
 			{
-				// TODO: Why doesn't this work?
 				if (listGetAt(extends_str, i) eq "WEB-INF.cftags.component" or listGetAt(extends_str, i) eq "WEB-INF.cftags.interface")
 				{
-					listDeleteAt(extends_str, i);
+					extends_str = listDeleteAt(extends_str, i);
 					break;
 				}
 			}
-			returnRef_obj.setExtends(extends_str);
+			if (len(extends_str) > 0)
+			{
+				returnRef_obj.setExtends(extends_str);
+			}
 	
 			// set the inheritance info for components extended by the current one
 			for (i = 1; i <= listLen(extends_str); i++)

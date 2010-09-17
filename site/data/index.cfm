@@ -9,8 +9,3 @@
 </cfloop>
 
 <cfset builder_obj.generateDocumentation(application.documentRoot, packages_struct, library_struct) />
-
-<!--- 
-<cfdump var="#getComponentMetadata("fly.cso.domain.api.APISettings")#">
-<cfdump var="#getComponentMetadata("fly.cso.api.v1.CVAPI")#">
- --->
