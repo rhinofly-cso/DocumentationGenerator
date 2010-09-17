@@ -611,7 +611,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				returnRef_obj.setExtends(extends_str);
 			}
 	
-			// set the inheritance info for components extended by the current one
+			// set the inheritance info for ancestors of this component
+			// when no metadata object is present for the ancestor, we add its name to the 
+			// queue
 			for (i = 1; i <= listLen(extends_str); i++)
 			{
 				extendedComponent_str = listGetAt(extends_str, i);
@@ -641,7 +643,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			implements_str = structKeyList(metadataRef_struct.implements);
 			returnRef_obj.setImplements(implements_str);
 	
-			// set the inheritance info for components extended by the current one
+			// set the inheritance info for interfaces that this component implements
+			// when no metadata object is present for the interface, we add its name to the 
+			// queue
 			for (i = 1; i <= listLen(implements_str); i++)
 			{
 				implementedComponent_str = listGetAt(implements_str, i);
@@ -664,7 +668,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				}
 			}
 		}			
-		//and finally check for previously existing inheritance information
+		// and finally check for previously existing inheritance information
+		// if a component was earlier found to extend or implement this component, its name is 
+		// taken from the queue and set as an ancestor of implementor, respectively
 		if (structKeyExists(libraryRef_struct["_extendedByQueue"], name_str))
 		{
 			returnRef_obj.setExtendedBy(libraryRef_struct["_extendedByQueue"][name_str]);
@@ -691,6 +697,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var return_obj = "";
 		
 		// we make sure that the extendedBy queue and implementedBy queue structs exist
+		// these are necessary for generating correct inheritance information
+		// as each component is evaluated, its name is added to the list of known subclasses
+		// or implementors
 		if (not structKeyExists(libraryRef_struct, "_extendedByQueue"))
 		{
 			structInsert(libraryRef_struct, "_extendedByQueue", structNew());
@@ -770,10 +779,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var i = 0;
 		var files_qry = "";
 		var dirs_qry = "";
-		var componentPath_str = "";
+		var componentName_str = "";
 		var directoryPath_str = "";
 		var packageName_str = "";
-		var content_str = "";
+		var packageKey_str = "";
 		var metadata_struct = "";
 		var metadata_obj = "";
 		var path_str = arguments.path;
@@ -781,60 +790,61 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var libraryRef_struct = arguments.library;
 		var packagesRef_struct = arguments.packages;
 		
-		directoryPath_str = path_str;
-		directoryPath_str = removeChars(path_str, 1, len(customTagPath_str));
-		directoryPath_str = reReplace(directoryPath_str, "[/\\]+", ".", "all");
-		if (left(directoryPath_str, 1) eq ".")
+		// set the package name
+		packageName_str = removeChars(path_str, 1, len(customTagPath_str));
+		packageName_str = reReplace(packageName_str, "[/\\]+", ".", "all");
+		if (left(packageName_str, 1) eq ".")
 		{
-			directoryPath_str = removeChars(directoryPath_str, 1, 1);
+			packageName_str = removeChars(packageName_str, 1, 1);
 		}
-		if (len(directoryPath_str) > 0)
+		if (right(packageName_str, 1) eq ".")
 		{
-			if (right(directoryPath_str, 1) eq ".")
-			{
-				packageName_str = removeChars(directoryPath_str, len(directoryPath_str), 1);
-			}
-			else
-			{
-				packageName_str = directoryPath_str;
-				directoryPath_str &= ".";
-			}
+			packageName_str = removeChars(packageName_str, len(packageName_str), 1);
+		}
+
+		// set the package key string for use in the library and packages structs
+		if (len(packageName_str) eq 0)
+		{
+			packageKey_str = "_topLevel";
 		}
 		else
 		{
-			packageName_str = "_topLevel";
+			packageKey_str = packageName_str;
 		}
 
 		files_qry = directoryList(path_str, false, "query", "*.cfc");
 		if (files_qry.recordCount > 0)
 		{
-			structInsert(packagesRef_struct, packageName_str, structNew());
+			structInsert(packagesRef_struct, packageKey_str, structNew());
 		}
 		for (i = 1; i <= files_qry.recordCount; i++)
 		{
-			componentPath_str = directoryPath_str;
-			componentPath_str &= listGetAt(files_qry.name[i], 1, ".");
+			componentName_str = packageName_str;
+			if (len(packageName_str) > 0)
+			{
+				componentName_str &= ".";
+			}
+			componentName_str &= listGetAt(files_qry.name[i], 1, ".");
 			
 			try
 			{
-				metadata_struct = getComponentMetadata(componentPath_str);
+				metadata_struct = getComponentMetadata(componentName_str);
 			}
 			catch (any excptn)
 			{
-				throw(message="Could not obtain component metadata for #componentPath_str#.");
+				throw(message="Could not obtain component metadata for #componentName_str#.");
 			}
 			metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
-			structInsert(libraryRef_struct, metadata_struct.name, metadata_obj);
+			structInsert(libraryRef_struct, componentName_str, metadata_obj);
 
-			content_str = metadata_struct.name;
-			if (structKeyExists(packagesRef_struct[packageName_str], metadata_struct.type))
+			if (structKeyExists(packagesRef_struct[packageKey_str], metadata_struct.type))
 			{
-				content_str = listAppend(packagesRef_struct[packageName_str][metadata_struct.type], content_str);
-				packagesRef_struct[packageName_str][metadata_struct.type] = content_str;
+				componentName_str = listAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
+				packagesRef_struct[packageKey_str][metadata_struct.type] = componentName_str;
 			}
 			else
 			{
-				structInsert(packagesRef_struct[packageName_str], metadata_struct.type, content_str);
+				structInsert(packagesRef_struct[packageKey_str], metadata_struct.type, componentName_str);
 			}
 		}
 		
