@@ -769,10 +769,15 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	}
 	
 	/**
-		Read directory and all subdirectories for .cfc files.
+		Read directory and all subdirectories for .cfc files. Then append all metadata found 
+		for their contents to the library struct in the form of metadata objects and to the 
+		packages structs in the form of package content. In both cases, key strings are 
+		component names.
 		
 		@path Directory to be read.
 		@customTagPath Root directory of the library.
+		@library Library struct into which this function inserts component metadata objects.
+		@packages Structure into which this function inserts package content structs.
 	*/
 	public void function browseDirectory(required string path, required string customTagPath, required struct library, required struct packages)
 	{
@@ -812,13 +817,16 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			packageKey_str = packageName_str;
 		}
 
+		// retrieve the filenames of all components
 		files_qry = directoryList(path_str, false, "query", "*.cfc");
 		if (files_qry.recordCount > 0)
 		{
 			structInsert(packagesRef_struct, packageKey_str, structNew());
 		}
+		// for each component found
 		for (i = 1; i <= files_qry.recordCount; i++)
 		{
+			// set the component name
 			componentName_str = packageName_str;
 			if (len(packageName_str) > 0)
 			{
@@ -826,6 +834,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 			componentName_str &= listGetAt(files_qry.name[i], 1, ".");
 			
+			// get its metadata
 			try
 			{
 				metadata_struct = getComponentMetadata(componentName_str);
@@ -834,9 +843,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			{
 				throw(message="Could not obtain component metadata for #componentName_str#.");
 			}
+			// create the metadata object and insert it into the library struct
 			metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
 			structInsert(libraryRef_struct, componentName_str, metadata_obj);
 
+			// add component name to the list of components/interfaces in the packages struct
 			if (structKeyExists(packagesRef_struct[packageKey_str], metadata_struct.type))
 			{
 				componentName_str = listAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
@@ -848,12 +859,13 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 		}
 		
+		// do the same for all subdirectories
 		dirs_qry = directoryList(path_str, false, "query");
 		for (i = 1; i <= dirs_qry.recordCount; i++)
 		{
+			// we exclude folder determined by filter conditions set in Application.cfc
 			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludedFolders, dirs_qry.name[i]))
 			{
-				// we use directoryPath_str for an actual path again
 				directoryPath_str = path_str;
 				// the forward slash is always supposed to work
 				directoryPath_str &= "/";
