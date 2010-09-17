@@ -7,6 +7,6 @@ component
 	{
 		application["customTagPaths"] = this.customTagPaths;
 		application["reExcludedFolders"] = "^\."; // separate different folder REs by "|"
+		application["documentRoot"] = "C:\development\docGen\test";
 	}
-	
 }
