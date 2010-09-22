@@ -367,7 +367,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var customTagPath_str = arguments.customTagPath;
 		var libraryRef_struct = arguments.library;
 		var packagesRef_struct = arguments.packages;
-		
+
 		// set the package name
 		packageName_str = removeChars(path_str, 1, len(customTagPath_str));
 		packageName_str = reReplace(packageName_str, "[/\\]+", ".", "all");
@@ -396,6 +396,8 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		if (files_qry.recordCount > 0)
 		{
 			structInsert(packagesRef_struct, packageKey_str, structNew());
+//			writeOutput("Reading metadata for package: " & packageKey_str & "<br />");
+//			getPageContext().getOut().flush();
 		}
 		// for each component
 		for (i = 1; i <= files_qry.recordCount; i++)

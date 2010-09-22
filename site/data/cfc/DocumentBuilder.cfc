@@ -474,6 +474,8 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		for (i = 1; i <= listLen(packageList_str); i++)
 		{
 			packageKey_str = listGetAt(packageList_str, i);
+//			writeOutput("Writing documentation for package: " & packageKey_str & "<br />");
+//			getPageContext().getOut().flush();
 			writePackageDocumentation(packageKey_str, documentRoot_str, packages_struct, libraryRef_struct);
 		}
 
