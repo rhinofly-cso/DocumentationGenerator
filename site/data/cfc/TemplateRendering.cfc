@@ -23,14 +23,15 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	property string lastNameList;
 
 	/**
-		Converts a piece of string to a hyperlink, or text, depending whether such a link would 
-		lead somewhere.
+		Converts a piece of string to a hyperlink, or text, depending whether such a link 
+		would lead somewhere.
 		
 		@link String to be converted to a hyperlink.
 		@rootPath If not present in the webroot, all links to local pages are prepended by this root path.
 		@componentLastName Displays the link as the name behind the last dot of the full component name.
 		@returnHRefOnly Returns null/void in case no hyperlink could be created.
 		@fromPackageRoot Treats the current package directory as the webroot and strips links to components of the package path.
+		@return HTML hyperlink or plain text.
 	*/
 	public string function convertToLink(required string link, string rootPath="", boolean componentLastName="false", boolean returnHRefOnly="false", boolean fromPackageRoot="false")
 	{
@@ -167,21 +168,23 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	/**
 		Returns the hyperlink belonging to the package-detail page.
 		
-		@packageName Name of the package to which the hyperlink refers.
+		@packageKey Name of the package to which the hyperlink refers.
 	*/
-	public string function packageLink(required string packageName)
+	public string function packageLink(required string packageKey)
 	{
+		var displayName_str = "";
 		var packagePath_str = "";
 		var return_str = "";
-		var packageName_str = arguments.packageName;
+		var packageKey_str = arguments.packageKey;
 		
-		if (packageName_str eq "_topLevel")
+		if (packageKey_str eq "_topLevel")
 		{
-			packageName_str = "";
+			displayName_str = "Top Level";
 		}
 		else
 		{
-			packagePath_str = replace(packageName_str, ".", "/", "all");
+			displayName_str = packageKey_str;
+			packagePath_str = replace(packageKey_str, ".", "/", "all");
 			packagePath_str &= "/";
 		}
 
@@ -190,14 +193,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		return_str &= "package-detail.html"" onclick=""javascript:loadClassListFrame('";
 		return_str &= packagePath_str;
 		return_str &= "class-list.html');"">";
-		if (len(packageName_str) > 0)
-		{
-			return_str &= packageName_str;
-		}
-		else
-		{
-			return_str &= "Top Level";
-		}
+		return_str &= displayName_str;
 		return_str &= "</a>";
 		
 		return return_str;
@@ -206,11 +202,11 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	/**
 		Collects the hint from the metadata object and replaces all &#123;@link&#125; tags, 
 		together with their subsequent links, with hyperlinks. For example,	{@link} 
-		cfc.TemplateRendering is a link to the current page.
+		cfc.TemplateRendering is a link to the current page, rendered by this function.
 		
 		@metadataObject Metadata object from which to take the hint.
 		@rootPath Path to the webroot.
-		@type Obtains this type of hint: full (default), short, return, or throws.
+		@type Obtain this type of hint: full (default), short, return, or throws.
 	*/
 	public string function renderHint(required any metadataObject, string rootPath="", string type="full")
 	{
@@ -218,7 +214,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		var started_bool = false;
 		var hint_str = "";
 		var token_str = "";
-		var punctuationMark_str = "";
+		var punctuationMarks_str = "";
 		var parsedHint_str = "";
 		var metadataRef_obj = arguments.metadataObject;
 		var libraryRef_struct = this.getLibrary();
@@ -233,7 +229,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			{
 				hint_str = metadataRef_obj.getReturnHint();
 			}
-			else
+			else // includes full (default) and throws
 			{
 				hint_str = metadataRef_obj.getHint();
 			}
@@ -262,17 +258,15 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 				{
 					i += 1;
 					token_str = getToken(hint_str, i);
-					punctuationMark_str = right(token_str, 1);
-					if (findOneOf("!?)}]>:;.,", punctuationMark_str))
+					// consider the fact that the link expression can be directly followed by one or more punctuation marks
+					punctuationMarks_str = "";
+					while (findOneOf("!?)}]>:;.,", right(token_str, 1)))
 					{
+						punctuationMarks_str = right(token_str, 1) & punctuationMarks_str;
 						token_str = removeChars(token_str, len(token_str), 1);
-						token_str = convertToLink(token_str, arguments.rootPath);
-						token_str &= punctuationMark_str;
 					}
-					else
-					{
-						token_str = convertToLink(token_str, arguments.rootPath);
-					}
+					token_str = convertToLink(token_str, arguments.rootPath);
+					token_str &= punctuationMarks_str;
 				}
 				else
 				{

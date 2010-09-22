@@ -1,4 +1,3 @@
-<cfscript>
 /**
 	Contains the methods to create documentation pages from a struct of metadata objects.
 	
@@ -13,6 +12,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Sorts a list of components by the name behind the last dot of the full component name.
 		
 		@componentList List of component names.
+		@return Alphabetized list of component names.
 	*/
 	public string function sortByLastName(required string componentList)
 	{
@@ -28,7 +28,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		{
 			componentName_str = listGetAt(components_str, i);
 			
-			// reverse the order of expressions between (and around) the dots
+			// reverse the order of expressions separated by the dots
 			reverseName_str = "";
 			for (j = 1; j <= listLen(componentName_str, "."); j++)
 			{
@@ -60,8 +60,8 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	/**
 		Creates an array containing metadata objects. These are alphabetically order by last 
 		name of the componenent names. The names of the contributing components are given in 
-		the componentList argument and descriptions (references to) the metadata objects are 
-		taken from the library structure.
+		the componentList argument and the (references to) the metadata objects are taken from 
+		the library structure.
 		
 		@componentList List of component names.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
@@ -94,57 +94,11 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	}
 	
 	/**
-		@private
-		Inserts new property metadata objects into the allProperties struct for the properties 
-		of component and its ancestors.
-	*/
-	private void function _collectProperties(required string component, required struct library, required struct allProperties)
-	{
-		var i = 0;
-		var propertyName_str = "";
-		var property_struct = "";
-		var componentName_str = arguments.component;
-		var libraryRef_struct = arguments.library;
-		var propertiesRef_arr = libraryRef_struct[componentName_str].getProperties();
-		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
-		var allPropertiesRef_struct = arguments.allProperties;
-		
-		if (not isNull(propertiesRef_arr))
-		{
-			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
-			{
-				propertyName_str = propertiesRef_arr[i].getName();
-	
-				// if a property is inherited from one of the parents it is added, otherwise it is ignored
-				if (not structKeyExists(allPropertiesRef_struct, propertyName_str))
-				{
-					property_struct = structNew();
-					structInsert(property_struct, "metadata", propertiesRef_arr[i]);
-					structInsert(property_struct, "definedBy", componentName_str);
-					structInsert(allPropertiesRef_struct, propertyName_str, property_struct);
-				}
-			}
-		}
-		
-		if (not isNull(extendsRef_str))
-		{
-			for (i = 1; i <= listLen(extendsRef_str); i++)
-			{
-				componentName_str = listGetAt(extendsRef_str, i);
-				if (structKeyExists(libraryRef_struct, componentName_str))
-				{
-					_collectProperties(componentName_str, libraryRef_struct, allPropertiesRef_struct);
-				}
-			}
-		}
-	}
-	
-	/**
 		Creates an array of structures for properties containing name, metadata, and definedBy 
 		keys. The names are property names from the array given in the component metadata 
 		object in the library struct and all of its ancestors. The accompanying metadata key 
-		points to a CFProperty object containing the nessecary documentation information, 
-		and definedBy gives the name of the defining component.
+		points to a {@link} cfc.cfcData.CFProperty object containing the nessecary 
+		documentation information, and definedBy gives the name of the defining component.
 		
 		@component Name of the component for which all property information is to be retrieved.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
@@ -180,74 +134,47 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	
 	/**
 		@private
-		Inserts new function metadata objects into the allMethods struct for the methods of 
-		component and its ancestors.
+		Inserts property metadata objects into the allProperties struct for the properties of 
+		the component and its ancestors.
 	*/
-	private void function _collectMethods(required string component, required struct library, required struct allMethods)
+	private void function _collectProperties(required string component, required struct library, required struct allProperties)
 	{
 		var i = 0;
-		var methodName_str = "";
-		var method_struct = "";
-		var ancestor_str = "";
-		var implementsRef_str = "";
+		var propertyName_str = "";
+		var property_struct = "";
 		var componentName_str = arguments.component;
 		var libraryRef_struct = arguments.library;
+		var propertiesRef_arr = libraryRef_struct[componentName_str].getProperties();
 		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
-		var functionsRef_arr = libraryRef_struct[componentName_str].getFunctions();
-		var allMethodsRef_struct = arguments.allMethods;
+		var allPropertiesRef_struct = arguments.allProperties;
 		
-		if (not isNull(functionsRef_arr))
+		if (not isNull(propertiesRef_arr))
 		{
-			for (i = 1; i <= arrayLen(functionsRef_arr); i++)
+			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
 			{
-				methodName_str = functionsRef_arr[i].getName();
+				propertyName_str = propertiesRef_arr[i].getName();
 	
-				// if the method is present in one of the implementors or parents that method is designated as an override
-				if (structKeyExists(allMethodsRef_struct, methodName_str))
+				// if a property is inherited from one of the parents it is added
+				// otherwise, if it is already defined, it is ignored
+				if (not structKeyExists(allPropertiesRef_struct, propertyName_str))
 				{
-					allMethodsRef_struct[methodName_str].override = true;
-					// if the @inheritDoc tag was used, the reference to the metadata object is replaced
-					if (allMethodsRef_struct[methodName_str].metadata.getInheritDoc())
-					{
-						allMethodsRef_struct[methodName_str].metadata = functionsRef_arr[i];
-					}
-				}
-				// otherwise, a new entry is constructed
-				else
-				{
-					method_struct = structNew();
-					structInsert(method_struct, "metadata", functionsRef_arr[i]);
-					structInsert(method_struct, "definedBy", componentName_str);
-					structInsert(method_struct, "override", false);
-					structInsert(allMethodsRef_struct, methodName_str, method_struct);
-				}
-			}
-		}
-		
-		if (not isNull(extendsRef_str))
-		{
-			for (i = 1; i <= listLen(extendsRef_str); i++)
-			{
-				ancestor_str = listGetAt(extendsRef_str, i);
-				if (structKeyExists(libraryRef_struct, ancestor_str))
-				{
-					_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
+					property_struct = structNew();
+					structInsert(property_struct, "metadata", propertiesRef_arr[i]);
+					structInsert(property_struct, "definedBy", componentName_str);
+					structInsert(allPropertiesRef_struct, propertyName_str, property_struct);
 				}
 			}
 		}
 
-		if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFComponent"))
+		// collect the properties of all ancestors
+		if (not isNull(extendsRef_str))
 		{
-			implementsRef_str = libraryRef_struct[componentName_str].getImplements();
-			if (not isNull(implementsRef_str))
+			for (i = 1; i <= listLen(extendsRef_str); i++)
 			{
-				for (i = 1; i <= listLen(implementsRef_str); i++)
+				componentName_str = listGetAt(extendsRef_str, i);
+				if (structKeyExists(libraryRef_struct, componentName_str))
 				{
-					ancestor_str = listGetAt(implementsRef_str, i);
-					if (structKeyExists(libraryRef_struct, ancestor_str))
-					{
-						_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
-					}
+					_collectProperties(componentName_str, libraryRef_struct, allPropertiesRef_struct);
 				}
 			}
 		}
@@ -257,10 +184,10 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Creates an array of structures for methods containing name, metadata, definedBy, and 
 		override keys. The names are method names from the array given in the component 
 		metadata object in the library struct and all of its ancestors. The accompanying 
-		metadata key points to a CFFunction object containing the nessecary documentation 
-		information, definedBy gives the name of the defining component, and override contains 
-		a boolean that indicates whether the method definition is an override of a previous 
-		definition.
+		metadata key points to a {@link} cfc.cfcData.CFFunction object containing the 
+		nessecary documentation information, definedBy gives the name of the defining 
+		component, and override contains a boolean that indicates whether the method 
+		definition is an override of a previous definition.
 		
 		@component Name of the component for which all method information is to be retrieved.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
@@ -295,14 +222,91 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	}
 	
 	/**
+		@private
+		Inserts function metadata objects into the allMethods struct for the methods of the 
+		component and its ancestors.
+	*/
+	private void function _collectMethods(required string component, required struct library, required struct allMethods)
+	{
+		var i = 0;
+		var methodName_str = "";
+		var method_struct = "";
+		var ancestor_str = "";
+		var implementsRef_str = "";
+		var componentName_str = arguments.component;
+		var libraryRef_struct = arguments.library;
+		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
+		var functionsRef_arr = libraryRef_struct[componentName_str].getFunctions();
+		var allMethodsRef_struct = arguments.allMethods;
+		
+		if (not isNull(functionsRef_arr))
+		{
+			for (i = 1; i <= arrayLen(functionsRef_arr); i++)
+			{
+				methodName_str = functionsRef_arr[i].getName();
+	
+				// if the method is already defined in a subclass or implementor, that method definition is designated as an override
+				if (structKeyExists(allMethodsRef_struct, methodName_str))
+				{
+					allMethodsRef_struct[methodName_str].override = true;
+					// if the @inheritDoc tag was used, the reference to the documentation information is replaced
+					if (allMethodsRef_struct[methodName_str].metadata.getInheritDoc())
+					{
+						allMethodsRef_struct[methodName_str].metadata = functionsRef_arr[i];
+					}
+				}
+				// otherwise, a new entry is constructed
+				else
+				{
+					method_struct = structNew();
+					structInsert(method_struct, "metadata", functionsRef_arr[i]);
+					structInsert(method_struct, "definedBy", componentName_str);
+					structInsert(method_struct, "override", false);
+					structInsert(allMethodsRef_struct, methodName_str, method_struct);
+				}
+			}
+		}
+		
+		// collect the methods of all ancestors
+		if (not isNull(extendsRef_str))
+		{
+			for (i = 1; i <= listLen(extendsRef_str); i++)
+			{
+				ancestor_str = listGetAt(extendsRef_str, i);
+				if (structKeyExists(libraryRef_struct, ancestor_str))
+				{
+					_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
+				}
+			}
+		}
+
+		if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFComponent"))
+		{
+			// collect the methods of all interfaces this component implements and their ancestors
+			implementsRef_str = libraryRef_struct[componentName_str].getImplements();
+			if (not isNull(implementsRef_str))
+			{
+				for (i = 1; i <= listLen(implementsRef_str); i++)
+				{
+					ancestor_str = listGetAt(implementsRef_str, i);
+					if (structKeyExists(libraryRef_struct, ancestor_str))
+					{
+						_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 		Creates documentation pages for all interfaces and components in a package.
 		
-		@packageName Name of the package for which to generate documentation.
+		@packageKey Name of the package (key) for which to generate documentation.
 		@documentRoot Directory path into which all documentation is put. Contains the index.html file.
 		@packages Structure that contains lists of interface and component names for all packages. Created by {@link} cfc.MetadataFactory#browseDirectory().
 		@library Structure that contains metadata objects for all components in the library.
 	*/
-	public void function writePackageDocumentation(required string packageName, required string documentRoot, required struct packages, required struct library)
+	public void function writePackageDocumentation(required string packageKey, required string documentRoot, required struct packages, required struct library)
 	{
 		var i = 0;
 		var model = structNew();
@@ -310,37 +314,40 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var page_str = "";
 		var componentName_str = "";
 		var packagePath_str = "";
-		var packageName_str = arguments.packageName;
-		var packageRef_struct = arguments.packages[packageName_str];
+		var packageKey_str = arguments.packageKey;
+		var packageRef_struct = arguments.packages[packageKey_str];
 		var libraryRef_struct = arguments.library;
 		var libraryList_str = structKeyList(libraryRef_struct);
 		
-		// initialize a number of variables in the model scope
+		// initialize a number of variables in the model scope, which is used in the templates
 		structInsert(model, "interfaces_arr", arrayNew(1));
 		structInsert(model, "components_arr", arrayNew(1));
 		structInsert(model, "cfMetadata_obj", "");
 		structInsert(model, "properties_arr", "");
 		structInsert(model, "methods_arr", "");
+		structInsert(model, "packageName_str", "");
 
-		structInsert(model, "packageName_str", packageName_str);
 		structInsert(model, "libraryRef_struct", libraryRef_struct);
 		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
 		model.rendering_obj.setLibrary(libraryRef_struct);
+		// make a list of the last names of all components for performing quick searches
 		for (i = 1; i <= listLen(libraryList_str); i++)
 		{
 			libraryList_str = listSetAt(libraryList_str, i, listLast(listGetAt(libraryList_str, i), "."));
 		}
 		model.rendering_obj.setLastNameList(libraryList_str);
 
-		// determine the correct path to the package documentation directory
+		// set the correct path to the package documentation directory
 		packagePath_str = reReplace(arguments.documentRoot, "[/\\]+", "/", "all");
 		if (right(packagePath_str, 1) neq "/")
 		{
 			packagePath_str &= "/";
 		}
-		if (packageName_str neq "_topLevel")
+		// check if the package is Top Level
+		if (packageKey_str neq "_topLevel")
 		{
-			packagePath_str &= replace(packageName_str, ".", "/", "all");
+			model.packageName_str = packageKey_str;
+			packagePath_str &= replace(packageKey_str, ".", "/", "all");
 			packagePath_str &= "/";
 		}
 		// make sure the directory exists
@@ -397,11 +404,6 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 			}
 		}
 		
-		if (model.packageName_str eq "_topLevel")
-		{
-			model.packageName_str = "";
-		}
-
 		// generate component list
 		savecontent variable="page_str"
 		{
@@ -422,6 +424,8 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	}
 
 	/**
+		Creates documentation pages for all packages in the library.
+		
 		@documentRoot Directory path into which all documentation is put. Contains the index.html file.
 		@packages Structure that contains lists of interface and component names for all packages. Created by {@link} cfc.MetadataFactory#browseDirectory().
 		@library Structure that contains metadata objects for all components in the library.
@@ -432,7 +436,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var model = structNew();
 		var localVar = structNew();
 		var page_str = "";
-		var packageName_str = "";
+		var packageKey_str = "";
 		var apiDocSource_str = "";
 		var documentRoot_str = arguments.documentRoot;
 		var packages_struct = arguments.packages;
@@ -459,23 +463,23 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		apiDocSource_str = listDeleteAt(apiDocSource_str, listLen(apiDocSource_str, "/"), "/");
 		apiDocSource_str &= "/apiDoc/";
 		
-		// check that the document root has the correct format
+		// check that the path to the document root has the correct format
 		documentRoot_str = reReplace(documentRoot_str, "[/\\]+", "/", "all");
 		if (right(documentRoot_str, 1) neq "/")
 		{
 			documentRoot_str &= "/";
 		}
 		
-		// copy basic files
-		_copyBasicFiles(apiDocSource_str, documentRoot_str);
-		
 		// write all package documentation
 		for (i = 1; i <= listLen(packageList_str); i++)
 		{
-			packageName_str = listGetAt(packageList_str, i);
-			writePackageDocumentation(packageName_str, documentRoot_str, packages_struct, libraryRef_struct);
+			packageKey_str = listGetAt(packageList_str, i);
+			writePackageDocumentation(packageKey_str, documentRoot_str, packages_struct, libraryRef_struct);
 		}
 
+		// copy basic files
+		_copyBasicFiles(apiDocSource_str, documentRoot_str);
+		
 		// write lists and summaries for all classes and packages
 		savecontent variable="page_str"
 		{
@@ -553,4 +557,3 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		}
 	}
 }
-</cfscript>

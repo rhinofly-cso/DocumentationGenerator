@@ -1,4 +1,3 @@
-<cfscript>
 /**
 	Contains the methods to populate a struct with metadata objects and assign their values.
 	
@@ -878,4 +877,3 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		metadataRef_obj.setHint(trim(parsedHint_str));
 	}
 }
-</cfscript>

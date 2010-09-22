@@ -98,7 +98,7 @@
 		<cfset localVar.rowOdd_num = 0 />
 		
 		<cfoutput>
-			<cfloop list="#localVar.packages_str#" index="localVar.packageName_str">
+			<cfloop list="#localVar.packages_str#" index="localVar.packageKey_str">
 				<cfif localVar.rowOdd_num>
 					<cfset localVar.rowOdd_num = 0 />
 				<cfelse>
@@ -109,7 +109,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering_obj.packageLink(localVar.packageName_str)#
+						#model.rendering_obj.packageLink(localVar.packageKey_str)#
 					</td>
 					<td class="summaryTableLastCol">
 					</td>

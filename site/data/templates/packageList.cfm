@@ -32,9 +32,9 @@
 
 <ul>
 	<cfoutput>
-		<cfloop list="#localVar.packages_str#" index="localVar.packageName_str">
+		<cfloop list="#localVar.packages_str#" index="localVar.packageKey_str">
 			<li>
-				#model.rendering_obj.packageLink(localVar.packageName_str)#
+				#model.rendering_obj.packageLink(localVar.packageKey_str)#
 			</li>
 		</cfloop>
 	</cfoutput>
