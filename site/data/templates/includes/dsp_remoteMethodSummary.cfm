@@ -58,6 +58,7 @@
 					<cfset localVar.methodSignature_str &= """" />
 				<cfelseif localVar.argumentType_str eq "date">
 					<cfset localVar.methodSignature_str &= """" />
+					<cfset localVar.methodSignature_str &= localVar.argumentDefault />
 					<cfset localVar.methodSignature_str &= """" />
 				<cfelseif localVar.argumentType_str eq "numeric">
 					<cfset localVar.methodSignature_str &= localVar.argumentDefault />

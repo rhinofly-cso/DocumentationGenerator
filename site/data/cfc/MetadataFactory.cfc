@@ -201,6 +201,12 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			return_obj.setType(propertyRef_struct.type);
 		}
 		
+		// default
+		if (structKeyExists(propertyRef_struct, "default"))
+		{
+			return_obj.setDefault(propertyRef_struct.default);
+		}
+		
 		// serializable		
 		if (structKeyExists(propertyRef_struct, "serializable"))
 		{

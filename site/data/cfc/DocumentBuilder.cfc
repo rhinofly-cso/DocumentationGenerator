@@ -98,7 +98,9 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		keys. The names are property names from the array given in the component metadata 
 		object in the library struct and all of its ancestors. The accompanying metadata key 
 		points to a {@link} cfc.cfcData.CFProperty object containing the nessecary 
-		documentation information, and definedBy gives the name of the defining component.
+		documentation information, definedBy gives the name of the defining component, and 
+		override contains a boolean that indicates whether the property definition is an 
+		override of a previous definition.
 		
 		@component Name of the component for which all property information is to be retrieved.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
@@ -154,13 +156,18 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 			{
 				propertyName_str = propertiesRef_arr[i].getName();
 	
-				// if a property is inherited from one of the parents it is added
-				// otherwise, if it is already defined, it is ignored
-				if (not structKeyExists(allPropertiesRef_struct, propertyName_str))
+				// if the property is already defined in a subclass or implementor, that property definition is designated as an override
+				if (structKeyExists(allPropertiesRef_struct, propertyName_str))
+				{
+					allPropertiesRef_struct[propertyName_str].override = true;
+				}
+				// otherwise, a new entry is created
+				else
 				{
 					property_struct = structNew();
 					structInsert(property_struct, "metadata", propertiesRef_arr[i]);
 					structInsert(property_struct, "definedBy", componentName_str);
+					structInsert(property_struct, "override", false);
 					structInsert(allPropertiesRef_struct, propertyName_str, property_struct);
 				}
 			}

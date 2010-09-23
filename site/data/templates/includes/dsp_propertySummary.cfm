@@ -49,6 +49,9 @@
 							#localVar.propertySignature_str#
 						</div>
 						<div class="summaryTableDescription">
+							<cfif localVar.properties_struct.propertySummaryRows[localVar.row_num].override>
+								[override]
+							</cfif>
 							#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
 						</div>
 					</td>
@@ -74,6 +77,9 @@
 							#localVar.propertySignature_str#
 						</div>
 						<div class="summaryTableDescription">
+							<cfif localVar.properties_struct.propertySummaryRows[localVar.row_num].override>
+								[override]
+							</cfif>
 							#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
 						</div>
 					</td>

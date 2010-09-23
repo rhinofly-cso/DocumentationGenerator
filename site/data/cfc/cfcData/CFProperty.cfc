@@ -7,6 +7,7 @@
 component displayname="cfc.cfcData.CFProperty" extends="cfc.cfcData.CFMetadata" accessors="true" output="false"
 {
 	property name="type" type="string" hint="Variable type of the property.";
+	property name="default" type="any" hint="Default value of the type <i>type</i>.";
 	property name="serializable" type="boolean" hint="Indicates whether the property is serializable.";
 
 	property name="author" type="string" hint="Author of the component.";
