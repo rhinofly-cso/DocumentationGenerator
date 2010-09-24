@@ -7,6 +7,10 @@
 <cfloop from="1" to="#arrayLen(localVar.properties_struct.propertyDetailItems)#" index="localVar.row_num">
 	<cfset localVar.propertyMetadata_obj = localVar.properties_struct.propertyDetailItems[localVar.row_num].metadata />
 
+	<cfif isInstanceOf(localVar.propertyMetadata_obj, "cfc.cfcData.CFMapping")>
+		<cfset localVar.ormAttributes_arr = getMetadata(localVar.propertyMetadata_obj).properties />
+	</cfif>
+
 	<cfset localVar.propertyRelated_str = localVar.propertyMetadata_obj.getRelated() />
 	<cfset localVar.propertyType_str = localVar.propertyMetadata_obj.getType() />
 	<cfset localVar.propertyDefault = localVar.propertyMetadata_obj.getDefault() />
@@ -65,14 +69,38 @@
 					#localVar.propertyDefault#
 				</p>
 			</cfif>
+			<cfif isInstanceOf(localVar.propertyMetadata_obj, "cfc.cfcData.CFMapping")>
+				<p>
+					<span class="label">ORM attributes</span>
+					<ul class="paddedList">
+						<cfset localVar.ormStarted_bool = false />
+						<cfloop from="1" to="#arrayLen(localVar.ormAttributes_arr)#" index="localVar.row_num">
+							<cfset localVar.attributeName_str = localVar.ormAttributes_arr[localVar.row_num].name />
+							<cfinvoke component="#localVar.propertyMetadata_obj#" method="get#localVar.attributeName_str#" returnvariable="localVar.attributeValue" />
+							<cfif not isNull(localVar.attributeValue)>
+								<cfset localVar.ormStarted_bool = true />
+								<cfif localVar.attributeName_str eq "cfc">
+									<cfset localVar.attributeValue = model.rendering_obj.convertToLink(localVar.attributeValue, localVar.rootPath_str, false) />
+								</cfif>
+								<cfoutput>
+									<li><code>#localVar.attributeName_str#="#localVar.attributeValue#"</code></li>
+								</cfoutput>
+							</cfif>
+						</cfloop>
+						<cfif not localVar.ormStarted_bool>
+							<li>&lt;<i>none</i>&gt;</li>
+						</cfif>
+					</ul>
+				</p>
+			</cfif>
 			<cfif not isNull(localVar.propertyRelated_str)>
-				<cfset localVar.started_bool = false />
+				<cfset localVar.relatedStarted_bool = false />
 				<cfset localVar.relatedLinks_str = "" />
 				<cfloop list="#localVar.propertyRelated_str#" index="localVar.component_str">
-					<cfif localVar.started_bool>
+					<cfif localVar.relatedStarted_bool>
 						<cfset localVar.relatedLinks_str &= ", " />
 					<cfelse>
-						<cfset localVar.started_bool = true>
+						<cfset localVar.relatedStarted_bool = true>
 					</cfif>
 					<cfset localVar.relatedLinks_str &= model.rendering_obj.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true) />
 				</cfloop>

@@ -14,3 +14,11 @@
 	width: 10px;
 	text-align: right;
 }
+.plainList {
+	padding-left: 0;
+	list-style-type: none;
+}
+.paddedList {
+	padding-left: 20px;
+	list-style-type: none;
+}

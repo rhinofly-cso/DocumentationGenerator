@@ -132,6 +132,12 @@
 		<cfinclude template="./includes/dsp_propertySummary.cfm">
 	</div>
 </cfif>
+<cfif arrayLen(localVar.properties_struct.persistentPropertySummaryRows) gt 0 >
+	<a name="persistentPropertySummaryRows"></a>
+	<div class="summarySection">
+		<cfinclude template="./includes/dsp_persistentPropertySummary.cfm">
+	</div>
+</cfif>
 <cfif arrayLen(localVar.methods_struct.methodSummaryRows) gt 0>
 	<a name="methodSummary"></a>
 	<div class="summarySection">

@@ -30,7 +30,7 @@
 	</a>
 </h3>
 
-<ul>
+<ul class="plainList">
 	<cfoutput>
 		<cfloop list="#localVar.packages_str#" index="localVar.packageKey_str">
 			<li>

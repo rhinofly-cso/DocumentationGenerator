@@ -1,3 +1,4 @@
+<cfscript>
 /**
 	Contains the methods to populate a struct with metadata objects and assign their values.
 	
@@ -180,12 +181,28 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		Creates and returns a property metadata object from a struct.
 		
 		@propertyMetadata Metadata struct for a single property, obtained from a component metadata struct.
+		@persistent Indicates whether the property is defined by a persistent component.
 	*/
-	public cfc.cfcData.CFProperty function createPropertyObject(required struct propertyMetadata)
+	public cfc.cfcData.CFProperty function createPropertyObject(required struct propertyMetadata, boolean persistent=false)
 	{
-		var return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
+		var return_obj = "";
+		var persistent_bool = arguments.persistent; // the default value for property persistence is equal to that of the component
 		var propertyRef_struct = arguments.propertyMetadata;
-		
+
+		// check if the property persistence has a value other than the default value
+		if (structKeyExists(propertyRef_struct, "persistent"))
+		{
+			persistent_bool = propertyRef_struct.persistent;
+		}
+		if (persistent_bool)
+		{
+			return_obj = createObject("component", "cfc.cfcData.CFMapping").init();
+		}
+		else
+		{
+			return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
+		}
+
 		// the "type", "serializable", and "private" properties have default values
 		return_obj.setType("any");
 		return_obj.setSerializable(true);
@@ -230,6 +247,21 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		{
 			return_obj.setPrivate(propertyRef_struct.private);
 		}
+
+		// ORM-specific attributes
+		if (persistent_bool)
+		{
+			// the "fieldType" property has a default value
+			return_obj.setFieldType("column");
+
+			_resolveORMAttributes(propertyRef_struct, return_obj);
+
+			// the "type" property has a default value "array" instead of "any" for collections, as well as for one-to-many and many-to-many relationships
+			if (not structKeyExists(propertyRef_struct, "type") and listValueCountNoCase("collection,one-to-many,many-to-many", return_obj.getFieldType()))
+			{
+				return_obj.setType("array");
+			}
+		}
 		
 		return return_obj;
 	}
@@ -240,19 +272,26 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	private void function _resolveProperties(required struct metadata, required any metadataObject)
 	{
+		var persistent_bool = false;
 		var propertiesRef_arr = "";
 		var propertyObjs_arr = arrayNew(1);
 		var property_obj = "";
 		var i = 0;
 		var metadataRef_struct = arguments.metadata;
 		var metadataRef_obj = arguments.metadataObject;
-		
+
+		// determine persistence of the component
+		if (structKeyExists(metadataRef_struct, "persistent"))
+		{
+			persistent_bool = metadataRef_struct.persistent;
+		}
+
 		if (structKeyExists(metadataRef_struct, "properties"))
 		{
 			propertiesRef_arr = metadataRef_struct.properties;
 			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
 			{
-				property_obj = createPropertyObject(propertiesRef_arr[i]);
+				property_obj = createPropertyObject(propertiesRef_arr[i], persistent_bool);
 				_resolveHint(propertiesRef_arr[i], property_obj, metadataRef_struct.path);
 
 				arrayAppend(propertyObjs_arr, property_obj);
@@ -270,6 +309,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	public cfc.cfcData.CFC function createMetadataObject(required struct metadata, required struct library)
 	{
+		var persistent_bool = false;
 		var metadataRef_struct = arguments.metadata;
 		var libraryRef_struct = arguments.library;
 		var name_str = metadataRef_struct.name;
@@ -291,7 +331,18 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// determine the type and create the appropriate object
 		if (metadataRef_struct.type eq "component")
 		{
-			return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
+			if (structKeyExists(metadataRef_struct, "persistent"))
+			{
+				persistent_bool = metadataRef_struct.persistent;
+			}
+			if (persistent_bool)
+			{
+				return_obj = createObject("component", "cfc.cfcData.CFPersistentComponent").init();
+			}
+			else
+			{
+				return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
+			}
 			
 			// the "serializable" property has a default value for components
 			return_obj.setSerializable(true);
@@ -343,6 +394,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		_resolveInheritance(metadataRef_struct, return_obj, libraryRef_struct);
 		_resolveProperties(metadataRef_struct, return_obj);
 		_resolveFunctions(metadataRef_struct, return_obj);
+		if (persistent_bool)
+		{
+			_resolveORMAttributes(metadataRef_struct, return_obj);
+		}
 		
 		return return_obj;
 	}
@@ -884,4 +939,32 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// assignment of the remaining hint
 		metadataRef_obj.setHint(trim(parsedHint_str));
 	}
+	
+	/**
+		Assigns the values of ORM-specific attributes in the metadata struct to the metadata 
+		object. All property names of the metadata object are identical to the corresponding 
+		attributes.
+	*/
+	private void function _resolveORMAttributes(required struct metadata, required struct metadataObject)
+	{
+		var i = 0;
+		var attributeName_str = "";
+		var argumentCollection_struct = "";
+		var tagUtils_obj = createObject("component", "cfc.TagUtils");
+		var metadataRef_struct = arguments.metadata;
+		var metadataRef_obj = arguments.metadataObject;
+		var ormAttributes_arr = getMetadata(metadataRef_obj).properties;
+		
+		for (i = 1; i <= arrayLen(ormAttributes_arr); i++)
+		{
+			attributeName_str = ormAttributes_arr[i].name;
+			if (structKeyExists(metadataRef_struct, attributeName_str))
+			{
+				argumentCollection_struct = structNew();
+				structInsert(argumentCollection_struct, attributeName_str, metadataRef_struct[attributeName_str]);
+				tagUtils_obj.invokeMethod(metadataRef_obj, "set" & attributeName_str, argumentCollection_struct);
+			}
+		}
+	}
 }
+</cfscript>

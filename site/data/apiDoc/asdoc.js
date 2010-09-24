@@ -24,6 +24,8 @@ function isEclipse() {
 }
 function configPage() {
     setRowColorsInitial(true, "Property");
+    setRowColorsInitial(true, "persistentProperty");
+    setRowColorsInitial(true, "protectedProperty");
     setRowColorsInitial(true, "Method");
     setRowColorsInitial(true, "RemoteMethod");   
     setRowColorsInitial(true, "ProtectedMethod");   
@@ -199,6 +201,7 @@ function showHideInherited()
     setInheritedVisible(getCookie("showInheritedConstant") == "true", "Constant");
     setInheritedVisible(getCookie("showInheritedProtectedConstant") == "true", "ProtectedConstant");
     setInheritedVisible(getCookie("showInheritedProperty") == "true", "Property");
+    setInheritedVisible(getCookie("showInheritedPersistentProperty") == "true", "PersistentProperty");
     setInheritedVisible(getCookie("showInheritedProtectedProperty") == "true", "ProtectedProperty");
     setInheritedVisible(getCookie("showInheritedMethod") == "true", "Method");
     setInheritedVisible(getCookie("showInheritedRemoteMethod") == "true", "RemoteMethod");

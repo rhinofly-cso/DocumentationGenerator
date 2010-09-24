@@ -91,55 +91,46 @@
 			<cfif arrayLen(localVar.parameters_arr) gt 0>
 				<p>
 					<span class="label">Parameters</span>
-					<table cellpadding="0" cellspacing="0" border="0">
+					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
 							<cfset localVar.argumentHint_str = model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
-							<tr>
-								<td width="20px"></td>
-								<td>
-									<code>#localVar.parameters_arr[localVar.param_num].getType()# #localVar.parameters_arr[localVar.param_num].getName()#</code>
-									<cfif len(localVar.argumentHint_str) gt 0>
-										&mdash; #localVar.argumentHint_str#
-									</cfif>
-								</td>
-							</tr>
+							<li>
+								<code>#localVar.parameters_arr[localVar.param_num].getType()# #localVar.parameters_arr[localVar.param_num].getName()#</code>
+								<cfif len(localVar.argumentHint_str) gt 0>
+									&mdash; #localVar.argumentHint_str#
+								</cfif>
+							</li>
 						</cfloop>
-					</table>
+					</ul>
 				</p>
 			</cfif>
 			<cfif localVar.methodReturnType_str neq "void">
 				<p>
 					<span class="label">Returns</span>
-					<table cellpadding="0" cellspacing="0" border="0">
-						<tr>
-							<td width="20px"></td>
-							<td>
-								<code>#model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true)#</code>
-								<cfif len(localVar.methodReturnHint_str) gt 0>
-									&mdash; #localVar.methodReturnHint_str#
-								</cfif>
-							</td>
-						</tr>
-					</table>
+					<ul class="paddedList">
+						<li>
+							<code>#model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true)#</code>
+							<cfif len(localVar.methodReturnHint_str) gt 0>
+								&mdash; #localVar.methodReturnHint_str#
+							</cfif>
+						</li>
+					</ul>
 				</p>
 			</cfif>
 			<cfif not isNull(localVar.methodThrows_arr)>
 				<p>
 					<span class="label">Throws</span>
-					<table cellpadding="0" cellspacing="0" border="0">
+					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.methodThrows_arr)#" index="localVar.throws_num">
 							<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
-							<tr>
-								<td width="20px"></td>
-								<td>
-									<code>#localVar.methodThrows_arr[localVar.throws_num].getName()#</code>
-									<cfif len(localVar.throwsHint_str) gt 0>
-										&mdash; #localVar.throwsHint_str#
-									</cfif>
-								</td>
-							</tr>
+							<li>
+								<code>#localVar.methodThrows_arr[localVar.throws_num].getName()#</code>
+								<cfif len(localVar.throwsHint_str) gt 0>
+									&mdash; #localVar.throwsHint_str#
+								</cfif>
+							</li>
 						</cfloop>
-					</table>
+					</ul>
 				</p>
 			</cfif>
 			<cfif not isNull(localVar.methodRelated_str)>

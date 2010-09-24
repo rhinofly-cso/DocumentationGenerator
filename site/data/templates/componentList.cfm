@@ -37,7 +37,7 @@
 		<a href="package-detail.html##interfaceSummary" style="color:black">
 			<b>Interfaces</b>
 		</a>
-		<ul>
+		<ul class="plainList">
 			<cfloop from="1" to="#arrayLen(model.interfaces_arr)#" index="localVar.row_num">
 				<li>
 					#model.rendering_obj.convertToLink(model.interfaces_arr[localVar.row_num].getName(), "", true, false, true)#
@@ -50,7 +50,7 @@
 		<a href="package-detail.html##componentSummary" style="color:black">
 			<b>Components</b>
 		</a>
-		<ul>
+		<ul class="plainList">
 			<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
 				<li>
 					#model.rendering_obj.convertToLink(model.components_arr[localVar.row_num].getName(), "", true, false, true)#

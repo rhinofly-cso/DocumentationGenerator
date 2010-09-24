@@ -26,6 +26,10 @@
 
 <cfset localVar.extendsLinks_str = "" />
 
+<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFPersistentComponent")>
+	<cfset localVar.ormAttributes_arr = getMetadata(model.cfMetadata_obj).properties />
+</cfif>
+
 <!--- append the component description with inheritance info for interfaces --->
 <cfif localVar.type_str eq "Interface" and not isNull(localVar.extends_str)>
 	<cfset localVar.started_bool = false />
@@ -185,6 +189,32 @@
 				</td>
 			</tr>
 		</cfif>
+	</cfif>
+	
+	<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFPersistentComponent")>
+		<tr>
+			<td class="classHeaderTableLabel">
+				ORM attributes
+			</td>
+			<td>
+				<ul class="plainList">
+					<cfset localVar.started_bool = false />
+					<cfloop from="1" to="#arrayLen(localVar.ormAttributes_arr)#" index="localVar.row_num">
+						<cfset localVar.attributeName_str = localVar.ormAttributes_arr[localVar.row_num].name />
+						<cfinvoke component="#model.cfMetadata_obj#" method="get#localVar.attributeName_str#" returnvariable="localVar.attributeValue" />
+						<cfif not isNull(localVar.attributeValue)>
+							<cfset localVar.started_bool = true />
+							<cfoutput>
+								<li><code>#localVar.attributeName_str#="#localVar.attributeValue#"</code></li>
+							</cfoutput>
+						</cfif>
+					</cfloop>
+					<cfif not localVar.started_bool>
+						<li>&lt;<i>none</i>&gt;</li>
+					</cfif>
+				</ul>
+			</td>
+		</tr>
 	</cfif>
 	
 	<cfif not isNull(localVar.author_str)>

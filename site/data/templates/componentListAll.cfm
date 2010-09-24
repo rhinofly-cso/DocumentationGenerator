@@ -23,7 +23,7 @@
 	</a>
 </h3>
 
-<ul>
+<ul class="plainList">
 	<cfoutput>
 		<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
 			<cfset localVar.componentName_str = model.components_arr[localVar.row_num].getName() />

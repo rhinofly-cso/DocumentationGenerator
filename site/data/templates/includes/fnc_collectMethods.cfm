@@ -1,7 +1,7 @@
 <cffunction name="collectMethods" returntype="struct" output="false" hint="
-	Collects the different methods for the summaries of public, remote, and private methods, as 
-	well as for the detail list of all ""local"" methods (i.e. non-inherited). Also adds method 
-	signatures to the method metadata structures.
+	Collects the different method metadata objects for the summaries of public, remote, and 
+	private methods, as well as for the detail list of all ""local"" (i.e. non-inherited) 
+	methods. Also adds method signatures to the method metadata structures.
 ">
 	<cfargument name="componentName" type="string" required="true" />
 	<cfargument name="methodArray" type="array" required="true" />

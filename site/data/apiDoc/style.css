@@ -242,6 +242,12 @@ html>body .summaryTable {
 .showInheritedProperty {
 	display: inline;
 }
+.hideInheritedPersistentProperty {
+	display: none;
+}
+.showInheritedPersistentProperty {
+	display: inline;
+}
 .hideInheritedProtectedProperty {
 	display: none;
 }
