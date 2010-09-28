@@ -205,7 +205,7 @@
 						<cfif not isNull(localVar.attributeValue)>
 							<cfset localVar.started_bool = true />
 							<cfoutput>
-								<li class="codeListItem"><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
+								<li><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
 							</cfoutput>
 						</cfif>
 					</cfloop>

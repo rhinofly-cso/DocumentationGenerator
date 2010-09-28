@@ -13,6 +13,7 @@
 .summaryTableTypeCol {
 	width: 10px;
 	text-align: right;
+	white-space: nowrap;
 }
 .plainList {
 	padding-left: 0;
@@ -28,10 +29,12 @@
 	white-space: nowrap;
 }
 .classHeaderCodeList {
-	top-margin: 5px;
+	margin-top: 1px;
 	padding-left: 0;
 	list-style-type: none;
 }
-.codeListItem {
+code {
+	font-family: "Lucida Console", "Courier New", Courier, monospace; 
+	font-size: 12px;
 	line-height: 150%;
 }

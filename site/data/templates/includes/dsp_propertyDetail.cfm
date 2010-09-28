@@ -83,7 +83,7 @@
 									<cfset localVar.attributeValue = model.rendering_obj.convertToLink(localVar.attributeValue, localVar.rootPath_str, false) />
 								</cfif>
 								<cfoutput>
-									<li class="codeListItem"><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
+									<li><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
 								</cfoutput>
 							</cfif>
 						</cfloop>
