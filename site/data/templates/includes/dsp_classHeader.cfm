@@ -197,7 +197,7 @@
 				ORM attributes
 			</td>
 			<td>
-				<ul class="plainList">
+				<ul class="classHeaderCodeList">
 					<cfset localVar.started_bool = false />
 					<cfloop from="1" to="#arrayLen(localVar.ormAttributes_arr)#" index="localVar.row_num">
 						<cfset localVar.attributeName_str = localVar.ormAttributes_arr[localVar.row_num].name />
@@ -205,7 +205,7 @@
 						<cfif not isNull(localVar.attributeValue)>
 							<cfset localVar.started_bool = true />
 							<cfoutput>
-								<li><code>#localVar.attributeName_str#="#localVar.attributeValue#"</code></li>
+								<li class="codeListItem"><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
 							</cfoutput>
 						</cfif>
 					</cfloop>
