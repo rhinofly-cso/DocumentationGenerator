@@ -8,7 +8,12 @@
 	<cfset localVar.methodMetadata_obj = localVar.methods_struct.methodDetailItems[localVar.row_num].metadata />
 
 	<cfset localVar.methodReturnType_str = localVar.methodMetadata_obj.getReturnType() />
-	<cfset localVar.methodReturnHint_str = model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "return") />
+	<cftry>
+		<cfset localVar.methodReturnHint_str = model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "return") />
+		<cfcatch type="any">
+			<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+		</cfcatch>
+	</cftry>
 	<cfset localVar.methodThrows_arr = localVar.methodMetadata_obj.getThrows() />
 	<cfset localVar.methodRelated_str = localVar.methodMetadata_obj.getRelated() />
 
@@ -85,15 +90,25 @@
 		</table>
 		<div class="detailBody">
 			<code>#localVar.methodSignature_str#</code>
-			<p>
-				#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str)#
-			</p>
+			<cftry>
+				<p>
+					#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str)#
+				</p>
+				<cfcatch type="any">
+					<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+				</cfcatch>
+			</cftry>
 			<cfif arrayLen(localVar.parameters_arr) gt 0>
 				<p>
 					<span class="label">Parameters</span>
 					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
-							<cfset localVar.argumentHint_str = model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+							<cftry>
+								<cfset localVar.argumentHint_str = model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 							<li>
 								<code>#localVar.parameters_arr[localVar.param_num].getType()# #localVar.parameters_arr[localVar.param_num].getName()#</code>
 								<cfif len(localVar.argumentHint_str) gt 0>
@@ -122,7 +137,12 @@
 					<span class="label">Throws</span>
 					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.methodThrows_arr)#" index="localVar.throws_num">
-							<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
+							<cftry>
+								<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 							<li>
 								<code>#localVar.methodThrows_arr[localVar.throws_num].getName()#</code>
 								<cfif len(localVar.throwsHint_str) gt 0>

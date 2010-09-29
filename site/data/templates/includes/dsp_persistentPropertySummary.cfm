@@ -52,7 +52,12 @@
 							<cfif localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+							<cftry>
+								#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
@@ -80,7 +85,12 @@
 							<cfif localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+							<cftry>
+								#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">

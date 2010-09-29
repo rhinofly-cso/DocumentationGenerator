@@ -134,7 +134,12 @@
 						#model.rendering_obj.convertToLink(model.interfaces_arr[localVar.row_num].getName(), "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
-						#model.rendering_obj.renderHint(model.interfaces_arr[localVar.row_num], localVar.rootPath_str, "short")#
+						<cftry>
+							#model.rendering_obj.renderHint(model.interfaces_arr[localVar.row_num], localVar.rootPath_str, "short")#
+							<cfcatch type="any">
+								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+							</cfcatch>
+						</cftry>
 					</td>
 				</tr>
 			</cfoutput>
@@ -182,7 +187,12 @@
 						#model.rendering_obj.convertToLink(model.components_arr[localVar.row_num].getName(), "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
-						#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], localVar.rootPath_str, "short")#
+						<cftry>
+							#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], localVar.rootPath_str, "short")#
+							<cfcatch type="any">
+								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+							</cfcatch>
+						</cftry>
 					</td>
 				</tr>
 			</cfoutput>

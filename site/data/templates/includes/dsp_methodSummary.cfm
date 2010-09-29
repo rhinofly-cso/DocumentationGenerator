@@ -34,7 +34,12 @@
 		<cfset localVar.parameters_arr = localVar.methodMetadata_obj.getParameters() />
 		<cfset localVar.paramStarted_bool = false />
 		<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
-			<cfset model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+			<cftry>
+				<cfset model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+				<cfcatch type="any">
+					<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+				</cfcatch>
+			</cftry>
 			<cfset localVar.argumentType_str = localVar.parameters_arr[localVar.param_num].getType() />
 			<cfset localVar.argumentDefault = localVar.parameters_arr[localVar.param_num].getDefault() />
 			<cfif localVar.paramStarted_bool>
@@ -99,7 +104,12 @@
 							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+							<cftry>
+								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
@@ -127,7 +137,12 @@
 							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
 								[override]
 							</cfif>
-							#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+							<cftry>
+								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								<cfcatch type="any">
+									<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+								</cfcatch>
+							</cftry>
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">

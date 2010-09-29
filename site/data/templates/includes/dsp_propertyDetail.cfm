@@ -55,9 +55,14 @@
 		</table>
 		<div class="detailBody">
 			<code>#localVar.propertySignature_str#</code>
-			<p>
-				#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str)#
-			</p>
+			<cftry>
+				<p>
+					#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str)#
+				</p>
+				<cfcatch type="any">
+					<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+				</cfcatch>
+			</cftry>
 			<cfif not localVar.propertyMetadata_obj.getSerializable()>
 				<p>
 					<span class="label">Not serializable</span>

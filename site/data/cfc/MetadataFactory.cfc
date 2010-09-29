@@ -456,7 +456,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// create an empty struct if there are components in the package
 		if (files_qry.recordCount > 0)
 		{
-			structInsert(packagesRef_struct, packageKey_str, structNew());
+			if (not structKeyExists(packagesRef_struct, packageKey_str))
+			{
+				structInsert(packagesRef_struct, packageKey_str, structNew());
+			}
 //			writeOutput("Reading metadata for package: " & packageKey_str & "<br />");
 //			getPageContext().getOut().flush();
 		}

@@ -79,9 +79,8 @@
 	
 	<div class="MainContent"><br />
 	<p>
-		Documentation for components includes syntax and usage information for methods and 
-		properties for those APIs that belong to a specific library. The components are 
-		listed alphabetically.
+		Documentation for classes includes syntax and usage information for methods and 
+		properties.
 	</p>
 
 	<table cellpadding="3" cellspacing="0" class="summaryTable">
@@ -90,7 +89,7 @@
 				&nbsp;
 			</th>
 			<th width="20%">
-				Component
+				Class
 			</th>
 			<th width="20%">
 				Package
@@ -122,7 +121,12 @@
 						#model.rendering_obj.packageLink(localVar.packageName_str)#
 					</td>
 					<td class="summaryTableLastCol">
-						#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], "", "short")#
+						<cftry>
+							#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], "", "short")#
+							<cfcatch type="any">
+								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
+							</cfcatch>
+						</cftry>
 					</td>
 				</tr>
 			</cfoutput>

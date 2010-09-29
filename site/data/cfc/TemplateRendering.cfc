@@ -215,6 +215,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		var hint_str = "";
 		var token_str = "";
 		var punctuationMarks_str = "";
+		var tagLength_num = 0;
 		var parsedHint_str = "";
 		var metadataRef_obj = arguments.metadataObject;
 		var libraryRef_struct = this.getLibrary();
@@ -260,10 +261,35 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 					token_str = getToken(hint_str, i);
 					// consider the fact that the link expression can be directly followed by one or more punctuation marks
 					punctuationMarks_str = "";
-					while (findOneOf("!?)}]>:;.,", right(token_str, 1)))
+					while (findOneOf("!?)}]>:;.,", right(token_str, 1)) or right(token_str, 3) eq "<br")
 					{
-						punctuationMarks_str = right(token_str, 1) & punctuationMarks_str;
-						token_str = removeChars(token_str, len(token_str), 1);
+						if (right(token_str, 1) eq ">")
+						{
+							// look for a line-break tag
+							tagLength_num = len(token_str) - reFind("<br[\/]?>", token_str) + 1;
+							if (tagLength_num > len(token_str))
+							{
+								tagLength_num = 1;
+							}
+							writeOutput("<p>Found token: ""#token_str#"".</p>");
+							writeOutput("<p>Found punctuation: ""#right(token_str, tagLength_num)#"".</p>");
+							punctuationMarks_str = right(token_str, tagLength_num) & punctuationMarks_str;
+							token_str = removeChars(token_str, len(token_str) - tagLength_num + 1, tagLength_num);
+						}
+						else
+						{
+							// or a line-break tag containing a space
+							if (right(token_str, 3) eq "<br")
+							{
+								punctuationMarks_str = "<br";
+								token_str = removeChars(token_str, len(token_str) - 2, 3);
+							}
+							else
+							{
+								punctuationMarks_str = right(token_str, 1) & punctuationMarks_str;
+								token_str = removeChars(token_str, len(token_str), 1);
+							}
+						}
 					}
 					token_str = convertToLink(token_str, arguments.rootPath);
 					token_str &= punctuationMarks_str;
