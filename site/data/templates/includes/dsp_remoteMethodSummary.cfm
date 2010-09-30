@@ -107,7 +107,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
+								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.methods_struct.remoteMethodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -140,7 +140,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, true)#
+								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.methods_struct.remoteMethodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>

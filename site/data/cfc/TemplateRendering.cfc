@@ -129,10 +129,13 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			{
 				if (listFirst(componentName_str, ".") eq "java")
 				{
+					// make sure the last name begins with an uppercase character
+					componentName_str = listSetAt(componentName_str, listLen(componentName_str, "."), replace(listLast(componentName_str, "."), left(listLast(componentName_str, "."), 1), UCase(left(listLast(componentName_str, "."), 1))), ".");
+					
 					componentLink_str = "<a href=""";
 					componentLink_str &= "http://download.oracle.com/javase/6/docs/api/";
 					componentLink_str &= replace(componentName_str, ".", "/", "all");
-					componentLink_str &= "/package-summary.html";
+					componentLink_str &= ".html";
 					if (len(link_str) > len(componentName_str))
 					{
 						componentLink_str &= removechars(link_str, 1, len(componentName_str));
