@@ -781,10 +781,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 					else
 					{
 						// get hint line
-						token_str = trim(token_str);
+						token_str = lTrim(token_str);
 						if (left(token_str, 1) eq "*")
 						{
-							token_str = trim(removeChars(token_str, 1, 1));
+							token_str = lTrim(removeChars(token_str, 1, 1));
 						}
 
 						// if we previously encountered @throws	or @see
@@ -847,7 +847,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 							if (not hintTag_bool)
 							{
 								parsedHint_str &= token_str;
-								parsedHint_str &= " ";
+								parsedHint_str &= chr(10);
 							}
 						}
 						i += 1;
@@ -870,10 +870,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				else
 				{
 					// get hint line
-					token_str = trim(token_str);
+					token_str = lTrim(token_str);
 					if (left(token_str, 1) eq "*")
 					{
-						token_str = trim(removeChars(token_str, 1, 1));
+						token_str = lTrim(removeChars(token_str, 1, 1));
 					}
 					
 					// parse hint line
@@ -931,7 +931,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 						if (not hintTag_bool)
 						{
 							parsedHint_str &= token_str;
-							parsedHint_str &= " ";
+							parsedHint_str &= chr(10);
 						}
 					}
 					i += 1;

@@ -210,8 +210,6 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	*/
 	public string function renderHint(required any metadataObject, string rootPath="", string type="full")
 	{
-		var i = 0;
-		var started_bool = false;
 		var hint_str = "";
 		var token_str = "";
 		var punctuationMarks_str = "";
@@ -236,73 +234,75 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			}
 		}
 
-		i = 1;
 		while (true)
 		{
-			token_str = getToken(hint_str, i);
+			// remove spaces and get token
+			hint_str = lTrim(hint_str);
+			token_str = getToken(hint_str, 1);
+			// if there is one, continue and remove it from the hint
 			if (len(token_str) eq 0)
 			{
 				break;
 			}
-			else
-			{
-				if (started_bool)
-				{
-					parsedHint_str &= " ";
-				}
-				else
-				{
-					started_bool = true;
-				}
+			hint_str = removeChars(hint_str, 1, len(token_str));
 
-				if (token_str eq "{@link}")
+			// remove @link tag and convert following token to hyperlink
+			if (token_str eq "{@link}")
+			{
+				hint_str = lTrim(hint_str);
+				token_str = getToken(hint_str, 1);
+				if (len(token_str) eq 0)
 				{
-					i += 1;
-					token_str = getToken(hint_str, i);
-					// consider the fact that the link expression can be directly followed by one or more punctuation marks
-					punctuationMarks_str = "";
-					while (findOneOf("!?)}]>:;.,", right(token_str, 1)) or right(token_str, 3) eq "<br")
+					break;
+				}
+				hint_str = removeChars(hint_str, 1, len(token_str));
+
+				// consider the fact that the link expression can be directly followed by one or more punctuation marks
+				punctuationMarks_str = "";
+				while (findOneOf("!?)}]>:;.,", right(token_str, 1)) or right(token_str, 3) eq "<br")
+				{
+					if (right(token_str, 1) eq ">")
 					{
-						if (right(token_str, 1) eq ">")
+						// look for a line-break tag
+						tagLength_num = len(token_str) - reFind("<br[\/]?>", token_str) + 1;
+						if (tagLength_num > len(token_str))
 						{
-							// look for a line-break tag
-							tagLength_num = len(token_str) - reFind("<br[\/]?>", token_str) + 1;
-							if (tagLength_num > len(token_str))
-							{
-								tagLength_num = 1;
-							}
-							writeOutput("<p>Found token: ""#token_str#"".</p>");
-							writeOutput("<p>Found punctuation: ""#right(token_str, tagLength_num)#"".</p>");
-							punctuationMarks_str = right(token_str, tagLength_num) & punctuationMarks_str;
-							token_str = removeChars(token_str, len(token_str) - tagLength_num + 1, tagLength_num);
+							tagLength_num = 1;
+						}
+						punctuationMarks_str = right(token_str, tagLength_num) & punctuationMarks_str;
+						token_str = removeChars(token_str, len(token_str) - tagLength_num + 1, tagLength_num);
+					}
+					else
+					{
+						// or a line-break tag containing a space
+						if (right(token_str, 3) eq "<br")
+						{
+							punctuationMarks_str = "<br";
+							token_str = removeChars(token_str, len(token_str) - 2, 3);
 						}
 						else
 						{
-							// or a line-break tag containing a space
-							if (right(token_str, 3) eq "<br")
-							{
-								punctuationMarks_str = "<br";
-								token_str = removeChars(token_str, len(token_str) - 2, 3);
-							}
-							else
-							{
-								punctuationMarks_str = right(token_str, 1) & punctuationMarks_str;
-								token_str = removeChars(token_str, len(token_str), 1);
-							}
+							punctuationMarks_str = right(token_str, 1) & punctuationMarks_str;
+							token_str = removeChars(token_str, len(token_str), 1);
 						}
 					}
-					token_str = convertToLink(token_str, arguments.rootPath);
-					token_str &= punctuationMarks_str;
 				}
-				else
+				token_str = convertToLink(token_str, arguments.rootPath);
+				token_str &= punctuationMarks_str;
+			}
+			else
+			{
+				if (reFind("@link{.*}", token_str))
 				{
-					if (reFind("@link{.*}", token_str))
-					{
-						throw(message="Error: incorrect usage of the @link tag in the hint of #metadataRef_obj.getName()#.");
-					}
+					throw(message="Error: incorrect usage of the @link tag in the hint of #metadataRef_obj.getName()#.");
 				}
-				parsedHint_str &= token_str;
-				i += 1;
+			}
+
+			parsedHint_str &= token_str;
+			// if there are any characters left in the hint, we append the first one (a space character) to the parsed hint
+			if (len(hint_str) > 0)
+			{
+				parsedHint_str &= left(hint_str, 1);
 			}
 		}
 		return parsedHint_str;
