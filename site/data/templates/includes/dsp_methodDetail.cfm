@@ -110,7 +110,7 @@
 								</cfcatch>
 							</cftry>
 							<li>
-								<code>#localVar.parameters_arr[localVar.param_num].getType()# #localVar.parameters_arr[localVar.param_num].getName()#</code>
+								<code>#model.rendering_obj.convertToLink(localVar.parameters_arr[localVar.param_num].getType(), localVar.rootPath_str, true)# #localVar.parameters_arr[localVar.param_num].getName()#</code>
 								<cfif len(localVar.argumentHint_str) gt 0>
 									&mdash; #localVar.argumentHint_str#
 								</cfif>

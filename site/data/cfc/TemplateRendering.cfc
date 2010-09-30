@@ -11,17 +11,30 @@
 component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="true" output="false"
 {
 	/**
-		Structure containing component metadata objects for all components in the library.
+		Sets values of the component variable scope, for performing quick searches.
 		
 		@see cfc.cfcData.CFMetadata
+		
+		@library Structure containing component metadata objects for all components in the library.
 	*/
-	property struct library;
-	
-	/**
-		List of the library struct keys, converted to last name by removing the package name.
-	*/
-	property string lastNameList;
+	public cfc.TemplateRendering function init(required struct library)
+	{
+		var i = 0;
+		var libraryList_str = "";
 
+		variables._libraryRef_struct = arguments.library;
+
+		// make a list of the last names of all components for performing quick searches
+		libraryList_str = structKeyList(variables._libraryRef_struct);
+		for (i = 1; i <= listLen(libraryList_str); i++)
+		{
+			libraryList_str = listSetAt(libraryList_str, i, listLast(listGetAt(libraryList_str, i), "."));
+		}
+		variables._lastNameList_str = libraryList_str;
+		
+		return this;
+	}
+	
 	/**
 		Converts a piece of string to a hyperlink, or text, depending whether such a link 
 		would lead somewhere.
@@ -42,8 +55,6 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		var typeArray_bool = false;
 		var componentPageExists_bool = false;
 		var link_str = arguments.link;
-		var libraryRef_struct = this.getLibrary();
-		var lastNameList_str = this.getLastNameList();
 
 		if (left(link_str, 7) eq "http://")
 		{
@@ -64,15 +75,15 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			}
 
 			// check whether the component name can be determined uniquely from its last name
-			if (listValueCount(lastNameList_str, componentName_str) eq 1)
+			if (listValueCount(variables._lastNameList_str, componentName_str) eq 1)
 			{
-				libraryList_str = structKeyList(libraryRef_struct);
-				componentName_str = listGetAt(libraryList_str, listFind(lastNameList_str, componentName_str));
+				libraryList_str = structKeyList(variables._libraryRef_struct);
+				componentName_str = listGetAt(libraryList_str, listFind(variables._lastNameList_str, componentName_str));
 			}
 			
-			if (structKeyExists(libraryRef_struct, componentName_str))
+			if (structKeyExists(variables._libraryRef_struct, componentName_str))
 			{
-				if (not libraryRef_struct[componentName_str].getPrivate())
+				if (not variables._libraryRef_struct[componentName_str].getPrivate())
 				{
 					componentPageExists_bool = true;
 				}
@@ -119,7 +130,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 				{
 					componentLink_str &= "[]";
 				}
-				if (componentLastName and isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFInterface"))
+				if (arguments.componentLastName and isInstanceOf(variables._libraryRef_struct[componentName_str], "cfc.cfcData.CFInterface"))
 				{
 					componentLink_str = "<i>" & componentLink_str & "</i>";
 				}
@@ -219,7 +230,6 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 		var tagLength_num = 0;
 		var parsedHint_str = "";
 		var metadataRef_obj = arguments.metadataObject;
-		var libraryRef_struct = this.getLibrary();
 		
 		if (arguments.type eq "short")
 		{
