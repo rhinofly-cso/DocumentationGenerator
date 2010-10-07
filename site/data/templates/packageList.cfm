@@ -5,7 +5,7 @@
 	then given by this collective path name.
 	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
  --->
-<cfset localVar.packages_str = listSort(structKeyList(model.packages_struct), "textnocase") />
+<cfset localVar.packages_str = listSort(structKeyList(model.packages), "textnocase") />
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
@@ -34,7 +34,7 @@
 	<cfoutput>
 		<cfloop list="#localVar.packages_str#" index="localVar.packageKey_str">
 			<li>
-				#model.rendering_obj.packageLink(localVar.packageKey_str)#
+				#model.rendering.packageLink(localVar.packageKey_str)#
 			</li>
 		</cfloop>
 	</cfoutput>

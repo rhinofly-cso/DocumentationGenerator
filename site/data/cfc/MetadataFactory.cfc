@@ -5,6 +5,7 @@
 	@author Eelco Eggen
 	@date 18 August 2010
 */
+//TODO nieuwe class afsplitsen (hintResolver)
 component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 {
 	/**
@@ -409,11 +410,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		names.
 		
 		@path Directory to be read.
-		@customTagPath Root directory of the library.
+		@sourcePath Root directory of the library.
 		@library Library struct into which this function inserts component metadata objects.
 		@packages Structure into which this function inserts package content structs.
 	*/
-	public void function browseDirectory(required string path, required string customTagPath, required struct library, required struct packages)
+	public void function browseDirectory(required string path, required string sourcePath, required struct library, required struct packages)
 	{
 		var i = 0;
 		var files_qry = "";
@@ -425,12 +426,12 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		var metadata_struct = "";
 		var metadata_obj = "";
 		var path_str = arguments.path;
-		var customTagPath_str = arguments.customTagPath;
+		var sourcePath_str = arguments.sourcePath;
 		var libraryRef_struct = arguments.library;
 		var packagesRef_struct = arguments.packages;
 
 		// set the package name
-		packageName_str = removeChars(path_str, 1, len(customTagPath_str));
+		packageName_str = removeChars(path_str, 1, len(sourcePath_str));
 		packageName_str = reReplace(packageName_str, "[/\\]+", ".", "all");
 		if (left(packageName_str, 1) eq ".")
 		{
@@ -454,14 +455,9 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		// retrieve the filenames of all components
 		files_qry = directoryList(path_str, false, "query", "*.cfc");
 		// create an empty struct if there are components in the package
-		if (files_qry.recordCount > 0)
+		if (files_qry.recordCount > 0 and !structKeyExists(packagesRef_struct, packageKey_str))
 		{
-			if (not structKeyExists(packagesRef_struct, packageKey_str))
-			{
-				structInsert(packagesRef_struct, packageKey_str, structNew());
-			}
-//			writeOutput("Reading metadata for package: " & packageKey_str & "<br />");
-//			getPageContext().getOut().flush();
+			structInsert(packagesRef_struct, packageKey_str, structNew());
 		}
 		// for each component
 		for (i = 1; i <= files_qry.recordCount; i++)
@@ -511,7 +507,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				directoryPath_str = path_str;
 				directoryPath_str &= "/";
 				directoryPath_str &= dirs_qry.name[i];
-				browseDirectory(directoryPath_str, customTagPath_str, libraryRef_struct, packagesRef_struct);
+				browseDirectory(directoryPath_str, sourcePath_str, libraryRef_struct, packagesRef_struct);
 			}
 		}		
 	}
@@ -672,9 +668,16 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		}
 		if (structKeyExists(metadataRef_struct, "description"))
 		{
+			if (len(hint_str))
+			{
+				hint_str &= chr(10);
+			}
 			hint_str &= metadataRef_struct.description;
 		}
 
+		//Check if throws or see exists, if they do we have incorrect hint metadata
+		//TODO comment over het verschil tussen hoe coldfusion cfscript en tags behandelt
+		//TODO, de twee verschillende manieren in losse functies zetten
 		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
 		{
 			// determine type and matching search string
@@ -723,7 +726,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 			
 			// we have a hint to parse from CFScript code, which must be isolated by applying the search string
-			file_str = FileRead(arguments.path);
+			file_str = fileRead(arguments.path);
 			defStart_num = 1;
 
 			do
@@ -741,6 +744,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 					default:
 						comment_str = trim(left(file_str, defStart_num - 1));
 						reverse_str = reverse(comment_str);
+						//find the end of the comment
 						endFromLast_num = find("/*", reverse_str);
 				}
 
@@ -764,6 +768,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			
 			if (commentFound_bool)
 			{
+				//find begin
 				beginFromLast_num = find("**/", reverse_str);
 				comment_str = right(comment_str, beginFromLast_num - 1);
 				comment_str = left(comment_str, beginFromLast_num - endFromLast_num - 2);

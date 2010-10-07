@@ -4,7 +4,8 @@
 <cfset library_struct = structNew() />
 <cfset packages_struct = structNew() />
 
-<cfloop list="#application.customTagPaths#" index="libraryPath_str">
+<!-- TODO set the browseDirectory and generateDocumentation methods as first methods in their components -->
+<cfloop list="#application.sourcePaths#" index="libraryPath_str">
 	<cfset factory_obj.browseDirectory(libraryPath_str, libraryPath_str, library_struct, packages_struct) />
 </cfloop>
 

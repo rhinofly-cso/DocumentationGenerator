@@ -37,7 +37,7 @@
 		<cfset localVar.paramStarted_bool = false />
 		<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
 			<cftry>
-				<cfset model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+				<cfset model.rendering.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
 				<cfcatch type="any">
 					<cfthrow message="Please review the comments in component #localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 				</cfcatch>
@@ -52,7 +52,7 @@
 			<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
 				<cfset localVar.methodSignature_str &= "required " />
 			</cfif>
-			<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
+			<cfset localVar.methodSignature_str &= model.rendering.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
 			<cfset localVar.methodSignature_str &= " " />
 			<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
 			<cfif not isNull(localVar.argumentDefault)>
@@ -95,7 +95,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+							#model.rendering.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -107,7 +107,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								#model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -128,7 +128,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering_obj.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+							#model.rendering.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -140,7 +140,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								#model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -148,7 +148,7 @@
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#model.rendering_obj.convertToLink(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
+						#model.rendering.convertToLink(localVar.methods_struct.protectedMethodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

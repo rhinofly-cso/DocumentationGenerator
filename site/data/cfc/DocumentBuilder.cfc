@@ -1,3 +1,4 @@
+<cfscript>
 /**
 	Contains the methods to create documentation pages from a struct of metadata objects.
 	
@@ -326,15 +327,14 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var libraryRef_struct = arguments.library;
 		
 		// initialize a number of variables in the model scope, which is used in the templates
-		structInsert(model, "interfaces_arr", arrayNew(1));
-		structInsert(model, "components_arr", arrayNew(1));
-		structInsert(model, "cfMetadata_obj", "");
-		structInsert(model, "properties_arr", "");
-		structInsert(model, "methods_arr", "");
-		structInsert(model, "packageName_str", "");
-		structInsert(model, "libraryRef_struct", libraryRef_struct);
-		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
-		model.rendering_obj.init(libraryRef_struct);
+		structInsert(model, "interfaces", arrayNew(1));
+		structInsert(model, "components", arrayNew(1));
+		structInsert(model, "cfMetadata", "");
+		structInsert(model, "properties", "");
+		structInsert(model, "methods", "");
+		structInsert(model, "packageName", "");
+		structInsert(model, "library", libraryRef_struct);
+		structInsert(model, "rendering", new cfc.TemplateRendering(libraryRef_struct));
 
 		// set the correct path to the package documentation directory
 		packagePath_str = reReplace(arguments.documentRoot, "[/\\]+", "/", "all");
@@ -345,7 +345,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		// check if the package is Top Level
 		if (packageKey_str neq "_topLevel")
 		{
-			model.packageName_str = packageKey_str;
+			model.packageName = packageKey_str;
 			packagePath_str &= replace(packageKey_str, ".", "/", "all");
 			packagePath_str &= "/";
 		}
@@ -358,15 +358,15 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		// generate interface pages
 		if (structKeyExists(packageRef_struct, "interface"))
 		{
-			model.interfaces_arr = componentArray(packageRef_struct.interface, libraryRef_struct);
+			model.interfaces = componentArray(packageRef_struct.interface, libraryRef_struct);
 			for (i = 1; i <= listLen(packageRef_struct.interface); i++)
 			{
 				componentName_str = listGetAt(packageRef_struct.interface, i);
-				model.cfMetadata_obj = libraryRef_struct[componentName_str];
-				if (not model.cfMetadata_obj.getPrivate())
+				model.cfMetadata = libraryRef_struct[componentName_str];
+				if (not model.cfMetadata.getPrivate())
 				{
-					model.properties_arr = arrayNew(1);
-					model.methods_arr = methodArray(componentName_str, libraryRef_struct);
+					model.properties = arrayNew(1);
+					model.methods = methodArray(componentName_str, libraryRef_struct);
 					savecontent variable="page_str"
 					{
 						include "/templates/componentDetail.cfm";
@@ -382,15 +382,15 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		// generate component pages
 		if (structKeyExists(packageRef_struct, "component"))
 		{
-			model.components_arr = componentArray(packageRef_struct.component, libraryRef_struct);
+			model.components = componentArray(packageRef_struct.component, libraryRef_struct);
 			for (i = 1; i <= listLen(packageRef_struct.component); i++)
 			{
 				componentName_str = listGetAt(packageRef_struct.component, i);
-				model.cfMetadata_obj = libraryRef_struct[componentName_str];
-				if (not model.cfMetadata_obj.getPrivate())
+				model.cfMetadata = libraryRef_struct[componentName_str];
+				if (not model.cfMetadata.getPrivate())
 				{
-					model.properties_arr = propertyArray(componentName_str, libraryRef_struct);
-					model.methods_arr = methodArray(componentName_str, libraryRef_struct);
+					model.properties = propertyArray(componentName_str, libraryRef_struct);
+					model.methods = methodArray(componentName_str, libraryRef_struct);
 					savecontent variable="page_str"
 					{
 						include "/templates/componentDetail.cfm";
@@ -443,12 +443,10 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var libraryRef_struct = arguments.library;
 		
 		// initialize a number of variables in the model scope
-		structInsert(model, "packages_struct", packages_struct);
-		structInsert(model, "libraryRef_struct", libraryRef_struct);
-		structInsert(model, "rendering_obj", createObject("component", "cfc.TemplateRendering"));
-		model.rendering_obj.init(libraryRef_struct);
-		
-		structInsert(model, "components_arr", componentArray(structKeyList(libraryRef_struct), libraryRef_struct));
+		structInsert(model, "packages", packages_struct);
+		structInsert(model, "libraryRef", libraryRef_struct);
+		structInsert(model, "rendering", new cfc.TemplateRendering(libraryRef_struct));
+		structInsert(model, "components", componentArray(structKeyList(libraryRef_struct), libraryRef_struct));
 
 		// set the correct source directory for the basic files
 		apiDocSource_str = reReplace(getBaseTemplatePath(), "[/\\]+", "/", "all");
@@ -466,8 +464,6 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		for (i = 1; i <= listLen(packageList_str); i++)
 		{
 			packageKey_str = listGetAt(packageList_str, i);
-//			writeOutput("Writing documentation for package: " & packageKey_str & "<br />");
-//			getPageContext().getOut().flush();
 			writePackageDocumentation(packageKey_str, documentRoot_str, packages_struct, libraryRef_struct);
 		}
 
@@ -551,3 +547,4 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		}
 	}
 }
+</cfscript>

@@ -16,19 +16,22 @@
 <cfif not isDefined("collectMethods")>
 	<cfinclude template="./includes/fnc_collectMethods.cfm" />
 </cfif>
+<cfif not isDefined("renderLink")>
+	<cfinclude template="./includes/fnc_renderLink.cfm" />
+</cfif>
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
-<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFInterface")>
+<cfif isInstanceOf(model.cfMetadata, "cfc.cfcData.CFInterface")>
 	<cfset localVar.type_str = "Interface" />
-<cfelseif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFComponent")>
+<cfelseif isInstanceOf(model.cfMetadata, "cfc.cfcData.CFComponent")>
 	<cfset localVar.type_str = "Component" />
 <cfelse>
-	<cfthrow message="Error: unknown component type #getMetadata(model.cfMetadata_obj).name#.">
+	<cfthrow message="Error: unknown component type #getMetadata(model.cfMetadata).name#.">
 </cfif>
 
-<cfset localVar.componentName_str = model.cfMetadata_obj.getName() />
+<cfset localVar.componentName_str = model.cfMetadata.getName() />
 <cfset localVar.componentPage_str = replace(localVar.componentName_str, ".", "/", "all") & ".html" />
 <cfset localVar.packageName_str = listDeleteAt(localVar.componentName_str, listLen(localVar.componentName_str, "."), ".") />
 <cfset localVar.packagePath_str = replace(localVar.packageName_str, ".", "/", "all") & "/" />
@@ -39,11 +42,11 @@
 	<cfset local.displayName_str = "Top Level" />
 <cfelse>
 	<cfset localVar.rootPath_str = repeatString("../", listLen(localVar.packageName_str, ".")) />
-	<cfset local.displayName_str = model.packageName_str />
+	<cfset local.displayName_str = model.packageName />
 </cfif>
 
-<cfset localVar.properties_struct = collectProperties(localVar.componentName_str, model.properties_arr, model.rendering_obj) />
-<cfset localVar.methods_struct = collectMethods(localVar.componentName_str, model.methods_arr, model.rendering_obj) />
+<cfset localVar.properties_struct = collectProperties(localVar.componentName_str, model.properties, model.rendering) />
+<cfset localVar.methods_struct = collectMethods(localVar.componentName_str, model.methods, model.rendering) />
 
 <head>
 <cfoutput>

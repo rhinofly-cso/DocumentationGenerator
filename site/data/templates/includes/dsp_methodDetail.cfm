@@ -3,13 +3,13 @@
 </div>
 
 <cfset localVar.started_bool = false />
-
+//TODO move logic into a method as with fnc_collectMnethods.cfm
 <cfloop from="1" to="#arrayLen(localVar.methods_struct.methodDetailItems)#" index="localVar.row_num">
 	<cfset localVar.methodMetadata_obj = localVar.methods_struct.methodDetailItems[localVar.row_num].metadata />
 
 	<cfset localVar.methodReturnType_str = localVar.methodMetadata_obj.getReturnType() />
 	<cftry>
-		<cfset localVar.methodReturnHint_str = model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "return") />
+		<cfset localVar.methodReturnHint_str = model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "return") />
 		<cfcatch type="any">
 			<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 		</cfcatch>
@@ -19,7 +19,7 @@
 
 	<cfset localVar.methodSignature_str = localVar.methodMetadata_obj.getAccess() />
 	<cfset localVar.methodSignature_str &= " " />
-	<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true) />
+	<cfset localVar.methodSignature_str &= model.rendering.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true) />
 	<cfif localVar.methods_struct.methodDetailItems[localVar.row_num].override>
 		<cfset localVar.methodSignature_str &= " override" />
 	</cfif>
@@ -40,7 +40,7 @@
 		<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
 			<cfset localVar.methodSignature_str &= "required " />
 		</cfif>
-		<cfset localVar.methodSignature_str &= model.rendering_obj.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
+		<cfset localVar.methodSignature_str &= model.rendering.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
 		<cfset localVar.methodSignature_str &= " " />
 		<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
 		<cfif not isNull(localVar.argumentDefault)>
@@ -92,7 +92,7 @@
 			<code>#localVar.methodSignature_str#</code>
 			<cftry>
 				<p>
-					#model.rendering_obj.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str)#
+					#model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str)#
 				</p>
 				<cfcatch type="any">
 					<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
@@ -104,13 +104,13 @@
 					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
 							<cftry>
-								<cfset localVar.argumentHint_str = model.rendering_obj.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+								<cfset localVar.argumentHint_str = model.rendering.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 								</cfcatch>
 							</cftry>
 							<li>
-								<code>#model.rendering_obj.convertToLink(localVar.parameters_arr[localVar.param_num].getType(), localVar.rootPath_str, true)# #localVar.parameters_arr[localVar.param_num].getName()#</code>
+								<code>#model.rendering.convertToLink(localVar.parameters_arr[localVar.param_num].getType(), localVar.rootPath_str, true)# #localVar.parameters_arr[localVar.param_num].getName()#</code>
 								<cfif len(localVar.argumentHint_str) gt 0>
 									&mdash; #localVar.argumentHint_str#
 								</cfif>
@@ -124,7 +124,7 @@
 					<span class="label">Returns</span>
 					<ul class="paddedList">
 						<li>
-							<code>#model.rendering_obj.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true)#</code>
+							<code>#model.rendering.convertToLink(localVar.methodReturnType_str, localVar.rootPath_str, true)#</code>
 							<cfif len(localVar.methodReturnHint_str) gt 0>
 								&mdash; #localVar.methodReturnHint_str#
 							</cfif>
@@ -138,7 +138,7 @@
 					<ul class="paddedList">
 						<cfloop from="1" to="#arrayLen(localVar.methodThrows_arr)#" index="localVar.throws_num">
 							<cftry>
-								<cfset localVar.throwsHint_str = model.rendering_obj.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
+								<cfset localVar.throwsHint_str = model.rendering.renderHint(localVar.methodThrows_arr[localVar.throws_num], localVar.rootPath_str) />
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -157,7 +157,7 @@
 				<cfset localVar.relatedStarted_bool = false />
 				<cfset localVar.relatedLinks_str = "" />
 				<cfloop list="#localVar.methodRelated_str#" index="localVar.component_str">
-					<cfset localVar.methodRelated_str = model.rendering_obj.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
+					<cfset localVar.methodRelated_str = model.rendering.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
 					<cfif not isNull(localVar.methodRelated_str)>
 						<cfif localVar.relatedStarted_bool>
 							<cfset localVar.relatedLinks_str &= ", " />

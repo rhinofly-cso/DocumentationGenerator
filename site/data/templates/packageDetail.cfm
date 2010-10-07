@@ -9,14 +9,14 @@
 <html>
 
 
-<cfif len(model.packageName_str) eq 0>
+<cfif len(model.packageName) eq 0>
 	<cfset localVar.packagePath_str = "" />
 	<cfset localVar.rootPath_str = "" />
 	<cfset local.displayName_str = "Top Level" />
 <cfelse>
-	<cfset localVar.packagePath_str = replace(model.packageName_str, ".", "/", "all") & "/" />
-	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageName_str, ".")) />
-	<cfset local.displayName_str = model.packageName_str />
+	<cfset localVar.packagePath_str = replace(model.packageName, ".", "/", "all") & "/" />
+	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageName, ".")) />
+	<cfset local.displayName_str = model.packageName />
 </cfif>
 
 <cfoutput>
@@ -98,7 +98,7 @@
 	
 <div class="MainContent">
 
-<cfif arrayLen(model.interfaces_arr) gt 0>
+<cfif arrayLen(model.interfaces) gt 0>
 	<a name="interfaceSummary"></a>
 	<div class="summaryTableTitle">
 		Interfaces
@@ -119,7 +119,7 @@
 
 		<cfset localVar.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="#arrayLen(model.interfaces_arr)#" index="localVar.row_num">
+		<cfloop from="1" to="#arrayLen(model.interfaces)#" index="localVar.row_num">
 			<cfif localVar.rowOdd_num>
 				<cfset localVar.rowOdd_num = 0 />
 			<cfelse>
@@ -131,11 +131,11 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering_obj.convertToLink(model.interfaces_arr[localVar.row_num].getName(), "", true, false, true)#
+						#model.rendering.convertToLink(model.interfaces[localVar.row_num].getName(), "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						<cftry>
-							#model.rendering_obj.renderHint(model.interfaces_arr[localVar.row_num], localVar.rootPath_str, "short")#
+							#model.rendering.renderHint(model.interfaces[localVar.row_num], localVar.rootPath_str, "short")#
 							<cfcatch type="any">
 								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 							</cfcatch>
@@ -146,12 +146,12 @@
 		</cfloop>
 	</table>
 
-	<cfif arrayLen(model.components_arr) gt 0>
+	<cfif arrayLen(model.components) gt 0>
 		<br />
 	</cfif>
 </cfif>
 
-<cfif arrayLen(model.components_arr) gt 0>
+<cfif arrayLen(model.components) gt 0>
 	<a name="componentSummary"></a>
 	<div class="summaryTableTitle">
 		Components
@@ -172,7 +172,7 @@
 
 		<cfset localVar.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
+		<cfloop from="1" to="#arrayLen(model.components)#" index="localVar.row_num">
 			<cfif localVar.rowOdd_num>
 				<cfset localVar.rowOdd_num = 0 />
 			<cfelse>
@@ -184,11 +184,11 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering_obj.convertToLink(model.components_arr[localVar.row_num].getName(), "", true, false, true)#
+						#model.rendering.convertToLink(model.components[localVar.row_num].getName(), "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						<cftry>
-							#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], localVar.rootPath_str, "short")#
+							#model.rendering.renderHint(model.components[localVar.row_num], localVar.rootPath_str, "short")#
 							<cfcatch type="any">
 								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 							</cfcatch>

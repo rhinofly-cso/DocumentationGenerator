@@ -101,8 +101,8 @@
 
 		<cfset localVar.rowOdd_num = 0 />
 		
-		<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
-			<cfset localVar.componentName_str = model.components_arr[localVar.row_num].getName() />
+		<cfloop from="1" to="#arrayLen(model.components)#" index="localVar.row_num">
+			<cfset localVar.componentName_str = model.components[localVar.row_num].getName() />
 			<cfset localVar.packageName_str = listDeleteAt(localVar.componentName_str, listLen(localVar.componentName_str, "."), ".") />
 			<cfif localVar.rowOdd_num>
 				<cfset localVar.rowOdd_num = 0 />
@@ -115,14 +115,14 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering_obj.convertToLink(localVar.componentName_str, "", true)#
+						#model.rendering.convertToLink(localVar.componentName_str, "", true)#
 					</td>
 					<td class="summaryTableCol">
-						#model.rendering_obj.packageLink(localVar.packageName_str)#
+						#model.rendering.packageLink(localVar.packageName_str)#
 					</td>
 					<td class="summaryTableLastCol">
 						<cftry>
-							#model.rendering_obj.renderHint(model.components_arr[localVar.row_num], "", "short")#
+							#model.rendering.renderHint(model.components[localVar.row_num], "", "short")#
 							<cfcatch type="any">
 								<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 							</cfcatch>

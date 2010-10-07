@@ -41,7 +41,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering_obj.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+							#model.rendering.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -53,7 +53,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+								#model.rendering.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -74,7 +74,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering_obj.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+							#model.rendering.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -86,7 +86,7 @@
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering_obj.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
+								#model.rendering.renderHint(localVar.propertyMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
 									<cfthrow message="Please review the comments in component #localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
@@ -94,7 +94,7 @@
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#model.rendering_obj.convertToLink(localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
+						#model.rendering.convertToLink(localVar.properties_struct.propertySummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

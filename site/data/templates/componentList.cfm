@@ -9,12 +9,12 @@
 <html>
 
 
-<cfif len(model.packageName_str) eq 0>
+<cfif len(model.packageName) eq 0>
 	<cfset localVar.rootPath_str = "" />
 	<cfset local.displayName_str = "Top Level" />
 <cfelse>
-	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageName_str, ".")) />
-	<cfset local.displayName_str = model.packageName_str />
+	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageName, ".")) />
+	<cfset local.displayName_str = model.packageName />
 </cfif>
 
 <cfoutput>
@@ -33,27 +33,27 @@
 			Package #local.displayName_str#</a>
 	</h3>
 	
-	<cfif arrayLen(model.interfaces_arr) gt 0>
+	<cfif arrayLen(model.interfaces) gt 0>
 		<a href="package-detail.html##interfaceSummary" style="color:black">
 			<b>Interfaces</b>
 		</a>
 		<ul class="plainList">
-			<cfloop from="1" to="#arrayLen(model.interfaces_arr)#" index="localVar.row_num">
+			<cfloop from="1" to="#arrayLen(model.interfaces)#" index="localVar.row_num">
 				<li>
-					#model.rendering_obj.convertToLink(model.interfaces_arr[localVar.row_num].getName(), "", true, false, true)#
+					#model.rendering.convertToLink(model.interfaces[localVar.row_num].getName(), "", true, false, true)#
 				</li>
 			</cfloop>
 		</ul>
 	</cfif>
 
-	<cfif arrayLen(model.components_arr) gt 0>
+	<cfif arrayLen(model.components) gt 0>
 		<a href="package-detail.html##componentSummary" style="color:black">
 			<b>Components</b>
 		</a>
 		<ul class="plainList">
-			<cfloop from="1" to="#arrayLen(model.components_arr)#" index="localVar.row_num">
+			<cfloop from="1" to="#arrayLen(model.components)#" index="localVar.row_num">
 				<li>
-					#model.rendering_obj.convertToLink(model.components_arr[localVar.row_num].getName(), "", true, false, true)#
+					#model.rendering.convertToLink(model.components[localVar.row_num].getName(), "", true, false, true)#
 				</li>
 			</cfloop>
 		</ul>

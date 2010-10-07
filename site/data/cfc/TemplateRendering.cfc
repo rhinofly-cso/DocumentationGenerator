@@ -8,33 +8,117 @@
 	@see cfc.MetadataFactory
 		cfc.DocumentBuilder
 */
+//TODO refactor the methods in way that they do not contain any html
 component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="true" output="false"
 {
 	/**
 		Sets values of the component variable scope, for performing quick searches.
 		
 		@see cfc.cfcData.CFMetadata
-		
 		@library Structure containing component metadata objects for all components in the library.
 	*/
 	public cfc.TemplateRendering function init(required struct library)
 	{
 		var i = 0;
-		var libraryList_str = "";
 
 		variables._libraryRef_struct = arguments.library;
+		variables._libraryList_str = structKeyList(variables._libraryRef_struct);
 
 		// make a list of the last names of all components for performing quick searches
-		libraryList_str = structKeyList(variables._libraryRef_struct);
-		for (i = 1; i <= listLen(libraryList_str); i++)
+		variables._lastNameList_str = "";
+		for (i = 1; i <= listLen(variables._libraryList_str); i++)
 		{
-			libraryList_str = listSetAt(libraryList_str, i, listLast(listGetAt(libraryList_str, i), "."));
+			variables._lastNameList_str = listAppend(variables._lastNameList_str, listLast(listGetAt(variables._libraryList_str, i), "."));
 		}
-		variables._lastNameList_str = libraryList_str;
 		
 		return this;
 	}
+
+	/**
+		Converts a component name to a url, if such a thing can be constructed. Otherwise, it 
+		returns an empty string.
+
+		@componentName Component name to be converted to a url.
+		@rootPath If not present in the webroot, all links to local pages are prepended by this root path.
+		@fromPackageRoot Treats the current package directory as the webroot and strips links to components of the package path.
+	*/
+	public string function toHRef(required string componentName, string rootPath="", boolean fromPackageRoot="false")
+	{
+		var componentLink_str = "";
+		var componentName_str = arguments.componentName;
+
+		// check whether the component name can be determined uniquely from its last name
+		if (listValueCount(variables._lastNameList_str, componentName_str) eq 1)
+		{
+			componentName_str = listGetAt(variables._libraryList_str, listFind(variables._lastNameList_str, componentName_str));
+		}
+		
+		if (structKeyExists(variables._libraryRef_struct, componentName_str) and !variables._libraryRef_struct[componentName_str].getPrivate())
+		{
+			componentLink_str = arguments.rootPath;
+			if (arguments.fromPackageRoot)
+			{
+				componentLink_str &= listLast(componentName_str, ".");
+			}
+			else
+			{
+				componentLink_str &= replace(componentName_str, ".", "/", "all");
+			}
+			componentLink_str &= ".html";
+			return componentLink_str;
+		}
+		else
+		{
+			return "";
+		}
+	}
+
+	/**
+		Converts a component name to the url of the package class list corresponding to the 
+		component, if such a thing can be constructed. Otherwise, it returns an empty string.
+
+		@componentName Component name to be converted to a hyperlink.
+		@rootPath If not present in the webroot, all links to local pages are prepended by this root path.
+		@fromPackageRoot Treats the current package directory as the webroot and strips links to components of the package path.
+	*/
+	public string function toFrameLink(required string componentName, string rootPath="", boolean fromPackageRoot="false")
+	{
+		var frameLink_str = "";
+		var componentName_str = arguments.componentName;
+
+		// check whether the component name can be determined uniquely from its last name
+		if (listValueCount(variables._lastNameList_str, componentName_str) eq 1)
+		{
+			componentName_str = listGetAt(variables._libraryList_str, listFind(variables._lastNameList_str, componentName_str));
+		}
+		
+		if (structKeyExists(variables._libraryRef_struct, componentName_str) and !variables._libraryRef_struct[componentName_str].getPrivate())
+		{
+			frameLink_str = arguments.rootPath;
+			if (not arguments.fromPackageRoot)
+			{
+				frameLink_str &= replace(listDeleteAt(componentName_str, listLen(componentName_str, "."), "."), ".", "/", "all");
+				frameLink_str &= "/";
+			}
+			frameLink_str &= "class-list.html";
+			return frameLink_str;
+		}
+		else
+		{
+			return "";
+		}
+	}
 	
+	/**
+		Checks if the component name belongs to an interface. If so, returns true, otherwise, 
+		returns false
+		@componentName Component name to be converted to a hyperlink.
+	*/
+	public boolean function isInterface(required string componentName)
+	{
+		return isInstanceOf(variables._libraryRef_struct[arguments.componentName], "cfc.cfcData.CFInterface"");
+	}
+
 	/**
 		Converts a piece of string to a hyperlink, or text, depending whether such a link 
 		would lead somewhere.
@@ -50,10 +134,7 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 	{
 		var componentLink_str = "";
 		var componentName_str = "";
-		var libraryList_str = "";
-		var listCount_num = 0;
 		var typeArray_bool = false;
-		var componentPageExists_bool = false;
 		var link_str = arguments.link;
 
 		if (left(link_str, 7) eq "http://")
@@ -77,18 +158,10 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 			// check whether the component name can be determined uniquely from its last name
 			if (listValueCount(variables._lastNameList_str, componentName_str) eq 1)
 			{
-				libraryList_str = structKeyList(variables._libraryRef_struct);
-				componentName_str = listGetAt(libraryList_str, listFind(variables._lastNameList_str, componentName_str));
+				componentName_str = listGetAt(variables._libraryList_str, listFind(variables._lastNameList_str, componentName_str));
 			}
 			
-			if (structKeyExists(variables._libraryRef_struct, componentName_str))
-			{
-				if (not variables._libraryRef_struct[componentName_str].getPrivate())
-				{
-					componentPageExists_bool = true;
-				}
-			}
-			if (componentPageExists_bool)
+			if (structKeyExists(variables._libraryRef_struct, componentName_str) and !variables._libraryRef_struct[componentName_str].getPrivate())
 			{
 				componentLink_str = "<a href=""";
 				componentLink_str &= arguments.rootPath;
@@ -106,9 +179,9 @@ component displayname="cfc.TemplateRendering" extends="fly.Object" accessors="tr
 					componentLink_str &= removechars(link_str, 1, len(componentName_str));
 				}
 				componentLink_str &= """ onclick=""javascript:loadClassListFrame('";
+				componentLink_str &= arguments.rootPath;
 				if (not arguments.fromPackageRoot)
 				{
-					componentLink_str &= arguments.rootPath;
 					componentLink_str &= replace(listDeleteAt(componentName_str, listLen(componentName_str, "."), "."), ".", "/", "all");
 					componentLink_str &= "/";
 				}

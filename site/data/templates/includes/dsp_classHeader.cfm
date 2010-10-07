@@ -4,30 +4,30 @@
 	componentName_str, componentPage_str, packageName_str, packagePath_str, rootPath_str, and 
 	type_str
  --->
-<cfset localVar.extends_str = model.cfMetadata_obj.getExtends() />
-<cfset localVar.extendedBy_str = model.cfMetadata_obj.getExtendedBy() />
+<cfset localVar.extends_str = model.cfMetadata.getExtends() />
+<cfset localVar.extendedBy_str = model.cfMetadata.getExtendedBy() />
 
 <cfif localVar.type_str eq "Component">
-	<cfset localVar.implements_str = model.cfMetadata_obj.getImplements() />
+	<cfset localVar.implements_str = model.cfMetadata.getImplements() />
 </cfif>
 <cfif localVar.type_str eq "Interface">
-	<cfset localVar.implementedBy_str = model.cfMetadata_obj.getImplementedBy() />
+	<cfset localVar.implementedBy_str = model.cfMetadata.getImplementedBy() />
 </cfif>
 
-<cfset localVar.author_str = model.cfMetadata_obj.getAuthor() />
-<cfset localVar.date_str = model.cfMetadata_obj.getDate() />
+<cfset localVar.author_str = model.cfMetadata.getAuthor() />
+<cfset localVar.date_str = model.cfMetadata.getDate() />
 <cftry>
-	<cfset localVar.hint_str = model.rendering_obj.renderHint(model.cfMetadata_obj, localVar.rootPath_str) />
+	<cfset localVar.hint_str = model.rendering.renderHint(model.cfMetadata, localVar.rootPath_str) />
 	<cfcatch type="any">
 		<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 	</cfcatch>
 </cftry>
-<cfset localVar.related_str = model.cfMetadata_obj.getRelated() />
+<cfset localVar.related_str = model.cfMetadata.getRelated() />
 
 <cfset localVar.extendsLinks_str = "" />
 
-<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFPersistentComponent")>
-	<cfset localVar.ormAttributes_arr = getMetadata(model.cfMetadata_obj).properties />
+<cfif isInstanceOf(model.cfMetadata, "cfc.cfcData.CFPersistentComponent")>
+	<cfset localVar.ormAttributes_arr = getMetadata(model.cfMetadata).properties />
 </cfif>
 
 <!--- append the component description with inheritance info for interfaces --->
@@ -40,7 +40,7 @@
 		<cfelse>
 			<cfset localVar.started_bool = true>
 		</cfif>
-		<cfset localVar.extendsLinks_str &= model.rendering_obj.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
+		<cfset localVar.extendsLinks_str &= model.rendering.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
 	</cfloop>
 </cfif>
 
@@ -49,7 +49,7 @@
 <cfif not isNull(localVar.related_str)>
 	<cfset localVar.started_bool = false />
 	<cfloop list="#localVar.related_str#" index="localVar.component_str">
-		<cfset localVar.componentRelated_str = model.rendering_obj.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
+		<cfset localVar.componentRelated_str = model.rendering.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
 		<cfif not isNull(localVar.componentRelated_str)>
 			<cfif localVar.started_bool>
 				<cfset localVar.relatedLinks_str &= ", " />
@@ -91,11 +91,11 @@
 			<cfset localVar.inheritance_str &= " <img src=""" />
 			<cfset localVar.inheritance_str &= localVar.rootPath_str />
 			<cfset localVar.inheritance_str &= "images/inherit-arrow.gif"" title=""Inheritance"" alt=""Inheritance"" class=""inheritArrow""> " />
-			<cfset localVar.inheritance_str &= model.rendering_obj.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
+			<cfset localVar.inheritance_str &= model.rendering.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
 	
 			<!--- break the loop if either the ancestor is not present in the library --->
-			<cfif structKeyExists(model.libraryRef_struct, localVar.parent_str)>
-				<cfset localVar.parent_str = model.libraryRef_struct[localVar.parent_str].getExtends() />
+			<cfif structKeyExists(model.library, localVar.parent_str)>
+				<cfset localVar.parent_str = model.library[localVar.parent_str].getExtends() />
 				<!--- if for some reason, the ancestor doesn't extend anything, we break the loop --->
 				<cfif isNull(localVar.parent_str)>
 					<cfbreak />
@@ -124,7 +124,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementsLinks_str &= model.rendering_obj.convertToLink(localVar.interface_str, localVar.rootPath_str, true) />
+			<cfset localVar.implementsLinks_str &= model.rendering.convertToLink(localVar.interface_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -146,7 +146,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementorsLinks_str &= model.rendering_obj.convertToLink(localVar.component_str, localVar.rootPath_str, true) />
+			<cfset localVar.implementorsLinks_str &= model.rendering.convertToLink(localVar.component_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -168,7 +168,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.subclassesLinks_str &= model.rendering_obj.convertToLink(localVar.child_str, localVar.rootPath_str, true) />
+			<cfset localVar.subclassesLinks_str &= model.rendering.convertToLink(localVar.child_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -182,7 +182,7 @@
 	</cfif>
 
 	<cfif localVar.type_str eq "Component">
-		<cfif not model.cfMetadata_obj.getSerializable()>
+		<cfif not model.cfMetadata.getSerializable()>
 			<tr>
 				<td class="classHeaderTableLabel">
 					Not serializable
@@ -191,7 +191,7 @@
 		</cfif>
 	</cfif>
 	
-	<cfif isInstanceOf(model.cfMetadata_obj, "cfc.cfcData.CFPersistentComponent")>
+	<cfif isInstanceOf(model.cfMetadata, "cfc.cfcData.CFPersistentComponent")>
 		<tr>
 			<td class="classHeaderTableLabel">
 				ORM attributes
@@ -201,7 +201,7 @@
 					<cfset localVar.started_bool = false />
 					<cfloop from="1" to="#arrayLen(localVar.ormAttributes_arr)#" index="localVar.row_num">
 						<cfset localVar.attributeName_str = localVar.ormAttributes_arr[localVar.row_num].name />
-						<cfinvoke component="#model.cfMetadata_obj#" method="get#localVar.attributeName_str#" returnvariable="localVar.attributeValue" />
+						<cfinvoke component="#model.cfMetadata#" method="get#localVar.attributeName_str#" returnvariable="localVar.attributeValue" />
 						<cfif not isNull(localVar.attributeValue)>
 							<cfset localVar.started_bool = true />
 							<cfoutput>
