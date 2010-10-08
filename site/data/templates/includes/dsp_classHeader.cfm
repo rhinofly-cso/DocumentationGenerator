@@ -1,7 +1,7 @@
 <!--- 
 	Creates rows for the component-detail table including the package and component/interface 
 	name. The following variables are defined in the local scope in componentDetail.cfm: 
-	componentName_str, componentPage_str, packageName_str, packagePath_str, rootPath_str, and 
+	componentName_str, componentPage_str, packageDisplayName_str, packagePath_str, rootPath_str, and 
 	type_str
  --->
 <cfset localVar.extends_str = model.cfMetadata.getExtends() />
@@ -40,7 +40,7 @@
 		<cfelse>
 			<cfset localVar.started_bool = true>
 		</cfif>
-		<cfset localVar.extendsLinks_str &= model.rendering.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
+		<cfset localVar.extendsLinks_str &= renderLink(localVar.parent_str, model.rendering, localVar.rootPath_str, true) />
 	</cfloop>
 </cfif>
 
@@ -49,7 +49,7 @@
 <cfif not isNull(localVar.related_str)>
 	<cfset localVar.started_bool = false />
 	<cfloop list="#localVar.related_str#" index="localVar.component_str">
-		<cfset localVar.componentRelated_str = model.rendering.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
+		<cfset localVar.componentRelated_str = renderLink(trim(localVar.component_str), model.rendering, localVar.rootPath_str, true, true) />
 		<cfif not isNull(localVar.componentRelated_str)>
 			<cfif localVar.started_bool>
 				<cfset localVar.relatedLinks_str &= ", " />
@@ -68,9 +68,7 @@
 				Package
 			</td>
 			<td>
-				<a href="package-detail.html"
-					onclick="javascript:loadClassListFrame('class-list.html')">
-					#localVar.packageName_str#</a>
+				#packageLink(model.packageKey, true)#
 			</td>
 		</tr>
 		<tr>
@@ -91,7 +89,7 @@
 			<cfset localVar.inheritance_str &= " <img src=""" />
 			<cfset localVar.inheritance_str &= localVar.rootPath_str />
 			<cfset localVar.inheritance_str &= "images/inherit-arrow.gif"" title=""Inheritance"" alt=""Inheritance"" class=""inheritArrow""> " />
-			<cfset localVar.inheritance_str &= model.rendering.convertToLink(localVar.parent_str, localVar.rootPath_str, true) />
+			<cfset localVar.inheritance_str &= renderLink(localVar.parent_str, model.rendering, localVar.rootPath_str, true) />
 	
 			<!--- break the loop if either the ancestor is not present in the library --->
 			<cfif structKeyExists(model.library, localVar.parent_str)>
@@ -124,7 +122,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementsLinks_str &= model.rendering.convertToLink(localVar.interface_str, localVar.rootPath_str, true) />
+			<cfset localVar.implementsLinks_str &= renderLink(localVar.interface_str, model.rendering, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -146,7 +144,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementorsLinks_str &= model.rendering.convertToLink(localVar.component_str, localVar.rootPath_str, true) />
+			<cfset localVar.implementorsLinks_str &= renderLink(localVar.component_str, model.rendering, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -168,7 +166,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.subclassesLinks_str &= model.rendering.convertToLink(localVar.child_str, localVar.rootPath_str, true) />
+			<cfset localVar.subclassesLinks_str &= renderLink(localVar.child_str, model.rendering, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>

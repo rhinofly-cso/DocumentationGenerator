@@ -1,22 +1,26 @@
 <!--- 
-	This template requires the name packageName_str of the package in the model scope.
-	Also, it requires an alphabetically sorted array of metadata objects interfaces_arr in 
+	This template requires the string packageKey in the model scope.
+	Also, it requires an alphabetically sorted array interfaces of metadata objects in 
 	the model scope for all interfaces in the library (sorted by last name) and a similar 
-	array of components_arr for the (non-interface) components.
-	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
+	array components for the (non-interface) components.
+	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
+<cfif not isDefined("renderLink")>
+	<cfinclude template="./includes/fnc_renderLink.cfm" />
+</cfif>
+
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 
 
-<cfif len(model.packageName) eq 0>
+<cfif model.packageKey eq "_topLevel">
 	<cfset localVar.packagePath_str = "" />
 	<cfset localVar.rootPath_str = "" />
-	<cfset local.displayName_str = "Top Level" />
+	<cfset local.packageDisplayName_str = "Top Level" />
 <cfelse>
-	<cfset localVar.packagePath_str = replace(model.packageName, ".", "/", "all") & "/" />
-	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageName, ".")) />
-	<cfset local.displayName_str = model.packageName />
+	<cfset localVar.packagePath_str = replace(model.packageKey, ".", "/", "all") & "/" />
+	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageKey, ".")) />
+	<cfset local.packageDisplayName_str = model.packageKey />
 </cfif>
 
 <cfoutput>
@@ -25,7 +29,7 @@
 		<link rel="stylesheet" href="#localVar.rootPath_str#style.css" type="text/css" media="screen" />
 		<link rel="stylesheet" href="#localVar.rootPath_str#print.css" type="text/css" media="print" />
 		<link rel="stylesheet" href="#localVar.rootPath_str#override.css" type="text/css" />
-		<title>#local.displayName_str# Summary</title>
+		<title>#local.packageDisplayName_str# Summary</title>
 	</head>
 
 	<body>
@@ -36,7 +40,7 @@
 	<script language="javascript" type="text/javascript" src="#localVar.rootPath_str#cookies.js">
 	</script>
 	<script language="javascript" type="text/javascript"><!--
-		asdocTitle = '#local.displayName_str# package - API Documentation';
+		asdocTitle = '#local.packageDisplayName_str# package - API Documentation';
 		var baseRef = '#localVar.rootPath_str#';
 		window.onload = configPage;
 	--></script>
@@ -77,7 +81,7 @@
 		</tr>
 		<tr class="titleTableRow2">
 			<td class="titleTableSubTitle" id="subTitle" align="left">
-				#local.displayName_str#
+				#local.packageDisplayName_str#
 			</td>
 		</tr>
 		<tr class="titleTableRow3">
@@ -90,7 +94,7 @@
 	<script language="javascript" type="text/javascript" xml:space="preserve"><!--
 		if (!isEclipse() || window.name != ECLIPSE_FRAME_NAME)
 		{
-			titleBar_setSubTitle("#local.displayName_str#");
+			titleBar_setSubTitle("#local.packageDisplayName_str#");
 			titleBar_setSubNav(false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,false);
 		}
 	--></script>
@@ -131,7 +135,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering.convertToLink(model.interfaces[localVar.row_num].getName(), "", true, false, true)#
+						#renderLink(model.interfaces[localVar.row_num].getName(), model.rendering, "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						<cftry>
@@ -184,7 +188,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering.convertToLink(model.components[localVar.row_num].getName(), "", true, false, true)#
+						#renderLink(model.components[localVar.row_num].getName(), model.rendering, "", true, false, true)#
 					</td>
 					<td class="summaryTableLastCol">
 						<cftry>

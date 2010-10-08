@@ -1,407 +1,13 @@
-<cfscript>
 /**
 	Contains the methods to populate a struct with metadata objects and assign their values.
 	
 	@author Eelco Eggen
 	@date 18 August 2010
 */
-//TODO nieuwe class afsplitsen (hintResolver)
 component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 {
-	/**
-		Creates and returns an argument metadata object from a struct.
-		
-		@argumentMetadata Metadata struct for a single argument, obtained from a function metadata struct.
-	*/
-	public cfc.cfcData.CFArgument function createArgumentObject(required struct argumentMetadata)
-	{
-		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
-		var argumentRef_struct = arguments.argumentMetadata;
-
-		// the "required", "type", and "hint" properties have default values
-		return_obj.setRequired(false);
-		return_obj.setType("any");
-		return_obj.setHint("");
-		
-		// name		
-		return_obj.setName(argumentRef_struct.name);
-		
-		// type
-		if (structKeyExists(argumentRef_struct, "type"))
-		{
-			return_obj.setType(argumentRef_struct.type);
-		}
-		
-		// default
-		if (structKeyExists(argumentRef_struct, "default"))
-		{
-			return_obj.setDefault(argumentRef_struct.default);
-		}
-		
-		// required
-		if (structKeyExists(argumentRef_struct, "required"))
-		{
-			return_obj.setRequired(argumentRef_struct.required);
-		}
-		
-		// hint
-		if (structKeyExists(argumentRef_struct, "hint"))
-		{
-			return_obj.setHint(argumentRef_struct.hint);
-		}
-		
-		return return_obj;		
-	}
-	
-	/**
-		@private
-		Creates and assigns argument metadata objects to a function metadata object.
-	*/
-	private void function _resolveParameters(required struct functionMetadata, required any functionObject)
-	{
-		var i = 0;
-		var argument_obj = "";
-		var argumentObjs_arr = arrayNew(1);
-		var functionRef_struct = arguments.functionMetadata;
-		var parametersRef_arr = functionRef_struct.parameters;
-		var functionRef_obj = arguments.functionObject;
-		
-		for (i = 1; i <= arrayLen(parametersRef_arr); i++)
-		{
-			argument_obj = createArgumentObject(parametersRef_arr[i]);
-			arrayAppend(argumentObjs_arr, argument_obj);
-		}
-		
-		functionRef_obj.setParameters(argumentObjs_arr);
-	}
-
-	/**
-		Creates and returns a function metadata object from a struct.
-		
-		@functionMetadata Metadata struct for a single function, obtained from a component metadata struct.
-	*/
-	public cfc.cfcData.CFFunction function createFunctionObject(required struct functionMetadata)
-	{
-		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
-		var functionRef_struct = arguments.functionMetadata;
-		
-		// the "access", "returnType", "returnHint", "inheritDoc", and "private" properties have default values
-		return_obj.setAccess("public");
-		return_obj.setReturnType("any");
-		return_obj.setReturnHint("");
-		return_obj.setInheritDoc(false);
-		return_obj.setPrivate(false);
-		// additionally, the "hint" property is set to "" by default in _resolveFunctions() by _resolveHint()
-		
-		// name		
-		return_obj.setName(functionRef_struct.name);
-		
-		// access		
-		if (structKeyExists(functionRef_struct, "access"))
-		{
-			return_obj.setAccess(functionRef_struct.access);
-		}
-		
-		// returnType
-		if (structKeyExists(functionRef_struct, "returnType"))
-		{
-			return_obj.setReturnType(functionRef_struct.returnType);
-		}
-		
-		// returnHint		
-		if (structKeyExists(functionRef_struct, "return"))
-		{
-			return_obj.setReturnHint(functionRef_struct.return);
-		}
-		
-		// inheritDoc
-		if (structKeyExists(functionRef_struct, "inheritDoc"))
-		{
-			return_obj.setInheritDoc(functionRef_struct.inheritDoc);
-		}
-		
-		// author - possible, but not currently applied in documentation
-		if (structKeyExists(functionRef_struct, "author"))
-		{
-			return_obj.setAuthor(functionRef_struct.author);
-		}
-		
-		// date - possible, but not currently applied in documentation
-		if (structKeyExists(functionRef_struct, "date"))
-		{
-			return_obj.setDate(functionRef_struct.date);
-		}
-		
-		// private
-		if (structKeyExists(functionRef_struct, "private"))
-		{
-			return_obj.setPrivate(functionRef_struct.private);
-		}
-		
-		if (structKeyExists(functionRef_struct, "parameters"))
-		{
-			_resolveParameters(functionRef_struct, return_obj);
-		}
-		else
-		{
-			return_obj.setParameters(arrayNew(1));
-		}
-		
-		return return_obj;
-	}
-	
-	/**
-		@private
-		Determines the methods of the component and sets the appropriate parameters.
-	*/
-	private void function _resolveFunctions(required struct metadata, required any metadataObject)
-	{
-		var functionsRef_arr = "";
-		var functionObjs_arr = arrayNew(1);
-		var function_obj = "";
-		var i = 0;
-		var metadataRef_struct = arguments.metadata;
-		var metadataRef_obj = arguments.metadataObject;
-		
-		if (structKeyExists(metadataRef_struct, "functions"))
-		{
-			functionsRef_arr = metadataRef_struct.functions;
-			for (i = 1; i <= arrayLen(functionsRef_arr); i++)
-			{
-				function_obj = createFunctionObject(functionsRef_arr[i]);
-				_resolveHint(functionsRef_arr[i], function_obj, metadataRef_struct.path);
-
-				arrayAppend(functionObjs_arr, function_obj);
-			}
-			
-			metadataRef_obj.setFunctions(functionObjs_arr);
-		}
-	}
-	
-	/**
-		Creates and returns a property metadata object from a struct.
-		
-		@propertyMetadata Metadata struct for a single property, obtained from a component metadata struct.
-		@persistent Indicates whether the property is defined by a persistent component.
-	*/
-	public cfc.cfcData.CFProperty function createPropertyObject(required struct propertyMetadata, boolean persistent=false)
-	{
-		var return_obj = "";
-		var persistent_bool = arguments.persistent; // the default value for property persistence is equal to that of the component
-		var propertyRef_struct = arguments.propertyMetadata;
-
-		// check if the property persistence has a value other than the default value
-		if (structKeyExists(propertyRef_struct, "persistent"))
-		{
-			persistent_bool = propertyRef_struct.persistent;
-		}
-		if (persistent_bool)
-		{
-			return_obj = createObject("component", "cfc.cfcData.CFMapping").init();
-		}
-		else
-		{
-			return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
-		}
-
-		// the "type", "serializable", and "private" properties have default values
-		return_obj.setType("any");
-		return_obj.setSerializable(true);
-		return_obj.setPrivate(false);
-		// additionally, the "hint" property is set to "" by default in _resolveProperties() by _resolveHint()
-		
-		// name		
-		return_obj.setName(propertyRef_struct.name);
-		
-		// type
-		if (structKeyExists(propertyRef_struct, "type"))
-		{
-			return_obj.setType(propertyRef_struct.type);
-		}
-		
-		// default
-		if (structKeyExists(propertyRef_struct, "default"))
-		{
-			return_obj.setDefault(propertyRef_struct.default);
-		}
-		
-		// serializable		
-		if (structKeyExists(propertyRef_struct, "serializable"))
-		{
-			return_obj.setSerializable(propertyRef_struct.serializable);
-		}
-		
-		// author - possible, but not currently applied in documentation
-		if (structKeyExists(propertyRef_struct, "author"))
-		{
-			return_obj.setAuthor(propertyRef_struct.author);
-		}
-		
-		// date - possible, but not currently applied in documentation
-		if (structKeyExists(propertyRef_struct, "date"))
-		{
-			return_obj.setDate(propertyRef_struct.date);
-		}
-		
-		// private
-		if (structKeyExists(propertyRef_struct, "private"))
-		{
-			return_obj.setPrivate(propertyRef_struct.private);
-		}
-
-		// ORM-specific attributes
-		if (persistent_bool)
-		{
-			// the "fieldType" property has a default value
-			return_obj.setFieldType("column");
-
-			_resolveORMAttributes(propertyRef_struct, return_obj);
-
-			// the "type" property has a default value "array" instead of "any" for collections, as well as for one-to-many and many-to-many relationships
-			if (not structKeyExists(propertyRef_struct, "type") and listValueCountNoCase("collection,one-to-many,many-to-many", return_obj.getFieldType()))
-			{
-				return_obj.setType("array");
-			}
-		}
-		
-		return return_obj;
-	}
-	
-	/**
-		@private
-		Determines the properties of the component and sets the appropriate parameters.
-	*/
-	private void function _resolveProperties(required struct metadata, required any metadataObject)
-	{
-		var persistent_bool = false;
-		var propertiesRef_arr = "";
-		var propertyObjs_arr = arrayNew(1);
-		var property_obj = "";
-		var i = 0;
-		var metadataRef_struct = arguments.metadata;
-		var metadataRef_obj = arguments.metadataObject;
-
-		// determine persistence of the component
-		if (structKeyExists(metadataRef_struct, "persistent"))
-		{
-			persistent_bool = metadataRef_struct.persistent;
-		}
-
-		if (structKeyExists(metadataRef_struct, "properties"))
-		{
-			propertiesRef_arr = metadataRef_struct.properties;
-			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
-			{
-				property_obj = createPropertyObject(propertiesRef_arr[i], persistent_bool);
-				_resolveHint(propertiesRef_arr[i], property_obj, metadataRef_struct.path);
-
-				arrayAppend(propertyObjs_arr, property_obj);
-			}
-			
-			metadataRef_obj.setProperties(propertyObjs_arr);
-		}
-	}
-
-	/**
-		Determines the data type, creates the appropriate object, and returns it.
-		
-		@metadata Metadata struct of the component, or interface.
-		@library Reference to a struct in which the component objects and inheritance information will be stored.
-	*/
-	public cfc.cfcData.CFC function createMetadataObject(required struct metadata, required struct library)
-	{
-		var persistent_bool = false;
-		var metadataRef_struct = arguments.metadata;
-		var libraryRef_struct = arguments.library;
-		var name_str = metadataRef_struct.name;
-		var return_obj = "";
-		
-		// we make sure that the extendedBy and implementedBy queue structs exist
-		// these are necessary for generating correct inheritance information
-		// as each component is evaluated, its name is added to the list of known subclasses
-		// or implementors
-		if (not structKeyExists(libraryRef_struct, "_extendedByQueue"))
-		{
-			structInsert(libraryRef_struct, "_extendedByQueue", structNew());
-		}
-		if (not structKeyExists(libraryRef_struct, "_implementedByQueue"))
-		{
-			structInsert(libraryRef_struct, "_implementedByQueue", structNew());
-		}
-		
-		// determine the type and create the appropriate object
-		if (metadataRef_struct.type eq "component")
-		{
-			if (structKeyExists(metadataRef_struct, "persistent"))
-			{
-				persistent_bool = metadataRef_struct.persistent;
-			}
-			if (persistent_bool)
-			{
-				return_obj = createObject("component", "cfc.cfcData.CFPersistentComponent").init();
-			}
-			else
-			{
-				return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
-			}
-			
-			// the "serializable" property has a default value for components
-			return_obj.setSerializable(true);
-		}
-		else
-		{
-			if (metadataRef_struct.type eq "interface")
-			{
-				return_obj = createObject("component", "cfc.cfcData.CFInterface").init();
-			}
-			else
-			{
-				throw(message="Error: unknown CFC type #metadataRef_struct.type#.");
-			}
-		}
-		
-		// the "private" property has a default value for both components and interfaces
-		return_obj.setPrivate(false);
-		// additionally, the "hint" property is set to "" by default in _resolveHint()
-		
-		// name		
-		return_obj.setName(name_str);
-		
-		// serializable
-		if (structKeyExists(metadataRef_struct, "serializable"))
-		{
-			return_obj.setSerializable(metadataRef_struct.serializable);
-		}
-
-		// author
-		if (structKeyExists(metadataRef_struct, "author"))
-		{
-			return_obj.setAuthor(metadataRef_struct.author);
-		}
-
-		// date
-		if (structKeyExists(metadataRef_struct, "date"))
-		{
-			return_obj.setDate(metadataRef_struct.date);
-		}
-
-		// private
-		if (structKeyExists(metadataRef_struct, "private"))
-		{
-			return_obj.setPrivate(metadataRef_struct.private);
-		}
-
-		_resolveHint(metadataRef_struct, return_obj, metadataRef_struct.path);
-		_resolveInheritance(metadataRef_struct, return_obj, libraryRef_struct);
-		_resolveProperties(metadataRef_struct, return_obj);
-		_resolveFunctions(metadataRef_struct, return_obj);
-		if (persistent_bool)
-		{
-			_resolveORMAttributes(metadataRef_struct, return_obj);
-		}
-		
-		return return_obj;
-	}
+	// create an object for resolving any tags in the component, property, or function hints
+	variables._hintResolver_obj = createObject("component", "cfc.hintResolver");
 	
 	/**
 		Reads the directory and all subdirectories for .cfc files. Then appends all metadata 
@@ -500,18 +106,120 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		dirs_qry = directoryList(path_str, false, "query");
 		for (i = 1; i <= dirs_qry.recordCount; i++)
 		{
-			// we exclude folder determined by filter conditions set in Application.cfc
-			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludedFolders, dirs_qry.name[i]))
+			// set the subdirectory path
+			directoryPath_str = path_str;
+			directoryPath_str &= "/";
+			directoryPath_str &= dirs_qry.name[i];
+			
+			// we exclude folders determined by filter conditions set in settings.xml
+			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludedFolders, dirs_qry.name[i]) and not listFind(application.excludedPaths, directoryPath_str))
 			{
-				// set the subdirectory path
-				directoryPath_str = path_str;
-				directoryPath_str &= "/";
-				directoryPath_str &= dirs_qry.name[i];
 				browseDirectory(directoryPath_str, sourcePath_str, libraryRef_struct, packagesRef_struct);
 			}
 		}		
 	}
 
+	/**
+		Determines the data type, creates the appropriate object, and returns it.
+		
+		@metadata Metadata struct of the component, or interface.
+		@library Reference to a struct in which the component objects and inheritance information will be stored.
+	*/
+	public cfc.cfcData.CFC function createMetadataObject(required struct metadata, required struct library)
+	{
+		var persistent_bool = false;
+		var metadataRef_struct = arguments.metadata;
+		var libraryRef_struct = arguments.library;
+		var name_str = metadataRef_struct.name;
+		var return_obj = "";
+		
+		// we make sure that the extendedBy and implementedBy queue structs exist
+		// these are necessary for generating correct inheritance information
+		// as each component is evaluated, its name is added to the list of known subclasses
+		// or implementors
+		if (not structKeyExists(libraryRef_struct, "_extendedByQueue"))
+		{
+			structInsert(libraryRef_struct, "_extendedByQueue", structNew());
+		}
+		if (not structKeyExists(libraryRef_struct, "_implementedByQueue"))
+		{
+			structInsert(libraryRef_struct, "_implementedByQueue", structNew());
+		}
+		
+		// determine the type and create the appropriate object
+		if (metadataRef_struct.type eq "component")
+		{
+			if (structKeyExists(metadataRef_struct, "persistent"))
+			{
+				persistent_bool = metadataRef_struct.persistent;
+			}
+			if (persistent_bool)
+			{
+				return_obj = createObject("component", "cfc.cfcData.CFPersistentComponent").init();
+			}
+			else
+			{
+				return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
+			}
+			
+			// the "serializable" property has a default value for components
+			return_obj.setSerializable(true);
+		}
+		else
+		{
+			if (metadataRef_struct.type eq "interface")
+			{
+				return_obj = createObject("component", "cfc.cfcData.CFInterface").init();
+			}
+			else
+			{
+				throw(message="Error: unknown CFC type #metadataRef_struct.type#.");
+			}
+		}
+		
+		// the "private" property has a default value for both components and interfaces
+		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in the hint resolver
+		
+		// name		
+		return_obj.setName(name_str);
+		
+		// serializable
+		if (structKeyExists(metadataRef_struct, "serializable"))
+		{
+			return_obj.setSerializable(metadataRef_struct.serializable);
+		}
+
+		// author
+		if (structKeyExists(metadataRef_struct, "author"))
+		{
+			return_obj.setAuthor(metadataRef_struct.author);
+		}
+
+		// date
+		if (structKeyExists(metadataRef_struct, "date"))
+		{
+			return_obj.setDate(metadataRef_struct.date);
+		}
+
+		// private
+		if (structKeyExists(metadataRef_struct, "private"))
+		{
+			return_obj.setPrivate(metadataRef_struct.private);
+		}
+
+		variables._hintResolver_obj.resolveHint(metadataRef_struct, return_obj, metadataRef_struct.path);
+		_resolveInheritance(metadataRef_struct, return_obj, libraryRef_struct);
+		_resolveProperties(metadataRef_struct, return_obj);
+		_resolveFunctions(metadataRef_struct, return_obj);
+		if (persistent_bool)
+		{
+			_resolveORMAttributes(metadataRef_struct, return_obj);
+		}
+		
+		return return_obj;
+	}
+	
 	/**
 		@private
 		Determines the inheritance of a component and sets the appropriate parameters. 
@@ -630,322 +338,296 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	
 	/**
 		@private
-		Determines whether the hint contained @throws and/or @see tags that were removed by
-		the parsing of CFScript code. If so, these are retrieved from the .cfc file and
-		correctly processed. Alternatively, for tag-based CF code, all tags present in the 
-		hint are parsed.
-		
-		@path Path of the .cfc file that contains the code for the given metadata object.
+		Determines the properties of the component and sets the appropriate parameters.
 	*/
-	private void function _resolveHint(required struct metadata, required any metadataObject, required string path)
+	private void function _resolveProperties(required struct metadata, required any metadataObject)
 	{
-		var hint_str = "";
-		var search_str = "";
-		var file_str = "";
-		var comment_str = "";
-		var reverse_str = "";
-		var defWords_str = "";
-		var token_str = "";
-		var tag_str = "";
-		var defStart_num = 0;
-		var endFromLast_num = 0;
-		var beginFromLast_num = 0;
+		var persistent_bool = false;
+		var propertiesRef_arr = "";
+		var propertyObjs_arr = arrayNew(1);
+		var property_obj = "";
 		var i = 0;
-		var exceptionMetadata_obj = "";
-		var commentFound_bool = false;
-		var functionHint_bool = false;
-		var throwsTagFollow_bool = false;
-		var seeTagFollow_bool = false;
-		var hintTag_bool = false;
-		var parsedHint_str = "";
 		var metadataRef_struct = arguments.metadata;
 		var metadataRef_obj = arguments.metadataObject;
 
-		// obtain the initial value of the hint
-		if (structKeyExists(metadataRef_struct, "hint"))
+		// determine persistence of the component
+		if (structKeyExists(metadataRef_struct, "persistent"))
 		{
-			hint_str &= metadataRef_struct.hint;
-		}
-		if (structKeyExists(metadataRef_struct, "description"))
-		{
-			if (len(hint_str))
-			{
-				hint_str &= chr(10);
-			}
-			hint_str &= metadataRef_struct.description;
+			persistent_bool = metadataRef_struct.persistent;
 		}
 
-		//Check if throws or see exists, if they do we have incorrect hint metadata
-		//TODO comment over het verschil tussen hoe coldfusion cfscript en tags behandelt
-		//TODO, de twee verschillende manieren in losse functies zetten
-		if (structKeyExists(metadataRef_struct, "throws") or structKeyExists(metadataRef_struct, "see"))
+		if (structKeyExists(metadataRef_struct, "properties"))
 		{
-			// determine type and matching search string
-			if (isInstanceOf(metadataRef_obj, "cfc.cfcData.CFProperty"))
+			propertiesRef_arr = metadataRef_struct.properties;
+			for (i = 1; i <= arrayLen(propertiesRef_arr); i++)
 			{
-				// look for the word "property" and its name, on one or more lines 
-				// before encountering a semicolon 
-				search_str = "\bproperty\b[^;]*\b";
-				search_str &= metadataRef_obj.getName();
-				search_str &= "[^\w\.=]";
-			}
-			else
-			{
-				if (isInstanceOf(metadataRef_obj, "cfc.cfcData.CFFunction"))
-				{
-					// look for the word "function" and its name, on one or more lines
-					// before encountering a curly bracket
-					search_str = "\bfunction\b[^\(]*\b";
-					search_str &= metadataRef_obj.getName();
-					search_str &= "\b";
-					functionHint_bool = true;
-				}
-				else
-				{
-					if (isInstanceOf(metadataRef_obj, "cfc.cfcData.CFComponent"))
-					{
-						// look for the word "component" followed by a curly bracket
-						// either on the same line or at the start of the next
-						search_str = "\bcomponent\b[^\n\r]*[\s]*\{";
-					}
-					else
-					{
-						if (isInstanceOf(metadataRef_obj, "cfc.cfcData.CFInterface"))
-						{
-							// look for the word "interface" followed by a curly bracket
-							// either on the same line or at the start of the next
-							search_str = "\binterface\b[^\n\r]*[\s]*\{";
-						}
-						else
-						{
-							throw(message="Could not process hint for type #getMetadata(metadataRef_obj).name#.");
-						}
-					}
-	
-				}
+				property_obj = createPropertyObject(propertiesRef_arr[i], persistent_bool);
+				variables._hintResolver_obj.resolveHint(propertiesRef_arr[i], property_obj, metadataRef_struct.path);
+
+				arrayAppend(propertyObjs_arr, property_obj);
 			}
 			
-			// we have a hint to parse from CFScript code, which must be isolated by applying the search string
-			file_str = fileRead(arguments.path);
-			defStart_num = 1;
+			metadataRef_obj.setProperties(propertyObjs_arr);
+		}
+	}
 
-			do
-			{
-				// first, apply the search string and look for the nearest preceding comment
-				defStart_num = reFind(search_str, file_str, defStart_num + 1);
-				switch (defStart_num)
-				{
-					case 0:
-						endFromLast_num = 0;
-						break;
-					case 1:
-						endFromLast_num = 0;
-						break;
-					default:
-						comment_str = trim(left(file_str, defStart_num - 1));
-						reverse_str = reverse(comment_str);
-						//find the end of the comment
-						endFromLast_num = find("/*", reverse_str);
-				}
+	/**
+		Creates and returns a property metadata object from a struct.
+		
+		@propertyMetadata Metadata struct for a single property, obtained from a component metadata struct.
+		@persistent Indicates whether the property is defined by a persistent component.
+	*/
+	public cfc.cfcData.CFProperty function createPropertyObject(required struct propertyMetadata, boolean persistent=false)
+	{
+		var return_obj = "";
+		var persistent_bool = arguments.persistent; // the default value for property persistence is equal to that of the component
+		var propertyRef_struct = arguments.propertyMetadata;
 
-				// next, extract the words in between the comment and the definition
-				// these must not contain curly brackets or semicolons
-				switch (endFromLast_num)
-				{
-					case 0:
-						break;
-					case 1:
-						commentFound_bool = true;
-						break;
-					default:
-						defWords_str = right(comment_str, endFromLast_num - 1);
-						if (functionHint_bool and findOneOf("{};", defWords_str) eq 0)
-						{
-							commentFound_bool = true;
-						}
-				}
-			} while (defStart_num > 0 and not commentFound_bool);
-			
-			if (commentFound_bool)
-			{
-				//find begin
-				beginFromLast_num = find("**/", reverse_str);
-				comment_str = right(comment_str, beginFromLast_num - 1);
-				comment_str = left(comment_str, beginFromLast_num - endFromLast_num - 2);
-
-				// parsing the hint one line after another
-				i = 1;
-				while (true)
-				{
-					token_str = getToken(comment_str, i, chr(10));
-					// getToken only returns an empty string if index i is larger than the number of tokens
-					if (len(token_str) eq 0)
-					{
-						break;
-					}
-					else
-					{
-						// get hint line
-						token_str = lTrim(token_str);
-						if (left(token_str, 1) eq "*")
-						{
-							token_str = lTrim(removeChars(token_str, 1, 1));
-						}
-
-						// if we previously encountered @throws	or @see
-						// we check for new tokens or additional input lines
-						if (throwsTagFollow_bool)
-						{
-							if (left(token_str, 1) eq "@" or len(token_str) eq 0)
-							{
-								throwsTagFollow_bool = false;
-							}
-							else
-							{
-								token_str = "@throws " & token_str;
-							}
-						}
-						if (seeTagFollow_bool)
-						{
-							if (left(token_str, 1) eq "@" or len(token_str) eq 0)
-							{
-								seeTagFollow_bool = false;
-							}
-							else
-							{
-								token_str = "@see " & token_str;
-							}
-						}
-
-						// parse hint line
-						if (find("@", token_str) eq 1)
-						{
-							if (functionHint_bool)
-							{
-								if (find("@throws", token_str) eq 1)
-								{
-									token_str = trim(removechars(token_str, 1, 7));
-									exceptionMetadata_obj = createObject("component", "cfc.cfcData.CFMetadata");
-									exceptionMetadata_obj.setName(getToken(token_str, 1));
-									exceptionMetadata_obj.setHint(trim(removechars(token_str, 1, len(getToken(token_str, 1)))));
-									metadataRef_obj.addThrows(exceptionMetadata_obj);
-									throwsTagFollow_bool = true;
-								}
-							}
-							if (find("@see", token_str) eq 1)
-							{
-								metadataRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-								seeTagFollow_bool = true;
-							}
-							if (tag_str eq "@hint")
-							{
-								parsedHint_str = trim(removechars(token_str, 1, 7));
-								hintTag_bool = true;
-							}
-							if (tag_str eq "@internal")
-							{
-								hintTag_bool = true;
-							}
-						}
-						else
-						{
-							if (not hintTag_bool)
-							{
-								parsedHint_str &= token_str;
-								parsedHint_str &= chr(10);
-							}
-						}
-						i += 1;
-					}
-				}
-			}
+		// check if the property persistence has a value other than the default value
+		if (structKeyExists(propertyRef_struct, "persistent"))
+		{
+			persistent_bool = propertyRef_struct.persistent;
+		}
+		if (persistent_bool)
+		{
+			return_obj = createObject("component", "cfc.cfcData.CFMapping").init();
 		}
 		else
 		{
-			// tag-based hint parsing
-			i = 1;
-			while (true)
-			{
-				token_str = getToken(hint_str, i, chr(10));
-				// getToken only returns an empty string if index i is larger than the number of tokens
-				if (len(token_str) eq 0)
-				{
-					break;
-				}
-				else
-				{
-					// get hint line
-					token_str = lTrim(token_str);
-					if (left(token_str, 1) eq "*")
-					{
-						token_str = lTrim(removeChars(token_str, 1, 1));
-					}
-					
-					// parse hint line
-					if (find("@", token_str) eq 1)
-					{
-						tag_str = getToken(token_str, 1);
-						if (tag_str eq "@author")
-						{
-							metadataRef_obj.setAuthor(trim(removechars(token_str, 1, 7)));
-						}
-						if (tag_str eq "@date")
-						{
-							metadataRef_obj.setDate(trim(removechars(token_str, 1, 5)));
-						}
-						if (tag_str eq "@hint")
-						{
-							parsedHint_str = trim(removechars(token_str, 1, 7));
-							hintTag_bool = true;
-						}
-						if (tag_str eq "@internal")
-						{
-							hintTag_bool = true;
-						}
-						if (tag_str eq "@private")
-						{
-							metadataRef_obj.setPrivate(true);
-						}
-						if (tag_str eq "@see")
-						{
-							metadataRef_obj.addRelated(trim(removechars(token_str, 1, 4)));
-						}
-						if (functionHint_bool)
-						{
-							if (tag_str eq "@return")
-							{
-								metadataRef_obj.setReturnHint(trim(removechars(token_str, 1, 7)));
-							}
-							if (find("@throws", token_str) eq 1)
-							{
-								token_str = trim(removechars(token_str, 1, 7));
-								exceptionMetadata_obj = createObject("component", "cfc.cfcData.CFMetadata");
-								exceptionMetadata_obj.setName(getToken(token_str, 1));
-								exceptionMetadata_obj.setHint(trim(removechars(token_str, 1, len(getToken(token_str, 1)))));
-								metadataRef_obj.addThrows(exceptionMetadata_obj);
-								throwsTagFollow_bool = true;
-							}
-							if (tag_str eq "@inheritDoc")
-							{
-								metadataRef_obj.setInheritDoc(true);
-							}
-						}
-					}
-					else
-					{
-						if (not hintTag_bool)
-						{
-							parsedHint_str &= token_str;
-							parsedHint_str &= chr(10);
-						}
-					}
-					i += 1;
-				}
-			}
+			return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
 		}
 
-		// assignment of the remaining hint
-		metadataRef_obj.setHint(trim(parsedHint_str));
+		// the "type", "serializable", and "private" properties have default values
+		return_obj.setType("any");
+		return_obj.setSerializable(true);
+		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in _resolveProperties() by the hint resolver
+		
+		// name		
+		return_obj.setName(propertyRef_struct.name);
+		
+		// type
+		if (structKeyExists(propertyRef_struct, "type"))
+		{
+			return_obj.setType(propertyRef_struct.type);
+		}
+		
+		// default
+		if (structKeyExists(propertyRef_struct, "default"))
+		{
+			return_obj.setDefault(propertyRef_struct.default);
+		}
+		
+		// serializable		
+		if (structKeyExists(propertyRef_struct, "serializable"))
+		{
+			return_obj.setSerializable(propertyRef_struct.serializable);
+		}
+		
+		// author - possible, but not currently applied in documentation
+		if (structKeyExists(propertyRef_struct, "author"))
+		{
+			return_obj.setAuthor(propertyRef_struct.author);
+		}
+		
+		// date - possible, but not currently applied in documentation
+		if (structKeyExists(propertyRef_struct, "date"))
+		{
+			return_obj.setDate(propertyRef_struct.date);
+		}
+		
+		// private
+		if (structKeyExists(propertyRef_struct, "private"))
+		{
+			return_obj.setPrivate(propertyRef_struct.private);
+		}
+
+		// ORM-specific attributes
+		if (persistent_bool)
+		{
+			// the "fieldType" property has a default value
+			return_obj.setFieldType("column");
+
+			_resolveORMAttributes(propertyRef_struct, return_obj);
+
+			// the "type" property has a default value "array" instead of "any" for collections, as well as for one-to-many and many-to-many relationships
+			if (not structKeyExists(propertyRef_struct, "type") and listValueCountNoCase("collection,one-to-many,many-to-many", return_obj.getFieldType()))
+			{
+				return_obj.setType("array");
+			}
+		}
+		
+		return return_obj;
+	}
+	
+	/**
+		@private
+		Determines the methods of the component and sets the appropriate parameters.
+	*/
+	private void function _resolveFunctions(required struct metadata, required any metadataObject)
+	{
+		var functionsRef_arr = "";
+		var functionObjs_arr = arrayNew(1);
+		var function_obj = "";
+		var i = 0;
+		var metadataRef_struct = arguments.metadata;
+		var metadataRef_obj = arguments.metadataObject;
+		
+		if (structKeyExists(metadataRef_struct, "functions"))
+		{
+			functionsRef_arr = metadataRef_struct.functions;
+			for (i = 1; i <= arrayLen(functionsRef_arr); i++)
+			{
+				function_obj = createFunctionObject(functionsRef_arr[i]);
+				variables._hintResolver_obj.resolveHint(functionsRef_arr[i], function_obj, metadataRef_struct.path);
+
+				arrayAppend(functionObjs_arr, function_obj);
+			}
+			
+			metadataRef_obj.setFunctions(functionObjs_arr);
+		}
+	}
+	
+	/**
+		Creates and returns a function metadata object from a struct.
+		
+		@functionMetadata Metadata struct for a single function, obtained from a component metadata struct.
+	*/
+	public cfc.cfcData.CFFunction function createFunctionObject(required struct functionMetadata)
+	{
+		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
+		var functionRef_struct = arguments.functionMetadata;
+		
+		// the "access", "returnType", "returnHint", "inheritDoc", and "private" properties have default values
+		return_obj.setAccess("public");
+		return_obj.setReturnType("any");
+		return_obj.setReturnHint("");
+		return_obj.setInheritDoc(false);
+		return_obj.setPrivate(false);
+		// additionally, the "hint" property is set to "" by default in _resolveFunctions() by the hint resolver
+		
+		// name		
+		return_obj.setName(functionRef_struct.name);
+		
+		// access		
+		if (structKeyExists(functionRef_struct, "access"))
+		{
+			return_obj.setAccess(functionRef_struct.access);
+		}
+		
+		// returnType
+		if (structKeyExists(functionRef_struct, "returnType"))
+		{
+			return_obj.setReturnType(functionRef_struct.returnType);
+		}
+		
+		// returnHint		
+		if (structKeyExists(functionRef_struct, "return"))
+		{
+			return_obj.setReturnHint(functionRef_struct.return);
+		}
+		
+		// inheritDoc
+		if (structKeyExists(functionRef_struct, "inheritDoc"))
+		{
+			return_obj.setInheritDoc(functionRef_struct.inheritDoc);
+		}
+		
+		// author - possible, but not currently applied in documentation
+		if (structKeyExists(functionRef_struct, "author"))
+		{
+			return_obj.setAuthor(functionRef_struct.author);
+		}
+		
+		// date - possible, but not currently applied in documentation
+		if (structKeyExists(functionRef_struct, "date"))
+		{
+			return_obj.setDate(functionRef_struct.date);
+		}
+		
+		// private
+		if (structKeyExists(functionRef_struct, "private"))
+		{
+			return_obj.setPrivate(functionRef_struct.private);
+		}
+		
+		if (structKeyExists(functionRef_struct, "parameters"))
+		{
+			_resolveParameters(functionRef_struct, return_obj);
+		}
+		else
+		{
+			return_obj.setParameters(arrayNew(1));
+		}
+		
+		return return_obj;
+	}
+	
+	/**
+		@private
+		Creates and assigns argument metadata objects to a function metadata object.
+	*/
+	private void function _resolveParameters(required struct functionMetadata, required any functionObject)
+	{
+		var i = 0;
+		var argument_obj = "";
+		var argumentObjs_arr = arrayNew(1);
+		var functionRef_struct = arguments.functionMetadata;
+		var parametersRef_arr = functionRef_struct.parameters;
+		var functionRef_obj = arguments.functionObject;
+		
+		for (i = 1; i <= arrayLen(parametersRef_arr); i++)
+		{
+			argument_obj = createArgumentObject(parametersRef_arr[i]);
+			arrayAppend(argumentObjs_arr, argument_obj);
+		}
+		
+		functionRef_obj.setParameters(argumentObjs_arr);
+	}
+
+	/**
+		Creates and returns an argument metadata object from a struct.
+		
+		@argumentMetadata Metadata struct for a single argument, obtained from a function metadata struct.
+	*/
+	public cfc.cfcData.CFArgument function createArgumentObject(required struct argumentMetadata)
+	{
+		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
+		var argumentRef_struct = arguments.argumentMetadata;
+
+		// the "required", "type", and "hint" properties have default values
+		return_obj.setRequired(false);
+		return_obj.setType("any");
+		return_obj.setHint("");
+		
+		// name		
+		return_obj.setName(argumentRef_struct.name);
+		
+		// type
+		if (structKeyExists(argumentRef_struct, "type"))
+		{
+			return_obj.setType(argumentRef_struct.type);
+		}
+		
+		// default
+		if (structKeyExists(argumentRef_struct, "default"))
+		{
+			return_obj.setDefault(argumentRef_struct.default);
+		}
+		
+		// required
+		if (structKeyExists(argumentRef_struct, "required"))
+		{
+			return_obj.setRequired(argumentRef_struct.required);
+		}
+		
+		// hint
+		if (structKeyExists(argumentRef_struct, "hint"))
+		{
+			return_obj.setHint(argumentRef_struct.hint);
+		}
+		
+		return return_obj;		
 	}
 	
 	/**
@@ -975,4 +657,3 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		}
 	}
 }
-</cfscript>

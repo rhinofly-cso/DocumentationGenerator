@@ -50,7 +50,7 @@
 			<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
 				<cfset localVar.methodSignature_str &= "required " />
 			</cfif>
-			<cfset localVar.methodSignature_str &= model.rendering.convertToLink(localVar.argumentType_str, localVar.rootPath_str, true) />
+			<cfset localVar.methodSignature_str &= renderLink(localVar.argumentType_str, model.rendering, localVar.rootPath_str, true) />
 			<cfset localVar.methodSignature_str &= " " />
 			<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
 			<cfif not isNull(localVar.argumentDefault)>
@@ -93,7 +93,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+							#renderLink(localVar.methodMetadata_obj.getReturnType(), model.rendering, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -126,7 +126,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering.convertToLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
+							#renderLink(localVar.methodMetadata_obj.getReturnType(), model.rendering, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -146,7 +146,7 @@
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#model.rendering.convertToLink(localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
+						#renderLink(localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy, model.rendering, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

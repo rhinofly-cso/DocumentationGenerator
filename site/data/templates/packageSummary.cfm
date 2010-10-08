@@ -1,10 +1,14 @@
 <!--- 
-	This template requires a struct packages_struct in the model scope containing the names 
+	This template requires a struct packages in the model scope containing the names 
 	of all packages as keys. Although this template creates a summary-like page, there are no 
 	descriptions for packages. Therefore, essentially, this is the same list as constructed in 
 	packageList.cfm.
-	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
+	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
+<cfif not isDefined("renderLink")>
+	<cfinclude template="./includes/fnc_renderLink.cfm" />
+</cfif>
+
 <cfset localVar.packages_str = listSort(structKeyList(model.packages), "textnocase") />
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -109,7 +113,7 @@
 						&nbsp;
 					</td>
 					<td class="summaryTableSecondCol">
-						#model.rendering.packageLink(localVar.packageKey_str)#
+						#packageLink(localVar.packageKey_str)#
 					</td>
 					<td class="summaryTableLastCol">
 					</td>

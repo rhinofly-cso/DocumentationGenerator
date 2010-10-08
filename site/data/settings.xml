@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base>
+	<settings>
+		<sourcePath>C:\development\libraries\CSOShared</sourcePath>
+		<sourcePath>C:\development\libraries\RhinoflyLibrary\src</sourcePath>
+		<sourcePath>C:\development\libraries\TICC2Library\src</sourcePath>
+		<documentDestination>C:\development\docGen\test</documentDestination>
+		<excludedPath>C:\development\libraries\RhinoflyLibrary\src\fly\net\json\</excludedPath>
+	</settings>
+</base>

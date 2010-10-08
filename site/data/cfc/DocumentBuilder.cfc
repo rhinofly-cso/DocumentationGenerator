@@ -1,4 +1,3 @@
-<cfscript>
 /**
 	Contains the methods to create documentation pages from a struct of metadata objects.
 	
@@ -332,7 +331,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		structInsert(model, "cfMetadata", "");
 		structInsert(model, "properties", "");
 		structInsert(model, "methods", "");
-		structInsert(model, "packageName", "");
+		structInsert(model, "packageKey", packageKey_str);
 		structInsert(model, "library", libraryRef_struct);
 		structInsert(model, "rendering", new cfc.TemplateRendering(libraryRef_struct));
 
@@ -345,7 +344,6 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		// check if the package is Top Level
 		if (packageKey_str neq "_topLevel")
 		{
-			model.packageName = packageKey_str;
 			packagePath_str &= replace(packageKey_str, ".", "/", "all");
 			packagePath_str &= "/";
 		}
@@ -547,4 +545,3 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		}
 	}
 }
-</cfscript>

@@ -4,7 +4,7 @@
 	@return HTML hyperlink or plain text.
 ">
 	<cfargument name="link" type="string" required="true" hint="String to be converted to a hyperlink." />
-	<cfargument name="renderingObject" type="any" required="true" hint"Instance of the type {@link} cfc.TemplateRendering." />
+	<cfargument name="renderingObject" type="any" required="true" hint="Instance of the type {@link} cfc.TemplateRendering." />
 	<cfargument name="rootPath" type="string" required="false" default="" hint="If not present in the webroot, all links to local pages are prepended by this root path." />
 	<cfargument name="componentLastName" type="boolean" required="false" default="false" hint="Display the link as the name behind the last dot of the full component name." />
 	<cfargument name="returnNoText" type="boolean" required="false" default="false" hint="Return null/void in case no hyperlink could be created." />
@@ -76,7 +76,7 @@
 					<cfset componentLink_str &= listLast(componentName_str, ".") />
 				<cfelse>
 					<cfset componentLink_str &= ">" />
-					<cfset componentLink_str &= componentName_str />
+					<cfset componentLink_str &= rendering_obj.fullName(componentName_str) />
 				</cfif>
 				<cfset componentLink_str &= "</a>" />
 				<cfif typeArray_bool>
@@ -85,9 +85,9 @@
 				<cfif arguments.componentLastName and rendering_obj.isInterface(componentName_str)>
 					<cfset componentLink_str = "<i>" & componentLink_str & "</i>" />
 				</cfif>
-				<cfset return componentLink_str />
+				<cfreturn componentLink_str />
 			<cfelse>
-				<cfif arguments.returnHRefOnly>
+				<cfif arguments.returnNoText>
 					<cfreturn />
 				<cfelse>
 					<cfif typeArray_bool>
@@ -98,4 +98,36 @@
 			</cfif>
 		</cfif>
 	</cfif>
+</cffunction>
+
+<cffunction name="packageLink" returntype="string" output="false" hint="
+	Converts a package key to the hyperlink belonging to the package-detail page.
+	@return HTML hyperlink.
+">
+	<cfargument name="packageKey" type="string" required="true" hint="Package key to be converted to a hyperlink." />
+	<cfargument name="fromPackageRoot" type="boolean" required="false" default="false" hint="Treat the current package directory as the webroot and strips links to components of the package path." />
+
+	<cfset var displayName_str = "" />
+	<cfset var packagePath_str = "" />
+	<cfset var return_str = "" />
+	<cfset var packageKey_str = arguments.packageKey />
+
+	<cfif packageKey_str eq "_topLevel">
+		<cfset displayName_str = "Top Level" />
+	<cfelse>
+		<cfset displayName_str = packageKey_str />
+		<cfif not arguments.fromPackageRoot>
+			<cfset packagePath_str = replace(packageKey_str, ".", "/", "all") & "/" />
+		</cfif>
+	</cfif>
+
+	<cfset return_str = "<a href=""" />
+	<cfset return_str &= packagePath_str />
+	<cfset return_str &= "package-detail.html"" onclick=""javascript:loadClassListFrame('" />
+	<cfset return_str &= packagePath_str />
+	<cfset return_str &= "class-list.html');"">" />
+	<cfset return_str &= displayName_str />
+	<cfset return_str &= "</a>" />
+
+	<cfreturn return_str />
 </cffunction>

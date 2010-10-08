@@ -14,7 +14,7 @@
 	<cfset localVar.propertyRelated_str = localVar.propertyMetadata_obj.getRelated() />
 	<cfset localVar.propertyType_str = localVar.propertyMetadata_obj.getType() />
 	<cfset localVar.propertyDefault = localVar.propertyMetadata_obj.getDefault() />
-	<cfset localVar.propertySignature_str = model.rendering.convertToLink(localVar.propertyType_str, localVar.rootPath_str, true) />
+	<cfset localVar.propertySignature_str = renderLink(localVar.propertyType_str, model.rendering, localVar.rootPath_str, true) />
 	<cfif localVar.properties_struct.propertyDetailItems[localVar.row_num].override>
 		<cfset localVar.propertySignature_str &= " override" />
 	</cfif>
@@ -85,7 +85,7 @@
 							<cfif not isNull(localVar.attributeValue)>
 								<cfset localVar.ormStarted_bool = true />
 								<cfif localVar.attributeName_str eq "cfc">
-									<cfset localVar.attributeValue = model.rendering.convertToLink(localVar.attributeValue, localVar.rootPath_str, false) />
+									<cfset localVar.attributeValue = renderLink(localVar.attributeValue, model.rendering, localVar.rootPath_str, false) />
 								</cfif>
 								<cfoutput>
 									<li><code>#localVar.attributeName_str#="#localVar.attributeValue#";</code></li>
@@ -107,7 +107,7 @@
 					<cfelse>
 						<cfset localVar.relatedStarted_bool = true>
 					</cfif>
-					<cfset localVar.relatedLinks_str &= model.rendering.convertToLink(trim(localVar.component_str), localVar.rootPath_str, true) />
+					<cfset localVar.relatedLinks_str &= renderLink(trim(localVar.component_str), model.rendering, localVar.rootPath_str, true) />
 				</cfloop>
 				<p>
 					<span class="label">See also</span>

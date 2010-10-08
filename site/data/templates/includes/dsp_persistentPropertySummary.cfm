@@ -41,7 +41,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+							#renderLink(localVar.propertyMetadata_obj.getType(), model.rendering, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -74,7 +74,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#model.rendering.convertToLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+							#renderLink(localVar.propertyMetadata_obj.getType(), model.rendering, localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -94,7 +94,7 @@
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#model.rendering.convertToLink(localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].definedBy, localVar.rootPath_str, true)#
+						#renderLink(localVar.properties_struct.persistentPropertySummaryRows[localVar.row_num].definedBy, model.rendering, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

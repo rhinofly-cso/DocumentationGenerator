@@ -1,10 +1,14 @@
 <!--- 
-	This template requires a struct packages_struct in the model scope containing the names 
+	This template requires a struct packages in the model scope containing the names 
 	of all packages as keys. A package is a collection of components found in a single 
 	directory. These components all have the same name up to the last dot. The package name is 
 	then given by this collective path name.
-	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
+	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
+<cfif not isDefined("renderLink")>
+	<cfinclude template="./includes/fnc_renderLink.cfm" />
+</cfif>
+
 <cfset localVar.packages_str = listSort(structKeyList(model.packages), "textnocase") />
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -34,7 +38,7 @@
 	<cfoutput>
 		<cfloop list="#localVar.packages_str#" index="localVar.packageKey_str">
 			<li>
-				#model.rendering.packageLink(localVar.packageKey_str)#
+				#packageLink(localVar.packageKey_str)#
 			</li>
 		</cfloop>
 	</cfoutput>

@@ -10,3 +10,5 @@
 </cfloop>
 
 <cfset builder_obj.generateDocumentation(application.documentRoot, packages_struct, library_struct) />
+
+<html><head><title>Documentation Generator</title></head></html>

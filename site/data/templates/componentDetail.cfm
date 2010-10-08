@@ -1,14 +1,11 @@
 <!--- 
-	This template requires the metadata object cfMetadata_obj of the component in the 
-	model scope.
-	Also, it requires an array of structs properties_arr containing the names of all 
-	properties of the component and its ancestors, together with their metadata object, and 
-	the name of the component they are defined by. Struct keys are "name", "metadata", and 
-	"definedBy".
-	A similar array of structs methods_arr is required for all methods. This includes an 
-	extra key "override" which designates that the method definition overrides an earlier 
-	definition.
-	Finally, it requires an object rendering_obj of the type cfc.TemplateRendering.
+	This template requires the metadata object cfMetadata of the component in the model scope.
+	Also, it requires an array properties of structs containing the names of all properties of 
+	the component and its ancestors, together with their metadata object, and the name of the 
+	component they are defined by. Struct keys are "name", "metadata", and "definedBy".
+	A similar array methods of structs is required for all methods. This includes an extra key 
+	"override" which designates that the method definition overrides an earlier definition.
+	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
 <cfif not isDefined("collectProperties")>
 	<cfinclude template="./includes/fnc_collectProperties.cfm" />
@@ -33,16 +30,15 @@
 
 <cfset localVar.componentName_str = model.cfMetadata.getName() />
 <cfset localVar.componentPage_str = replace(localVar.componentName_str, ".", "/", "all") & ".html" />
-<cfset localVar.packageName_str = listDeleteAt(localVar.componentName_str, listLen(localVar.componentName_str, "."), ".") />
-<cfset localVar.packagePath_str = replace(localVar.packageName_str, ".", "/", "all") & "/" />
 
-<cfif len(localVar.packageName_str) eq 0>
-	<cfset localVar.packageName_str = "Top Level" />
+<cfif model.packageKey eq "_topLevel">
+	<cfset localVar.packagePath_str = "/" />
 	<cfset localVar.rootPath_str = "" />
-	<cfset local.displayName_str = "Top Level" />
+	<cfset localVar.packageDisplayName_str = "Top Level" />
 <cfelse>
-	<cfset localVar.rootPath_str = repeatString("../", listLen(localVar.packageName_str, ".")) />
-	<cfset local.displayName_str = model.packageName />
+	<cfset localVar.packagePath_str = replace(model.packageKey, ".", "/", "all") & "/" />
+	<cfset localVar.rootPath_str = repeatString("../", listLen(model.packageKey, ".")) />
+	<cfset localVar.packageDisplayName_str = model.packageKey />
 </cfif>
 
 <cfset localVar.properties_struct = collectProperties(localVar.componentName_str, model.properties, model.rendering) />

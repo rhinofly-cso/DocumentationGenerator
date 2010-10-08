@@ -1,8 +1,12 @@
 <!--- 
-	This template requires an alphabetically sorted array of metadata objects components_arr 
-	in the model scope for all components in the library (sorted by last name).
-	Also, it requires an object rendering_obj of the type cfc.TemplateRendering.
+	This template requires an alphabetically sorted array components of metadata objects in the 
+	model scope for all components in the library (sorted by last name).
+	Also, it requires an object rendering of the type cfc.TemplateRendering.
  --->
+<cfif not isDefined("renderLink")>
+	<cfinclude template="./includes/fnc_renderLink.cfm" />
+</cfif>
+
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
 <html>
 <head>
@@ -28,7 +32,7 @@
 		<cfloop from="1" to="#arrayLen(model.components)#" index="localVar.row_num">
 			<cfset localVar.componentName_str = model.components[localVar.row_num].getName() />
 			<li>
-				#model.rendering.convertToLink(localVar.componentName_str, "", true)#
+				#renderLink(localVar.componentName_str, model.rendering, "", true)#
 			</li>
 		</cfloop>
 	</cfoutput>
