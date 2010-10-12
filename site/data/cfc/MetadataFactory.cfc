@@ -76,29 +76,33 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 			componentName_str &= listGetAt(files_qry.name[i], 1, ".");
 			
-			// get its metadata
-			try
+			// check if the component is to be skipped, this happes when it is declared in the settings.xml file
+			if (not listFind(application.excludeComponents, componentName_str))
 			{
-				metadata_struct = getComponentMetadata(componentName_str);
-			}
-			catch (any excptn)
-			{
-				throw(message="Could not obtain component metadata for #componentName_str#.");
-			}
-
-			// create the metadata object and insert it into the library struct
-			metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
-			structInsert(libraryRef_struct, componentName_str, metadata_obj);
-
-			// add component name to the list of components/interfaces in the packages struct
-			if (structKeyExists(packagesRef_struct[packageKey_str], metadata_struct.type))
-			{
-				componentName_str = listAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
-				packagesRef_struct[packageKey_str][metadata_struct.type] = componentName_str;
-			}
-			else
-			{
-				structInsert(packagesRef_struct[packageKey_str], metadata_struct.type, componentName_str);
+				// get its metadata
+				try
+				{
+					metadata_struct = getComponentMetadata(componentName_str);
+				}
+				catch (any excptn)
+				{
+					throw(message="Could not obtain component metadata for #componentName_str#.");
+				}
+		
+				// create the metadata object and insert it into the library struct
+				metadata_obj = createMetadataObject(metadata_struct, libraryRef_struct);
+				structInsert(libraryRef_struct, componentName_str, metadata_obj);
+		
+				// add component name to the list of components/interfaces in the packages struct
+				if (structKeyExists(packagesRef_struct[packageKey_str], metadata_struct.type))
+				{
+					componentName_str = listAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
+					packagesRef_struct[packageKey_str][metadata_struct.type] = componentName_str;
+				}
+				else
+				{
+					structInsert(packagesRef_struct[packageKey_str], metadata_struct.type, componentName_str);
+				}
 			}
 		}
 		
@@ -112,7 +116,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			directoryPath_str &= dirs_qry.name[i];
 			
 			// we exclude folders determined by filter conditions set in settings.xml
-			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludedFolders, dirs_qry.name[i]) and not listFind(application.excludedPaths, directoryPath_str))
+			if (dirs_qry.type[i] eq "Dir" and not reFind(application.reExcludeFolders, dirs_qry.name[i]) and not listFind(application.excludePaths, directoryPath_str))
 			{
 				browseDirectory(directoryPath_str, sourcePath_str, libraryRef_struct, packagesRef_struct);
 			}
