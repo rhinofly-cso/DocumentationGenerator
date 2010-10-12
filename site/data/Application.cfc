@@ -2,8 +2,9 @@
 component
 {
 	this.name = "DocumentationGenerator";
+	_init();
 	
-	public void function onRequestStart(string target)
+	private void function _init()
 	{
 		var i = 0;
 		var sourcePaths_str = "";
@@ -21,7 +22,7 @@ component
 					sourcePaths_str = listAppend(sourcePaths_str, settings_xml.sourcePath[i].xmlText);
 				}
 				this.customTagPaths = sourcePaths_str;
-				application["sourcePaths"] = sourcePaths_str;
+				application["sourcePaths"] = reReplace(sourcePaths_str, "[/\\]+", "/", "all");
 			}
 			else
 			{
@@ -30,7 +31,7 @@ component
 
 			if (structKeyExists(xmlParse("settings.xml").base.settings, "documentDestination"))
 			{
-				application["documentRoot"] = settings_xml.documentDestination.xmlText;
+				application["documentRoot"] = reReplace(settings_xml.documentDestination.xmlText, "[/\\]+", "/", "all");
 			}
 			else
 			{
@@ -53,12 +54,16 @@ component
 					path_str = settings_xml.excludedPath[i].xmlText;
 					while (findOneOf("/\", right(path_str, 1)))
 					{
-						removeChars(path_str, len(path_str), 1);
+						path_str = removeChars(path_str, len(path_str), 1);
 					}
 					excludedPaths_str = listAppend(excludedPaths_str, path_str);
 				}
 			}
-			application["excludedPaths"] = reReplace(excludedPaths_str, "[/\\]+", ".", "all");
+			application["excludedPaths"] = reReplace(excludedPaths_str, "[/\\]+", "/", "all");
+		}
+		else
+		{
+			throw(message="Error: please specify the settings for the application in settings.xml, using the tag &lt;settings&gt;.")
 		}
 	}
 }
