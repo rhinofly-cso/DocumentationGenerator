@@ -7,7 +7,7 @@
 	@date 17 August 2010
 	@see cfc.cfcData.CFPersistentComponent
 */
-component displayname="cfc.cfcData.CFMapping" extends="cfc.cfcData.CFProperty" accessors="true" output="false"
+component displayname="cfc.cfcData.CFMapping" extends="cfc.cfcData.CFProperty" accessors="true" output="false" serializable="true"
 {
 	property name="fieldType" type="string" hint="Determines what type of mapping the attribute represents.";
 	property name="remotingFetch" type="boolean" hint="Indicates whether the attribute can be sent over flash remoting.";

@@ -5,7 +5,7 @@
 	@author Eelco Eggen
 	@date 17 August 2010
 */
-component displayname="cfc.cfcData.CFMetadata" extends="fly.Object" accessors="true" output="false"
+component displayname="cfc.cfcData.CFMetadata" extends="fly.Object" accessors="true" output="false" serializable="true"
 {
 	property name="name" type="string" hint="Display name of the thing associated with the metadata.";
 	property name="hint" type="string" hint="Hint that accompanies the component code.";

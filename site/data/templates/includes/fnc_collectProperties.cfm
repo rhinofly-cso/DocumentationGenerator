@@ -4,7 +4,6 @@
 ">
 	<cfargument name="componentName" type="string" required="true" />
 	<cfargument name="propertyArray" type="array" required="true" />
-	<cfargument name="renderingObject" type="any" required="true" />
 
 	<cfset var i = 0 />
 	<cfset var propertySummaryRows_arr = arrayNew(1) />

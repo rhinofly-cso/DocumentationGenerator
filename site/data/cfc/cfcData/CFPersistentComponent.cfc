@@ -6,7 +6,7 @@
 	@author Eelco Eggen
 	@date 23 September 2010
 */
-component displayname="cfc.cfcData.CFPersistentComponent" extends="cfc.cfcData.CFComponent" accessors="true" output="false"
+component displayname="cfc.cfcData.CFPersistentComponent" extends="cfc.cfcData.CFComponent" accessors="true" output="false" serializable="true"
 {
 	property name="entityName" type="string" hint="Entity name if it is different from the component name.";
 	property name="table" type="string" hint="Table name if it is different from the component name.";

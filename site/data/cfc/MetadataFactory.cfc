@@ -96,12 +96,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				// add component name to the list of components/interfaces in the packages struct
 				if (structKeyExists(packagesRef_struct[packageKey_str], metadata_struct.type))
 				{
-					componentName_str = listAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
-					packagesRef_struct[packageKey_str][metadata_struct.type] = componentName_str;
+					arrayAppend(packagesRef_struct[packageKey_str][metadata_struct.type], componentName_str);
 				}
 				else
 				{
-					structInsert(packagesRef_struct[packageKey_str], metadata_struct.type, componentName_str);
+					structInsert(packagesRef_struct[packageKey_str], metadata_struct.type, [componentName_str]);
 				}
 			}
 		}
@@ -233,10 +232,10 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	private void function _resolveInheritance(required struct metadata, required any metadataObject, required struct library)
 	{
-		var extends_str = "";
+		var extends_arr = [];
 		var extendedComponent_str = "";
-		var extendedBy_str = "";
-		var implements_str = "";
+		var extendedBy_arr = [];
+		var implements_arr = [];
 		var implementedComponent_str = "";
 		var implementedBy_str = "";
 		var i = 0;
@@ -250,30 +249,32 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			// set the inheritance for this component
 			if (metadataRef_struct.type == "component")
 			{
-				extends_str = metadataRef_struct.extends.name;
+				extends_arr = [metadataRef_struct.extends.name];
 			}
 			else
 			{
-				extends_str = structKeyList(metadataRef_struct.extends);
+				extends_arr = structKeyArray(metadataRef_struct.extends);
 			}
-			for (i = 1; i <= listLen(extends_str); i++)
+			var extend_str = ""; 
+			for (i = 1; i <= arrayLen(extends_arr); i++)
 			{
-				if (listGetAt(extends_str, i) eq "WEB-INF.cftags.component" or listGetAt(extends_str, i) eq "WEB-INF.cftags.interface")
+				extend_str = extends_arr[i];
+				if (extend_str eq "WEB-INF.cftags.component" or extend_str eq "WEB-INF.cftags.interface")
 				{
-					extends_str = listDeleteAt(extends_str, i);
+					arrayDeleteAt(extends_arr, i);
 					break;
 				}
 			}
-			if (len(extends_str) > 0)
+			if (arrayLen(extends_arr) > 0)
 			{
-				metadataRef_obj.setExtends(extends_str);
+				metadataRef_obj.setExtends(extends_arr);
 			}
 	
 			// set the inheritance info for ancestors of this component
 			// when no metadata object is present for the ancestor, we add its name to the queue
-			for (i = 1; i <= listLen(extends_str); i++)
+			for (i = 1; i <= arrayLen(extends_arr); i++)
 			{
-				extendedComponent_str = listGetAt(extends_str, i);
+				extendedComponent_str = extends_arr[i];
 	
 				if (structKeyExists(libraryRef_struct, extendedComponent_str))
 				{
@@ -283,12 +284,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 				{
 					if (structKeyExists(libraryRef_struct["_extendedByQueue"], extendedComponent_str))
 					{
-						extendedBy_str = libraryRef_struct["_extendedByQueue"][extendedComponent_str];
-						libraryRef_struct["_extendedByQueue"][extendedComponent_str] = listAppend(extendedBy_str, name_str);
+						arrayAppend(libraryRef_struct["_extendedByQueue"][extendedComponent_str], name_str);
 					}
 					else
 					{
-						structInsert(libraryRef_struct["_extendedByQueue"], extendedComponent_str, name_str);
+						structInsert(libraryRef_struct["_extendedByQueue"], extendedComponent_str, [name_str]);
 					}
 				}
 			}
@@ -297,14 +297,14 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		if (structKeyExists(metadataRef_struct, "implements"))
 		{
 			// set the inheritance for this component
-			implements_str = structKeyList(metadataRef_struct.implements);
-			metadataRef_obj.setImplements(implements_str);
+			implements_arr = structKeyArray(metadataRef_struct.implements);
+			metadataRef_obj.setImplements(implements_arr);
 	
 			// set the inheritance info for interfaces that this component implements
 			// when no metadata object is present for the interface, we add its name to the queue
-			for (i = 1; i <= listLen(implements_str); i++)
+			for (i = 1; i <= arrayLen(implements_arr); i++)
 			{
-				implementedComponent_str = listGetAt(implements_str, i);
+				implementedComponent_str = implements_arr[i];
 	
 				if (structKeyExists(libraryRef_struct, implementedComponent_str))
 				{

@@ -4,11 +4,11 @@
 	componentName_str, componentPage_str, packageDisplayName_str, packagePath_str, rootPath_str, and 
 	type_str
  --->
-<cfset localVar.extends_str = model.cfMetadata.getExtends() />
-<cfset localVar.extendedBy_str = model.cfMetadata.getExtendedBy() />
+<cfset localVar.extends_arr = model.cfMetadata.getExtends() />
+<cfset localVar.extendedBy_arr = model.cfMetadata.getExtendedBy() />
 
 <cfif localVar.type_str eq "Component">
-	<cfset localVar.implements_str = model.cfMetadata.getImplements() />
+	<cfset localVar.implements_arr = model.cfMetadata.getImplements() />
 </cfif>
 <cfif localVar.type_str eq "Interface">
 	<cfset localVar.implementedBy_str = model.cfMetadata.getImplementedBy() />
@@ -17,7 +17,7 @@
 <cfset localVar.author_str = model.cfMetadata.getAuthor() />
 <cfset localVar.date_str = model.cfMetadata.getDate() />
 <cftry>
-	<cfset localVar.hint_str = model.rendering.renderHint(model.cfMetadata, localVar.rootPath_str) />
+	<cfset localVar.hint_str = renderHint(model.cfMetadata, localVar.rootPath_str) />
 	<cfcatch type="any">
 		<cfthrow message="Please review the comments in component #localVar.componentName_str#." detail="#cfcatch.message#">
 	</cfcatch>
@@ -31,16 +31,16 @@
 </cfif>
 
 <!--- append the component description with inheritance info for interfaces --->
-<cfif localVar.type_str eq "Interface" and not isNull(localVar.extends_str)>
+<cfif localVar.type_str eq "Interface" and not isNull(localVar.extends_arr)>
 	<cfset localVar.started_bool = false />
 	<cfset localVar.extendsLinks_str = " extends " />
-	<cfloop list="#localVar.extends_str#" index="localVar.parent_str">
+	<cfloop array="#localVar.extends_arr#" index="localVar.parent_str">
 		<cfif localVar.started_bool>
 			<cfset localVar.extendsLinks_str &= ", " />
 		<cfelse>
 			<cfset localVar.started_bool = true>
 		</cfif>
-		<cfset localVar.extendsLinks_str &= renderLink(localVar.parent_str, model.rendering, localVar.rootPath_str, true) />
+		<cfset localVar.extendsLinks_str &= renderLink(localVar.parent_str, localVar.rootPath_str, true) />
 	</cfloop>
 </cfif>
 
@@ -49,7 +49,7 @@
 <cfif not isNull(localVar.related_str)>
 	<cfset localVar.started_bool = false />
 	<cfloop list="#localVar.related_str#" index="localVar.component_str">
-		<cfset localVar.componentRelated_str = renderLink(trim(localVar.component_str), model.rendering, localVar.rootPath_str, true, true) />
+		<cfset localVar.componentRelated_str = renderLink(trim(localVar.component_str), localVar.rootPath_str, true, true) />
 		<cfif not isNull(localVar.componentRelated_str)>
 			<cfif localVar.started_bool>
 				<cfset localVar.relatedLinks_str &= ", " />
@@ -82,20 +82,21 @@
 	</cfoutput>
 	
 	<!--- display inheritance info for components --->
-	<cfif localVar.type_str eq "Component" and not isNull(localVar.extends_str)>
+	<cfif localVar.type_str eq "Component" and not isNull(localVar.extends_arr)>
 		<cfset localVar.inheritance_str = listLast(localVar.componentName_str, ".") />
-		<cfset localVar.parent_str = localVar.extends_str />
+		<cfset localVar.parent_arr = localVar.extends_arr />
 		<cfloop condition="true">
+			<cfset localVar.parent_str = localVar.parent_arr[1] />
 			<cfset localVar.inheritance_str &= " <img src=""" />
 			<cfset localVar.inheritance_str &= localVar.rootPath_str />
 			<cfset localVar.inheritance_str &= "images/inherit-arrow.gif"" title=""Inheritance"" alt=""Inheritance"" class=""inheritArrow""> " />
-			<cfset localVar.inheritance_str &= renderLink(localVar.parent_str, model.rendering, localVar.rootPath_str, true) />
+			<cfset localVar.inheritance_str &= renderLink(localVar.parent_str, localVar.rootPath_str, true) />
 	
 			<!--- break the loop if either the ancestor is not present in the library --->
-			<cfif structKeyExists(model.library, localVar.parent_str)>
-				<cfset localVar.parent_str = model.library[localVar.parent_str].getExtends() />
+			<cfif structKeyExists(model.libraryRef, localVar.parent_str)>
+				<cfset localVar.parent_arr = model.libraryRef[localVar.parent_str].getExtends() />
 				<!--- if for some reason, the ancestor doesn't extend anything, we break the loop --->
-				<cfif isNull(localVar.parent_str)>
+				<cfif isNull(localVar.parent_arr)>
 					<cfbreak />
 				</cfif>
 			<cfelse>
@@ -113,16 +114,16 @@
 		</tr>
 	</cfif>
 		
-	<cfif localVar.type_str eq "Component" and not isNull(localVar.implements_str)>
+	<cfif localVar.type_str eq "Component" and not isNull(localVar.implements_arr)>
 		<cfset localVar.started_bool = false />
 		<cfset localVar.implementsLinks_str = "" />
-		<cfloop list="#localVar.implements_str#" index="localVar.interface_str">
+		<cfloop array="#localVar.implements_arr#" index="localVar.interface_str">
 			<cfif localVar.started_bool>
 				<cfset localVar.implementsLinks_str &= ", " />
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementsLinks_str &= renderLink(localVar.interface_str, model.rendering, localVar.rootPath_str, true) />
+			<cfset localVar.implementsLinks_str &= renderLink(localVar.interface_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -144,7 +145,7 @@
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.implementorsLinks_str &= renderLink(localVar.component_str, model.rendering, localVar.rootPath_str, true) />
+			<cfset localVar.implementorsLinks_str &= renderLink(localVar.component_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>
@@ -157,16 +158,16 @@
 		</tr>
 	</cfif>
 	
-	<cfif not isNull(localVar.extendedBy_str)>
+	<cfif not isNull(localVar.extendedBy_arr)>
 		<cfset localVar.started_bool = false />
 		<cfset localVar.subclassesLinks_str = "" />
-		<cfloop list="#localVar.extendedBy_str#" index="localVar.child_str">
+		<cfloop array="#localVar.extendedBy_arr#" index="localVar.child_str">
 			<cfif localVar.started_bool>
 				<cfset localVar.subclassesLinks_str &= ", " />
 			<cfelse>
 				<cfset localVar.started_bool = true>
 			</cfif>
-			<cfset localVar.subclassesLinks_str &= renderLink(localVar.child_str, model.rendering, localVar.rootPath_str, true) />
+			<cfset localVar.subclassesLinks_str &= renderLink(localVar.child_str, localVar.rootPath_str, true) />
 		</cfloop>
 		
 		<tr>

@@ -15,19 +15,20 @@
 	</tr>
 
 	<cfloop from="1" to="#arrayLen(localVar.methods_struct.methodSummaryRows)#" index="localVar.row_num">
-		<cfset localVar.methodMetadata_obj = localVar.methods_struct.methodSummaryRows[localVar.row_num].metadata />
+		<cfset localVar.method_struct = localVar.methods_struct.methodSummaryRows[localVar.row_num] />
+		<cfset localVar.methodMetadata_obj = localVar.method_struct.metadata />
 	
 		<cfset localVar.methodSignature_str = "<a href=""" />
-		<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy neq localVar.componentName_str>
+		<cfif localVar.method_struct.definedBy neq localVar.componentName_str>
 			<cfset localVar.methodSignature_str &= localVar.rootPath_str />
-			<cfset localVar.methodSignature_str &= replace(localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy, ".", "/", "all") />
+			<cfset localVar.methodSignature_str &= replace(localVar.method_struct.definedBy, ".", "/", "all") />
 			<cfset localVar.methodSignature_str &= ".html" />
 		</cfif>
 		<!--- append a pound sign --->
 		<cfset localVar.methodSignature_str &= chr(35) />
-		<cfset localVar.methodSignature_str &= localVar.methods_struct.methodSummaryRows[localVar.row_num].name />
+		<cfset localVar.methodSignature_str &= localVar.method_struct.name />
 		<cfset localVar.methodSignature_str &= "()"" class=""signatureLink"">" />
-		<cfset localVar.methodSignature_str &= localVar.methods_struct.methodSummaryRows[localVar.row_num].name />
+		<cfset localVar.methodSignature_str &= localVar.method_struct.name />
 		<cfset localVar.methodSignature_str &= "</a>" />
 
 		<cfset localVar.methodSignature_str &= "(" />
@@ -35,9 +36,9 @@
 		<cfset localVar.paramStarted_bool = false />
 		<cfloop from="1" to="#arrayLen(localVar.parameters_arr)#" index="localVar.param_num">
 			<cftry>
-				<cfset model.rendering.renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
+				<cfset renderHint(localVar.parameters_arr[localVar.param_num], localVar.rootPath_str) />
 				<cfcatch type="any">
-					<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+					<cfthrow message="Please review the comments in component #localVar.method_struct.definedBy#." detail="#cfcatch.message#">
 				</cfcatch>
 			</cftry>
 			<cfset localVar.argumentType_str = localVar.parameters_arr[localVar.param_num].getType() />
@@ -50,7 +51,7 @@
 			<cfif localVar.parameters_arr[localVar.param_num].getRequired()>
 				<cfset localVar.methodSignature_str &= "required " />
 			</cfif>
-			<cfset localVar.methodSignature_str &= renderLink(localVar.argumentType_str, model.rendering, localVar.rootPath_str, true) />
+			<cfset localVar.methodSignature_str &= renderLink(localVar.argumentType_str, localVar.rootPath_str, true) />
 			<cfset localVar.methodSignature_str &= " " />
 			<cfset localVar.methodSignature_str &= localVar.parameters_arr[localVar.param_num].getName() />
 			<cfif not isNull(localVar.argumentDefault)>
@@ -83,7 +84,7 @@
 		<cfset localVar.methodSignature_str &= ")" />
 
 		<cfoutput>
-			<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy eq localVar.componentName_str>
+			<cfif localVar.method_struct.definedBy eq localVar.componentName_str>
 				<tr class="">
 					<td class="summaryTablePaddingCol">
 						&nbsp;
@@ -93,7 +94,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#renderLink(localVar.methodMetadata_obj.getReturnType(), model.rendering, localVar.rootPath_str, true)#
+							#renderLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -101,13 +102,13 @@
 							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
+							<cfif localVar.method_struct.override>
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								#renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
-									<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+									<cfthrow message="Please review the comments in component #localVar.method_struct.definedBy#." detail="#cfcatch.message#">
 								</cfcatch>
 							</cftry>
 						</div>
@@ -126,7 +127,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#renderLink(localVar.methodMetadata_obj.getReturnType(), model.rendering, localVar.rootPath_str, true)#
+							#renderLink(localVar.methodMetadata_obj.getReturnType(), localVar.rootPath_str, true)#
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">
@@ -134,19 +135,21 @@
 							#localVar.methodSignature_str#
 						</div>
 						<div class="summaryTableDescription">
-							<cfif localVar.methods_struct.methodSummaryRows[localVar.row_num].override>
+							<cfif localVar.method_struct.override>
 								[override]
 							</cfif>
 							<cftry>
-								#model.rendering.renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
+								#renderHint(localVar.methodMetadata_obj, localVar.rootPath_str, "short")#
 								<cfcatch type="any">
-									<cfthrow message="Please review the comments in component #localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy#." detail="#cfcatch.message#">
+									<cfrethrow />
+									<cfset localVar.definedBy = localVar.method_struct.definedBy />
+									<cfthrow message="Please review the comments in component #localVar.definedBy# (#getComponentMetadata(localVar.definedBy).path#)." detail="#cfcatch.message#">
 								</cfcatch>
 							</cftry>
 						</div>
 					</td>
 					<td class="summaryTableOwnerCol">
-						#renderLink(localVar.methods_struct.methodSummaryRows[localVar.row_num].definedBy, model.rendering, localVar.rootPath_str, true)#
+						#renderLink(localVar.method_struct.definedBy, localVar.rootPath_str, true)#
 					</td>
 				</tr>
 			</cfif>

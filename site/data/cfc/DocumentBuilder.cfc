@@ -17,6 +17,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 	*/
 	public void function generateDocumentation(required string documentRoot, required struct packages, required struct library)
 	{
+		trace(text="generateDocumentation start");		
 		var i = 0;
 		var model = structNew();
 		var localVar = structNew();
@@ -25,19 +26,22 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var apiDocSource_str = "";
 		var documentRoot_str = arguments.documentRoot;
 		var packages_struct = arguments.packages;
-		var packageList_str = structKeyList(packages_struct);
 		var libraryRef_struct = arguments.library;
+		trace(text="arguments");		
+		var packages_arr = structKeyArray(packages_struct);
+		trace(text=" package key array");		
 		
 		// initialize a number of variables in the model scope
+		structInsert(model, "components", componentArray(structKeyArray(libraryRef_struct), libraryRef_struct));
 		structInsert(model, "packages", packages_struct);
 		structInsert(model, "libraryRef", libraryRef_struct);
-		structInsert(model, "rendering", new cfc.TemplateRendering(libraryRef_struct));
-		structInsert(model, "components", componentArray(structKeyList(libraryRef_struct), libraryRef_struct));
+		trace(text="model");		
 
 		// set the correct source directory for the basic files
 		apiDocSource_str = reReplace(getBaseTemplatePath(), "[/\\]+", "/", "all");
 		apiDocSource_str = listDeleteAt(apiDocSource_str, listLen(apiDocSource_str, "/"), "/");
 		apiDocSource_str &= "/apiDoc/";
+		trace(text=" apiSourceDoc");		
 		
 		// check that the path to the document root has the correct format
 		documentRoot_str = reReplace(documentRoot_str, "[/\\]+", "/", "all");
@@ -45,16 +49,19 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		{
 			documentRoot_str &= "/";
 		}
+		trace(text=" documentRoot");		
 		
 		// write all package documentation
-		for (i = 1; i <= listLen(packageList_str); i++)
+		for (i = 1; i <= arrayLen(packages_arr); i++)
 		{
-			packageKey_str = listGetAt(packageList_str, i);
+			packageKey_str = packages_arr[i];
 			writePackageDocumentation(packageKey_str, documentRoot_str, packages_struct, libraryRef_struct);
 		}
+		trace(text=" packageDocumentation");		
 
 		// copy basic files
 		_copyBasicFiles(apiDocSource_str, documentRoot_str);
+		trace(text=" copyBasicFiles");		
 		
 		// write lists and summaries for all classes and packages
 		savecontent variable="page_str"
@@ -64,6 +71,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		fileName_str = documentRoot_str;
 		fileName_str &= "all-classes.html";
 		fileWrite(fileName_str, page_str);
+		trace(text=" componentList");		
 
 		savecontent variable="page_str"
 		{
@@ -72,6 +80,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		fileName_str = documentRoot_str;
 		fileName_str &= "class-summary.html";
 		fileWrite(fileName_str, page_str);
+		trace(text=" componentSummary");		
 
 		savecontent variable="page_str"
 		{
@@ -80,6 +89,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		fileName_str = documentRoot_str;
 		fileName_str &= "package-list.html";
 		fileWrite(fileName_str, page_str);
+		trace(text=" packageList");		
 
 		savecontent variable="page_str"
 		{
@@ -88,6 +98,9 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		fileName_str = documentRoot_str;
 		fileName_str &= "package-summary.html";
 		fileWrite(fileName_str, page_str);
+		trace(text=" packageSummary");		
+		
+		trace(text="generateDocumentation end");
 	}
 	
 	/**
@@ -117,8 +130,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		structInsert(model, "properties", "");
 		structInsert(model, "methods", "");
 		structInsert(model, "packageKey", packageKey_str);
-		structInsert(model, "library", libraryRef_struct);
-		structInsert(model, "rendering", new cfc.TemplateRendering(libraryRef_struct));
+		structInsert(model, "libraryRef", libraryRef_struct);
 
 		// set the correct path to the package documentation directory
 		packagePath_str = reReplace(arguments.documentRoot, "[/\\]+", "/", "all");
@@ -142,9 +154,9 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		if (structKeyExists(packageRef_struct, "interface"))
 		{
 			model.interfaces = componentArray(packageRef_struct.interface, libraryRef_struct);
-			for (i = 1; i <= listLen(packageRef_struct.interface); i++)
+			for (i = 1; i <= arrayLen(packageRef_struct.interface); i++)
 			{
-				componentName_str = listGetAt(packageRef_struct.interface, i);
+				componentName_str = packageRef_struct.interface[i];
 				model.cfMetadata = libraryRef_struct[componentName_str];
 				if (not model.cfMetadata.getPrivate())
 				{
@@ -166,9 +178,9 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		if (structKeyExists(packageRef_struct, "component"))
 		{
 			model.components = componentArray(packageRef_struct.component, libraryRef_struct);
-			for (i = 1; i <= listLen(packageRef_struct.component); i++)
+			for (i = 1; i <= arrayLen(packageRef_struct.component); i++)
 			{
-				componentName_str = listGetAt(packageRef_struct.component, i);
+				componentName_str = packageRef_struct.component[i];
 				model.cfMetadata = libraryRef_struct[componentName_str];
 				if (not model.cfMetadata.getPrivate())
 				{
@@ -259,25 +271,24 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		@see cfc.MetadataFactory
 			cfc.cfcData.CFC
 	*/
-	public array function componentArray(required string componentList, required struct library)
+	public array function componentArray(required array componentArray, required struct library)
 	{
 		var return_arr = arrayNew(1);
 		var i = 0;
 		var componentName_str = "";
-		var components_str = sortByLastName(arguments.componentList);
+		var components_arr = sortByLastName(arguments.componentArray);
 		var libraryRef_struct = arguments.library;
+		var component_obj = javacast("null", 0);
 
-		for (i = 1; i <= listLen(components_str); i++)
+		for (i = 1; i <= arrayLen(components_arr); i++)
 		{
-			componentName_str = listGetAt(components_str, i);
+			componentName_str = components_arr[i];
 			if (structKeyExists(libraryRef_struct, componentName_str))
 			{
-				if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFC"))
+				component_obj = libraryRef_struct[componentName_str];
+				if (isInstanceOf(component_obj, "cfc.cfcData.CFC") and not component_obj.getPrivate())
 				{
-					if (not libraryRef_struct[componentName_str].getPrivate())
-					{
-						arrayAppend(return_arr, libraryRef_struct[componentName_str]);
-					}
+					arrayAppend(return_arr, component_obj);
 				}
 			}
 		}
@@ -290,19 +301,20 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		@componentList List of component names.
 		@return Alphabetized list of component names.
 	*/
-	public string function sortByLastName(required string componentList)
+	public array function sortByLastName(required array componentArray)
 	{
 		var i = 0;
 		var j = 0;
 		var componentName_str = "";
 		var reverseName_str = "";
 		var word_str = "";
-		var components_str = arguments.componentList;
+		var components_arr = arguments.componentArray;
+		var componentNames_struct = {};
 
 		// loop through all component names
-		for (i = 1; i <= listLen(components_str); i++)
+		for (i = 1; i <= arrayLen(components_arr); i++)
 		{
-			componentName_str = listGetAt(components_str, i);
+			componentName_str = components_arr[i];
 			
 			// reverse the order of expressions separated by the dots
 			reverseName_str = "";
@@ -311,26 +323,21 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 				word_str = listGetAt(componentName_str, j, ".");
 				reverseName_str = listPrepend(reverseName_str, word_str, ".");
 			}
-			components_str = listSetAt(components_str, i, reverseName_str);
+			componentNames_struct[reverseName_str] = componentName_str;
+			components_arr[i] = reverseName_str;
 		}
 
 		// sort alphabetically
-		components_str = listSort(components_str, "textnocase");
+		arraySort(components_arr, "textnocase");
 
 		// revert the names to their original form
-		for (i = 1; i <= listLen(components_str); i++)
+		for (i = 1; i <= arrayLen(components_arr); i++)
 		{
-			reverseName_str = listGetAt(components_str, i);
-			componentName_str = "";
-			for (j = 1; j <= listLen(reverseName_str, "."); j++)
-			{
-				word_str = listGetAt(reverseName_str, j, ".");
-				componentName_str = listPrepend(componentName_str, word_str, ".");
-			}
-			components_str = listSetAt(components_str, i, componentName_str);
+			reverseName_str = components_arr[i];
+			components_arr[i] = componentNames_struct[reverseName_str];
 		}
 		
-		return components_str;
+		return components_arr;
 	}
 	
 	/**
@@ -345,7 +352,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		@component Name of the component for which all property information is to be retrieved.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
 	*/
-	public array function propertyArray(required string component, required struct library)
+	public array function propertyArray(required string componentName, required struct library)
 	{
 		var return_arr = arrayNew(1);
 		var i = 0;
@@ -353,7 +360,7 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		var propertyName_str = "";
 		var property_struct = "";
 		var allProperties_struct = structNew();
-		var componentName_str = arguments.component;
+		var componentName_str = arguments.componentName;
 		var libraryRef_struct = arguments.library;
 		
 		_collectProperties(componentName_str, libraryRef_struct, allProperties_struct);
@@ -379,15 +386,15 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Inserts property metadata objects into the allProperties struct for the properties of 
 		the component and its ancestors.
 	*/
-	private void function _collectProperties(required string component, required struct library, required struct allProperties)
+	private void function _collectProperties(required string componentName, required struct library, required struct allProperties)
 	{
 		var i = 0;
 		var propertyName_str = "";
 		var property_struct = "";
-		var componentName_str = arguments.component;
+		var componentName_str = arguments.componentName;
 		var libraryRef_struct = arguments.library;
 		var propertiesRef_arr = libraryRef_struct[componentName_str].getProperties();
-		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
+		var extendsRef_arr = libraryRef_struct[componentName_str].getExtends();
 		var allPropertiesRef_struct = arguments.allProperties;
 		
 		if (not isNull(propertiesRef_arr))
@@ -414,11 +421,11 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		}
 
 		// collect the properties of all ancestors
-		if (not isNull(extendsRef_str))
+		if (not isNull(extendsRef_arr))
 		{
-			for (i = 1; i <= listLen(extendsRef_str); i++)
+			for (i = 1; i <= arrayLen(extendsRef_arr); i++)
 			{
-				componentName_str = listGetAt(extendsRef_str, i);
+				componentName_str = extendsRef_arr[i];
 				if (structKeyExists(libraryRef_struct, componentName_str))
 				{
 					_collectProperties(componentName_str, libraryRef_struct, allPropertiesRef_struct);
@@ -439,25 +446,24 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		@component Name of the component for which all method information is to be retrieved.
 		@library Struct containing key-value pairs of component names and their corresponding metadata objects.
 	*/
-	public array function methodArray(required string component, required struct library)
+	public array function methodArray(required string componentName, required struct library)
 	{
 		var return_arr = arrayNew(1);
 		var i = 0;
-		var methodList_str = "";
 		var methodName_str = "";
 		var method_struct = "";
 		var allMethods_struct = structNew();
-		var componentName_str = arguments.component;
+		var componentName_str = arguments.componentName;
 		var libraryRef_struct = arguments.library;
 		
 		_collectMethods(componentName_str, libraryRef_struct, allMethods_struct);
 		
-		methodList_str = structKeyList(allMethods_struct);
-		methodList_str = listSort(methodList_str, "textnocase");
+		var methodList_arr = structKeyArray(allMethods_struct);
+		arraySort(methodList_arr, "textnocase");
 		
-		for (i = 1; i <= listLen(methodList_str); i++)
+		for (i = 1; i <= arrayLen(methodList_arr); i++)
 		{
-			methodName_str = listGetAt(methodList_str, i);
+			methodName_str = methodList_arr[i];
 			if (not allMethods_struct[methodName_str].metadata.getPrivate())
 			{
 				method_struct = structCopy(allMethods_struct[methodName_str]);
@@ -473,16 +479,16 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		Inserts function metadata objects into the allMethods struct for the methods of the 
 		component and its ancestors.
 	*/
-	private void function _collectMethods(required string component, required struct library, required struct allMethods)
+	private void function _collectMethods(required string componentName, required struct library, required struct allMethods)
 	{
 		var i = 0;
 		var methodName_str = "";
 		var method_struct = "";
 		var ancestor_str = "";
-		var implementsRef_str = "";
-		var componentName_str = arguments.component;
+		var implementsRef_arr = [];
+		var componentName_str = arguments.componentName;
 		var libraryRef_struct = arguments.library;
-		var extendsRef_str = libraryRef_struct[componentName_str].getExtends();
+		var extendsRef_arr = libraryRef_struct[componentName_str].getExtends();
 		var functionsRef_arr = libraryRef_struct[componentName_str].getFunctions();
 		var allMethodsRef_struct = arguments.allMethods;
 		
@@ -515,11 +521,11 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		}
 		
 		// collect the methods of all ancestors
-		if (not isNull(extendsRef_str))
+		if (not isNull(extendsRef_arr))
 		{
-			for (i = 1; i <= listLen(extendsRef_str); i++)
+			for (i = 1; i <= arrayLen(extendsRef_arr); i++)
 			{
-				ancestor_str = listGetAt(extendsRef_str, i);
+				ancestor_str = extendsRef_arr[i];
 				if (structKeyExists(libraryRef_struct, ancestor_str))
 				{
 					_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);
@@ -530,12 +536,12 @@ component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
 		if (isInstanceOf(libraryRef_struct[componentName_str], "cfc.cfcData.CFComponent"))
 		{
 			// collect the methods of all interfaces this component implements and their ancestors
-			implementsRef_str = libraryRef_struct[componentName_str].getImplements();
-			if (not isNull(implementsRef_str))
+			implementsRef_arr = libraryRef_struct[componentName_str].getImplements();
+			if (not isNull(implementsRef_arr))
 			{
-				for (i = 1; i <= listLen(implementsRef_str); i++)
+				for (i = 1; i <= arrayLen(implementsRef_arr); i++)
 				{
-					ancestor_str = listGetAt(implementsRef_str, i);
+					ancestor_str = implementsRef_arr[i];
 					if (structKeyExists(libraryRef_struct, ancestor_str))
 					{
 						_collectMethods(ancestor_str, libraryRef_struct, allMethodsRef_struct);

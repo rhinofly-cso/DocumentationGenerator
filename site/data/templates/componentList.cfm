@@ -3,10 +3,9 @@
 	Also, it requires an alphabetically sorted array interfaces of metadata objects in the 
 	model scope for all interfaces in the library (sorted by last name) and a similar array 
 	components for the (non-interface) components.
-	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
 <cfif not isDefined("renderLink")>
-	<cfinclude template="./includes/fnc_renderLink.cfm" />
+	<cfinclude template="includes/fnc_renderFunctions.cfm" />
 </cfif>
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -44,7 +43,7 @@
 		<ul class="plainList">
 			<cfloop from="1" to="#arrayLen(model.interfaces)#" index="localVar.row_num">
 				<li>
-					#renderLink(model.interfaces[localVar.row_num].getName(), model.rendering, "", true, false, true)#
+					#renderLink(model.interfaces[localVar.row_num].getName(), "", true, false, true)#
 				</li>
 			</cfloop>
 		</ul>
@@ -57,7 +56,7 @@
 		<ul class="plainList">
 			<cfloop from="1" to="#arrayLen(model.components)#" index="localVar.row_num">
 				<li>
-					#renderLink(model.components[localVar.row_num].getName(), model.rendering, "", true, false, true)#
+					#renderLink(model.components[localVar.row_num].getName(), "", true, false, true)#
 				</li>
 			</cfloop>
 		</ul>

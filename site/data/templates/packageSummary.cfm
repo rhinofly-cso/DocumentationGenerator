@@ -3,10 +3,9 @@
 	of all packages as keys. Although this template creates a summary-like page, there are no 
 	descriptions for packages. Therefore, essentially, this is the same list as constructed in 
 	packageList.cfm.
-	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
 <cfif not isDefined("renderLink")>
-	<cfinclude template="./includes/fnc_renderLink.cfm" />
+	<cfinclude template="includes/fnc_renderFunctions.cfm" />
 </cfif>
 
 <cfset localVar.packages_str = listSort(structKeyList(model.packages), "textnocase") />

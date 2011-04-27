@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 17 August 2010
 */
-component displayname="cfc.cfcData.CFProperty" extends="cfc.cfcData.CFMetadata" accessors="true" output="false"
+component displayname="cfc.cfcData.CFProperty" extends="cfc.cfcData.CFMetadata" accessors="true" output="false" serializable="true"
 {
 	property name="type" type="string" hint="Variable type of the property.";
 	property name="default" type="any" hint="Default value of the type <i>type</i>.";

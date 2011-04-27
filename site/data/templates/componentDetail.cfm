@@ -5,16 +5,15 @@
 	component they are defined by. Struct keys are "name", "metadata", and "definedBy".
 	A similar array methods of structs is required for all methods. This includes an extra key 
 	"override" which designates that the method definition overrides an earlier definition.
-	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
 <cfif not isDefined("collectProperties")>
-	<cfinclude template="./includes/fnc_collectProperties.cfm" />
+	<cfinclude template="includes/fnc_collectProperties.cfm" />
 </cfif>
 <cfif not isDefined("collectMethods")>
-	<cfinclude template="./includes/fnc_collectMethods.cfm" />
+	<cfinclude template="includes/fnc_collectMethods.cfm" />
 </cfif>
 <cfif not isDefined("renderLink")>
-	<cfinclude template="./includes/fnc_renderLink.cfm" />
+	<cfinclude template="includes/fnc_renderFunctions.cfm" />
 </cfif>
 
 <!doctype html public "-//w3c//dtd HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd" />
@@ -41,8 +40,8 @@
 	<cfset localVar.packageDisplayName_str = model.packageKey />
 </cfif>
 
-<cfset localVar.properties_struct = collectProperties(localVar.componentName_str, model.properties, model.rendering) />
-<cfset localVar.methods_struct = collectMethods(localVar.componentName_str, model.methods, model.rendering) />
+<cfset localVar.properties_struct = collectProperties(localVar.componentName_str, model.properties) />
+<cfset localVar.methods_struct = collectMethods(localVar.componentName_str, model.methods) />
 
 <head>
 <cfoutput>

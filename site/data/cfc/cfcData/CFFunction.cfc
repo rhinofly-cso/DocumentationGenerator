@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 17 August 2010
 */
-component displayname="cfc.cfcData.CFFunction" extends="cfc.cfcData.CFMetadata" accessors="true" output="false"
+component displayname="cfc.cfcData.CFFunction" extends="cfc.cfcData.CFMetadata" accessors="true" output="false" serializable="true"
 {
 	property name="access" type="string" hint="Indicates whether the function is private or public.";
 	property name="returnType" type="string" hint="Variable type of function output.";

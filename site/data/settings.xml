@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <base>
 	<settings>
-		<sourcePath>C:\development\libraries\CSOShared</sourcePath>
-		<sourcePath>C:\development\libraries\RhinoflyLibrary\src</sourcePath>
-		<sourcePath>C:\development\libraries\TICC2Library\src</sourcePath>
-		<documentDestination>C:\development\docGen\test</documentDestination>
+		<sourcePath>C:\dev\sites\CSO\CSOShared\src</sourcePath>
+		<sourcePath>C:\dev\libraries\RhinoflyLibrary\src</sourcePath>
+		<documentDestination>C:\dev\sites\CSO\csoDoc\doc</documentDestination>
 	</settings>
 </base>

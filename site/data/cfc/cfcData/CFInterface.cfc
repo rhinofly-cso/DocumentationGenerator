@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 17 August 2010
 */
-component displayname="cfc.cfcData.CFInterface" extends="cfc.cfcData.CFC" accessors="true" output="false"
+component displayname="cfc.cfcData.CFInterface" extends="cfc.cfcData.CFC" accessors="true" output="false" serializable="true"
 {
 	property name="implementedBy" type="string" hint="List of CFCs that implement the interface.";
 

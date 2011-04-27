@@ -3,10 +3,9 @@
 	of all packages as keys. A package is a collection of components found in a single 
 	directory. These components all have the same name up to the last dot. The package name is 
 	then given by this collective path name.
-	Finally, it requires an object rendering of the type cfc.TemplateRendering.
  --->
 <cfif not isDefined("renderLink")>
-	<cfinclude template="./includes/fnc_renderLink.cfm" />
+	<cfinclude template="includes/fnc_renderFunctions.cfm" />
 </cfif>
 
 <cfset localVar.packages_str = listSort(structKeyList(model.packages), "textnocase") />

@@ -3,6 +3,8 @@ component
 {
 	this.name = "DocumentationGenerator";
 	variables._settings_struct = structNew();
+	this.sessionManagement = true;
+	this.sessionTimeout = createTimeSpan(0, 0, 100, 0);
 	
 	_init();
 	this.customTagPaths = variables._settings_struct.sourcePaths;
