@@ -46,7 +46,7 @@ component
 
 			if (structKeyExists(xmlParse("settings.xml").base.settings, "reExcludeFolder"))
 			{
-				for (i = 1; i <= arrayLen(settings_xml.reExcludedFolder); i++)
+				for (i = 1; i <= arrayLen(settings_xml.reExcludeFolder); i++)
 				{
 					reExcludeFolders_str = listAppend(reExcludeFolders_str, settings_xml.reExcludeFolder[i].xmlText, "|");
 				}

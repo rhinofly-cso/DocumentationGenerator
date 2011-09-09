@@ -320,11 +320,10 @@
 				<cfif len(link_str) > len(componentName_str)>
 					<!--- add the rest of the link --->
 					<cfset var linkRest_str = removechars(link_str, 1, len(componentName_str)) />
-					<cfset componentLink_str &= linkRest_str & "{" & typeArray_bool & "}"/>
 					<cfif typeArray_bool>
-						<cfset linkRest_str &= removechars(linkRest_str, 1, 2) />
+						<cfset linkRest_str = removechars(linkRest_str, 1, 2) />
 					</cfif>
-					<cfset componentLink_str &= linkRest_str & linkRest_str/>
+					<cfset componentLink_str &= linkRest_str />
 				</cfif>
 
 				<cfset componentLink_str &= """ onclick=""javascript:loadClassListFrame('" />
