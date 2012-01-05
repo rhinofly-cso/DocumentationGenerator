@@ -297,7 +297,14 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		if (structKeyExists(metadataRef_struct, "implements"))
 		{
 			// set the inheritance for this component
-			implements_arr = structKeyArray(metadataRef_struct.implements);
+			if (isStruct(metadataRef_struct.implements))
+			{
+				implements_arr = structKeyArray(metadataRef_struct.implements);
+			}
+			else
+			{
+				implements_arr = listToArray(metadataRef_struct.implements);
+			}
 			metadataRef_obj.setImplements(implements_arr);
 	
 			// set the inheritance info for interfaces that this component implements
