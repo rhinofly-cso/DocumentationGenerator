@@ -54,7 +54,7 @@
 				<cfset localVar.methodSignature_str &= """" />
 			<cfelseif localVar.argumentType_str eq "numeric">
 				<cfset localVar.methodSignature_str &= localVar.argumentDefault />
-			<cfelseif localVar.argumentType_str eq "boolean">
+			<cfelseif localVar.argumentType_str eq "boolean" and isBoolean(localVar.argumentDefault)>
 				<cfif localVar.argumentDefault>
 					<cfset localVar.methodSignature_str &= "true" />
 				<cfelse>
