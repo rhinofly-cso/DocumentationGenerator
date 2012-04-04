@@ -17,6 +17,7 @@ component
 		var path_str = "";
 		var excludePathList_str = "";
 		var excludeComponentList_str = "";
+		var includePackageList_str = "";
 		var settings_xml = xmlParse("settings.xml").base.settings;
 		
 		if (structKeyExists(xmlParse("settings.xml").base, "settings"))
@@ -75,6 +76,15 @@ component
 				}
 			}
 			variables._settings_struct["excludeComponents"] = excludeComponentList_str;
+			
+			if (structKeyExists(xmlParse("settings.xml").base.settings, "includePackage"))
+			{
+				for (i = 1; i <= arrayLen(settings_xml.includePackage); i++)
+				{
+					includePackageList_str = listAppend(includePackageList_str, settings_xml.includePackage[i].xmlText);
+				}
+			}
+			variables._settings_struct["includePackages"] = includePackageList_str;
 		}
 		else
 		{
