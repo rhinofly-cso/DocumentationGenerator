@@ -1,6 +1,3 @@
-DocumentationGenerator
-======================
-
 # Introduction
 
 The documentation generator is designed to make ColdFusion developers' lives easier. It generates static pages in HTML, which can then be used similar to language reference documentation. Just select the library or libraries of ColdFusion components (.cfc files) you are using.
@@ -31,7 +28,7 @@ The settings.xml file contains all the tags that determine how the documentation
   * `<sourcePath>` – an absolute path to a library up for documentation; use as many tags as you like
   * `<documentDestination>` – the destination folder (also an absolute path)
 
-Additionally, you can specify regular expressions for library folders that need to be skipped in `<reExcludeFolder>`. The tag adds REs in addition to the default value `&quot;^\\.&quot;`, which means that the generator always skips folders which have a name starting with a dot. Alternatively, specify an absolute path to a folder – and all of its subdirectories – that needs to be skipped in `<excludePath>`. You can also denote separate components that need to be skipped using `<excludeComponent>`. All tags can be used multiple times.
+Additionally, you can specify regular expressions for library folders that need to be skipped in `<reExcludeFolder>`. The tag adds REs in addition to the default value `"^\."`, which means that the generator always skips folders which have a name starting with a dot. Alternatively, specify an absolute path to a folder – and all of its subdirectories – that needs to be skipped in `<excludePath>`. You can also denote separate components that need to be skipped using `<excludeComponent>`. All tags can be used multiple times.
 
 ### Tag specifications
 
