@@ -5,10 +5,13 @@ In ColdFusion, there are two ways to generate metadata for the purpose of refere
   * set attributes native to ColdFusion
   * include tags in the hint of a component, interface, function, or property
 
-The hints in CFScript are placed directly in front of the definition, in between the comment symbols &quot;/**&quot; and &quot;*/&quot;. Each new line of comment can start with a &quot;*&quot;, but it's not necessary. In principle, a tag &quot;@foo&quot; within such a hint must be placed at the beginning of a line, and is converted to an attribute with the name &quot;foo&quot; and the value equal to whatever follows the tag in the form of a string. However, multiple uses of the same tag results in a single value corresponding to the last usage of the tag. Any comments not preceded by a tag are put into the &quot;hint&quot; attribute, unless the &quot;@hint&quot; tag is explicitly used.
-**Do not follow the tag by a tab character! Use a space character in stead.** For some reason I cannot fathom, ColdFusion considers tab characters to be a part of the tag...
-Tags that have the same name as an argument of the function following the comment are special in the sense that they set the &quot;hint&quot; attribute for the corresponding argument under &quot;parameters&quot;. No new attribute of the function is created.
-Tags that are placed in the hints or descriptions of _tag-based_ ColdFusion code are not automatically converted to metadata.
+The hints in CFScript are placed directly in front of the definition, in between the comment symbols "/\*\*" and "\*/". Each new line of comment can start with a "*", but it's not necessary. In principle, a tag "@foo" within such a hint must be placed at the beginning of a line, and is converted to an attribute with the name "foo" and the value equal to whatever follows the tag in the form of a string. However, multiple uses of the same tag results in a single value corresponding to the last usage of the tag. Any comments not preceded by a tag are put into the "hint" attribute, unless the "@hint" tag is explicitly used.
+
+**Do not follow the tag by a tab character! Use a space character in stead.** 
+
+For some reason I cannot fathom, ColdFusion considers tab characters to be a part of the tag...
+Tags that have the same name as an argument of the function following the comment are special in the sense that they set the "hint" attribute for the corresponding argument under "parameters". No new attribute of the function is created.
+Tags that are placed in the hints or descriptions of tag-based ColdFusion code are not automatically converted to metadata.
 
 ### Tags
 
@@ -77,5 +80,5 @@ CFScript: In CFBuilder, Adobe only allows you to use each distinct tag once. The
 
 ##### {@link}
 
-{`@link} link`
+`{@link} link`
 Creates a hyperlink in the documentation page. The expression for _link_ has the same format as the usage of the &quot;@see&quot; tag. However, the &quot;{@link}&quot; tag doesn't have to be placed at the beginning of a comment line. Essentially, it replaces the HTML hyperlink tag.
