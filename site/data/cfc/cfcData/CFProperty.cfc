@@ -14,6 +14,7 @@ component displayname="cfc.cfcData.CFProperty" extends="cfc.cfcData.CFMetadata" 
 	property name="date" type="string" hint="Date on which the component was written.";
 	property name="private" type="boolean" hint="Indicates whether the property should be documented.";
 	property name="related" type="string" hint="List of link expressions to related documentation pages.";
+	property name="length" type="numeric" hint="length of string for validation";
 
 	public void function addRelated(required string link)
 	{

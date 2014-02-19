@@ -426,6 +426,12 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		{
 			return_obj.setType(propertyRef_struct.type);
 		}
+
+		// length
+		if (structKeyExists(propertyRef_struct, "length"))
+		{
+			return_obj.setLength(propertyRef_struct.length);
+		}
 		
 		// default
 		if (structKeyExists(propertyRef_struct, "default"))

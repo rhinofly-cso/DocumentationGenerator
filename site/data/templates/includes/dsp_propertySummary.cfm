@@ -41,7 +41,7 @@
 					</td>
 					<td class="summaryTableTypeCol">
 						<div class="summarySignature">
-							#renderLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#
+							#renderLink(localVar.propertyMetadata_obj.getType(), localVar.rootPath_str, true)#<cfif len(localVar.propertyMetadata_obj.getLength())>(#localVar.propertyMetadata_obj.getLength()#)</cfif> 
 						</div>
 					</td>
 					<td class="summaryTableSignatureCol">

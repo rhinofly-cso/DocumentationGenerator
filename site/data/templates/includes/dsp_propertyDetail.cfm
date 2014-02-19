@@ -74,6 +74,15 @@
 					#localVar.propertyDefault#
 				</p>
 			</cfif>
+
+			<cfif len(localVar.propertyMetadata_obj.getLength())>
+				<p>
+					<span class="label">Max length:</span>
+					#localVar.propertyMetadata_obj.getLength()#
+				</p>
+			</cfif>
+
+
 			<cfif isInstanceOf(localVar.propertyMetadata_obj, "cfc.cfcData.CFMapping")>
 				<p>
 					<span class="label">ORM attributes</span>
