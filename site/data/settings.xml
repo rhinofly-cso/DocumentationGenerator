@@ -9,6 +9,6 @@
 		<includePackage>fly.cso.api.v1.data.shared</includePackage>
 		<includePackage>fly.cso.api.v1.filter</includePackage>
 		<includePackage>fly.cso.api.v1.selection</includePackage>
-		<documentDestination>C:\development\CSO\sites\api\public\dynamic\data\v1\docs\csoShared</documentDestination>
+		<documentDestination>C:\development\CSO\sites\apidocs\public\static\service\open-data\reference</documentDestination>
 	</settings>
 </base>
