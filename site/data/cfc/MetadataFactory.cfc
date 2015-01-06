@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 18 August 2010
 */
-component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
+component displayname="cfc.MetadataFactory" output="false"
 {
 	// create an object for resolving any tags in the component, property, or function hints
 	variables._hintResolver_obj = createObject("component", "cfc.hintResolver");
@@ -162,11 +162,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 			}
 			if (persistent_bool)
 			{
-				return_obj = createObject("component", "cfc.cfcData.CFPersistentComponent").init();
+				return_obj = new cfc.cfcData.CFPersistentComponent();
 			}
 			else
 			{
-				return_obj = createObject("component", "cfc.cfcData.CFComponent").init();
+				return_obj = new cfc.cfcData.CFComponent();
 			}
 			
 			// the "serializable" property has a default value for components
@@ -176,7 +176,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		{
 			if (metadataRef_struct.type eq "interface")
 			{
-				return_obj = createObject("component", "cfc.cfcData.CFInterface").init();
+				return_obj = new cfc.cfcData.CFInterface();
 			}
 			else
 			{
@@ -405,11 +405,11 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 		}
 		if (persistent_bool)
 		{
-			return_obj = createObject("component", "cfc.cfcData.CFMapping").init();
+			return_obj = new cfc.cfcData.CFMapping();
 		}
 		else
 		{
-			return_obj = createObject("component", "cfc.cfcData.CFProperty").init();
+			return_obj = new cfc.cfcData.CFProperty();
 		}
 
 		// the "type", "serializable", and "private" properties have default values
@@ -516,7 +516,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	public cfc.cfcData.CFFunction function createFunctionObject(required struct functionMetadata)
 	{
-		var return_obj = createObject("component", "cfc.cfcData.CFFunction").init();
+		var return_obj = new cfc.cfcData.CFFunction();
 		var functionRef_struct = arguments.functionMetadata;
 		
 		// the "access", "returnType", "returnHint", "inheritDoc", and "private" properties have default values
@@ -613,7 +613,7 @@ component displayname="cfc.MetadataFactory" extends="fly.Object" output="false"
 	*/
 	public cfc.cfcData.CFArgument function createArgumentObject(required struct argumentMetadata)
 	{
-		var return_obj = createObject("component", "cfc.cfcData.CFArgument").init();
+		var return_obj = new cfc.cfcData.CFArgument();
 		var argumentRef_struct = arguments.argumentMetadata;
 
 		// the "required", "type", and "hint" properties have default values

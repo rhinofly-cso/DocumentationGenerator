@@ -6,7 +6,7 @@
 	
 	@see cfc.MetadataFactory
 */
-component displayname="cfc.DocumentBuilder" extends="fly.Object" output="false"
+component displayname="cfc.DocumentBuilder" output="false"
 {
 	/**
 		Creates documentation pages for all packages in the library.

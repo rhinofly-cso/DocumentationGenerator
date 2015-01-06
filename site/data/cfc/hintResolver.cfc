@@ -4,7 +4,7 @@
 	@author Eelco Eggen
 	@date 8 October 2010
 */
-component displayname="cfc.hintResolver" extends="fly.Object" output="false"
+component displayname="cfc.hintResolver" output="false"
 {
 	/**
 		@private
