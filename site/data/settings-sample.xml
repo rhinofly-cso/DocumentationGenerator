@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base>
+	<settings>
+		<sourcePath>c:\development\myFirstProject\src</sourcePath>
+		<sourcePath>c:\development\mySecondProject\src</sourcePath>
+		<includePackage>fly.package.first</includePackage>
+		<includePackage>fly.package.second</includePackage>
+		<includePackage>fly.package.third</includePackage>
+		<documentDestination>c:\temp</documentDestination>
+	</settings>
+</base>

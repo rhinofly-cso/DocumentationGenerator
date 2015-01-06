@@ -1,7 +1,6 @@
 ﻿<cfcomponent displayname="cfc.TagUtils" hint="
 	Methods in this component provide access to functionality that is only available through 
-	tags. This component was taken as {@link} fly.cso.system.TagUtils from the CSOShared 
-	library and stripped down to only the invokeMethod function.
+	tags.
 ">
 	<cffunction name="invokeMethod" access="public" returntype="any" hint="Gives access to the cfinvoke tag">
 		<cfargument name="component" type="any" required="true" />

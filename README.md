@@ -19,11 +19,12 @@ To run this tool, you need:
   * a local installation of the ColdFusion 9 server, with the 9.0.1 update (or later)
   * to enable template caching (highly recommended)
   * a checkout of the documentation generator
-  * checkouts of all libraries that need to be included in the documentation
 
 ### Settings
 
-The settings.xml file contains all the tags that determine how the documentation is generated. The most important are:
+The `settings.xml` file contains all the tags that determine how the documentation is generated.
+Copy `settings-sample.xml` to `settings.xml` and change the values.
+The most important are:
 
   * `<sourcePath>` – an absolute path to a library up for documentation; use as many tags as you like
   * `<documentDestination>` – the destination folder (also an absolute path)

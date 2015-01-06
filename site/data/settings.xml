@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <base>
 	<settings>
-		<sourcePath>C:\development\CSO\shared\public\dynamic\CSOShared\src</sourcePath>
-		<sourcePath>C:\development\CSO\libraries\dynamic\RhinoflyLibrary\src</sourcePath>
+		<sourcePath>/home/jan/development/CSO/shared/public/dynamic/CSOShared/src</sourcePath>
+		<sourcePath>/home/jan/development/CSO/libraries/dynamic/RhinoflyLibrary/src</sourcePath>
 		<includePackage>fly.cso.api.v1</includePackage>
 		<includePackage>fly.cso.api.v1.data.cv</includePackage>
 		<includePackage>fly.cso.api.v1.data.job</includePackage>
 		<includePackage>fly.cso.api.v1.data.shared</includePackage>
 		<includePackage>fly.cso.api.v1.filter</includePackage>
 		<includePackage>fly.cso.api.v1.selection</includePackage>
-		<documentDestination>C:\development\CSO\sites\apidocs\public\static\service\open-data\reference</documentDestination>
+		
+		<documentDestination>/home/jan/development/CSO/sites/apidocs/public/static/service/open-data/reference</documentDestination>
 	</settings>
 </base>
